@@ -4,6 +4,7 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /api/$2
   name: amr-api-ingress-be
+  namespace: amr-portal-dev
 spec:
   ingressClassName: nginx
   rules:

@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: amr-deployment
+  namespace: amr-portal-dev
 spec:
   replicas: 1
   revisionHistoryLimit: 10
@@ -21,7 +22,7 @@ spec:
           command: ["uvicorn"]
           envFrom:
           - configMapRef:
-              name: amr-api-configmap
+              name: amr-api-configmap-dev
           image: DOCKER_IMAGE
           imagePullPolicy: Always
           ports:
@@ -37,4 +38,4 @@ spec:
       volumes:
       - name: amrdata
         persistentVolumeClaim:
-          claimName: amr-portal-pv-claim-data
+          claimName: amr-portal-pv-claim-data-dev

@@ -3,4 +3,5 @@ data:
   DUCKDB_PATH: /usr/data/amr_alpha_v26.duckdb
 kind: ConfigMap
 metadata:
-  name: amr-api-configmap
+  name: amr-api-configmap-dev
+  namespace: amr-portal-dev
