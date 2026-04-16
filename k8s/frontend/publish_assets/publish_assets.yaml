@@ -1,7 +1,8 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: amr-asset-copy
+  name: amr-asset-copy-dev
+  namespace: amr-portal-dev
 spec:
   backoffLimit: 2
   activeDeadlineSeconds: 100
@@ -29,4 +30,4 @@ spec:
       volumes:
         - name: static-asset-storage
           persistentVolumeClaim:
-            claimName: amr-portal-assets-pvc
+            claimName: amr-portal-assets-pvc-dev
