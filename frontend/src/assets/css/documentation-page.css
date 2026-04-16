@@ -1,0 +1,177 @@
+@import url('./default/defaults.css');
+
+@import url('./layouts/main-layout.css') layer(base);
+
+@import url('./components/embl-ebi-header.css') layer(components);
+@import url('./components/subheader.css') layer(components);
+@import url('./components/embl-ebi-footer.css') layer(components);
+
+@import url('./documentation/table.css') layer(components);
+
+html, body {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-width: 980px;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+
+/* NOTE: some of the amr-panel styles are copied from shared-panel-styles.ts */
+amr-panel {
+  display: block;
+  flex-grow: 1;
+  width: calc(100% - var(--standard-gutter) - var(--double-standard-gutter));
+  margin-left: var(--standard-gutter);
+  border-radius: var(--panel-border-radius);
+  background-color: var(--color-white);
+  padding-right: var(--standard-gutter);
+  padding-left: var(--double-standard-gutter);
+  padding-top: 50px;
+  padding-bottom: 50px;
+
+
+  h1, h2, h3, h4, h5, h6, p, ul {
+    max-width: 80ch;
+  }
+
+  ul, ol {
+    padding-left: 34px;
+  }
+
+  /* items of the top-level and second-level unordered list have black solid disks as list markers */
+  ul li {
+    padding-left: 5px;
+    list-style-type: disc;
+  }
+
+  a[href^="http"] {
+    &:before {
+      content: url('/assets/images/icons/icon_xlink_orange.svg');
+      display: inline-block;
+      width: 12px;
+      aspect-ratio: 1;
+      margin-left: 3px;
+      margin-right: 3px;
+    }
+  }
+
+  /* top-level list items have a margin-bottom, if not immediately followed by a nested list */
+  ul li:not(:has(+ ul, + ol)),
+  ol li:not(:has(+ ul, + ol)) {
+    margin-bottom: var(--line-height);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, auto);
+    grid-template-columns: 170px auto;
+    column-gap: var(--standard-gutter);
+  }
+
+  .article {
+    overflow-x: auto;
+  }
+
+  h1 {
+    font-size: 17px;
+    margin: 0 0 24px 0;
+    color: var(--color-dark-grey);
+  }
+
+  h2 {
+    font-size: 15px;
+    margin: 48px 0 10px 0;
+  }
+
+  h1 + h2 {
+    margin-top: 0;
+  }
+
+  h3, h4 {
+    font-size: 13px;
+  }
+
+  h3 {
+    margin-bottom: 0;
+  }
+
+  h3 + p {
+    margin-top: 0;
+  }
+
+  figure, img, pre {
+    max-width: 800px;
+  }
+
+  figure {
+    margin-top: 20px;
+  }
+
+  figure img {
+    width: 100%;
+    border: 1px solid var(--color-medium-dark-grey);
+  }
+
+  figcaption {
+    margin-top: 5px;
+    margin-bottom: 30px;
+    font-size: 13px;
+    font-weight: var(--font-weight-light);
+  }
+
+  pre {
+    white-space: pre-wrap;
+  }
+
+
+  /* STYLES FOR THE ASIDE WITH NAVIGATION */
+  .aside-content {
+    position: sticky;
+    top: 20px;
+  }
+
+  .aside-content ul {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    row-gap: 10px;
+  }
+
+  .aside-content li {
+    list-style-type: none;
+    padding: 0;
+    line-height: 1.3;
+  }
+
+  .aside-section-heading {
+    margin-bottom: 16px;
+    font-weight: var(--font-weight-light);
+  }
+
+  .table-of-contents {
+    display: flex;
+    flex-direction: column;
+    max-width: 130px;
+    padding-bottom: 50px;
+  }
+  
+  /* If the TOC block is followed by related pages block with links, draw a separator */
+  .table-of-contents:has(+ .related-pages) {
+    border-bottom: 1px solid var(--color-medium-light-grey);
+  }
+
+  .related-pages {
+    margin-top: 0.6rem;
+    display: flex;
+    flex-direction: column;
+  }
+}
+

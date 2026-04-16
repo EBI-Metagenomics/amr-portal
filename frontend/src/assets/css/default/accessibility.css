@@ -1,0 +1,9 @@
+/* Hide the text visually, but keep it accessible to screen readers */
+.visually-hidden {
+  clip-path: inset(50%);
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  white-space: nowrap;
+}

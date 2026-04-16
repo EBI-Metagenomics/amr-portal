@@ -1,0 +1,30 @@
+{% macro navigationLink(params) %}
+{# Params include: #}
+{# href — this is self-explanatory #}
+{# pageUrl - current page url #}
+{# anchorClass — optional class(es) string for the link #}
+{# activeAnchorClass — optional class(es) string for the active link #}
+{# NOTE! This macro expects to be used with a 'call' function #}
+{% set anchorClass = params.anchorClass | default("") %}
+{% set activeAnchorClass = params.activeAnchorClass | default("") %}
+{% set isActiveLink = params.href in params.pageUrl %}
+{% set linkClasses = anchorClass %}
+{% if isActiveLink %}
+  {% if anchorClass | length > 0 %}
+    {% set linkClasses = anchorClass + " " + activeAnchorClass %}
+  {% else %}
+    {% set linkClasses = activeAnchorClass %}
+  {% endif %}
+{% endif %}
+{% if isActiveLink %}
+<span {{ 'class="' + linkClasses + '"' if linkClasses | length > 0 }}>
+  {{ caller() }}
+</span>
+{% else %}
+<a href="{{ params.href }}" {{ 'class="' + linkClasses + '"' if linkClasses | length > 0 }}>
+  {{ caller() }}
+</a>
+{% endif %}
+{% endmacro %}
+
+

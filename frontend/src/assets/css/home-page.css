@@ -1,0 +1,8 @@
+@import url('./default/defaults.css');
+
+@import url('./components/embl-ebi-header.css') layer(components);
+@import url('./components/embl-ebi-footer.css') layer(components);
+@import url('./home/hero.css') layer(components);
+@import url('./home/home.css') layer(components);
+@import url('./home/link.css') layer(components);
+@import url('./components/card-link.css') layer(components);

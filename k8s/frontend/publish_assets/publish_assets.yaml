@@ -1,0 +1,32 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: amr-asset-copy
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 100
+  ttlSecondsAfterFinished: 5
+  template:
+    spec:
+      imagePullSecrets:
+        - name: ensemblweb-pull-secret
+      containers:
+      - name: amr-assets-copy
+        image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:1.0.1
+        tty: true
+        command: ["/usr/bin/download_artifacts.sh"]
+        args: [ "<PROJECT_ID>", "<JOB_ID>", "/usr/assets/downloads", "/usr/assets/dist", "frontend/dist"]
+        imagePullPolicy: Always
+        envFrom:
+          - configMapRef:
+              name: proxy-configmap
+          - secretRef:
+              name: amr-artifact-download-token
+        volumeMounts:
+          - mountPath: "/usr/assets"
+            name: static-asset-storage
+      restartPolicy: Never
+      volumes:
+        - name: static-asset-storage
+          persistentVolumeClaim:
+            claimName: amr-portal-assets-pvc

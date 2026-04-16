@@ -1,0 +1,31 @@
+/* 
+  Layout for pages other than the home page
+
+  Note:
+    - header height is set to 35px
+    - subheader height is set to 50px
+    - the height of the visible part of the footer is 40px
+*/
+
+main {
+  background-color: var(--color-medium-dark-grey);
+  padding-top: 10px;
+  padding-bottom: 20px;
+}
+
+amr-app {
+  --amr-top-panel-height: 360px;
+  --amr-header-height: 35px;
+  --amr-subheader-height: 50px;
+  /* To prevent layout shift while first the script and then the data is loaded */
+  min-height: calc(100vh - var(--amr-header-height) - var(--amr-subheader-height));
+}
+
+amr-app:not(:defined) {
+  /* When amr-app is defined, it will have display:grid.
+    Meanwhile, in order to avoid the layout shift,
+    we redefine the default custom element display property (which is inline)
+    to block, in order to make the heigh rules apply.
+  */
+  display: block;
+}

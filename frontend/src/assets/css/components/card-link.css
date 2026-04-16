@@ -1,0 +1,21 @@
+.card-link {
+  display: grid;
+  grid-template-rows: repeat(2, auto);
+  row-gap: 1rem;
+  padding: 21px 30px;
+  border-bottom: 8px solid var(--vf-color--green);
+  box-shadow: 0px 2px 4px 0px;
+  background-color: var(--color-white);
+
+  &:hover {
+    box-shadow: 0px 2px 4px 1px;
+  }
+
+  .description {
+    text-wrap: balance;
+  }
+
+  .homepage-link {
+    align-self: end;
+  }
+}

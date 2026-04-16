@@ -1,0 +1,47 @@
+{% extends "layouts/base.njk" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{{ 'src/assets/css/documentation-page.css' | getAssetOutputPath | transformWithHtmlBase }}" />
+{% endblock %}
+
+{% block body %}
+  {% include "components/header/header.njk" %}
+  {% include "components/header/subheader.njk" %}
+
+  <main>
+    <amr-panel>
+      <div class="grid">
+        <aside>
+          <div class="aside-content">
+            <div class="table-of-contents">
+              <div class="aside-section-heading">
+                On this page...
+              </div>
+              <ul class="links">
+              </ul>
+            </div>
+              <div class="related-pages">
+                <div class="aside-section-heading">
+                  Related documentation
+                </div>
+                <ul class="links">
+                {% for tag in tags %}
+                  {% for item in collections[tag] | sortByTitle %}
+                    {% if item.url != page.url %}
+                      <li><a href="{{ item.url }}">{{ item.data.title }}</a></li>
+                    {% endif %}
+                  {% endfor %}
+                {% endfor %}
+                </ul>
+              </div>
+          </div>
+        </aside>
+        <div class="article">
+          {{ content | safe }}
+        </div>
+      </div>
+    </amr-panel>
+  </main>
+
+  {% include "components/footer/footer.njk" %}
+{% endblock %}

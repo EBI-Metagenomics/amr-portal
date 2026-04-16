@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: amr-portal-nginx
+  name: amr-portal-nginx-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      ensembl.platform.app.name: amr-portal-nginx
+  template:
+    metadata:
+      labels:
+        ensembl.platform.app.name: amr-portal-nginx
+    spec:
+      imagePullSecrets:
+        - name: ensemblweb-pull-secret
+      containers:
+      - image: DOCKER_IMAGE
+        imagePullPolicy: Always
+        name: amr-portal-nginx
+        ports:
+        - containerPort: 8000
+          protocol: TCP
+        volumeMounts:
+        - mountPath: /usr/assets/
+          name: amrassets
+      volumes:
+        - name: amrassets
+          persistentVolumeClaim:
+            claimName: amr-portal-assets-pvc

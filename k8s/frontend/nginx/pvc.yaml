@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: amr-portal-assets-pvc
+spec:
+  storageClassName: standard-nfs-production
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10G

@@ -1,0 +1,19 @@
+{% extends "layouts/base.njk" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{{ 'src/assets/css/main-page.css' | getAssetOutputPath | transformWithHtmlBase }}" />
+{% endblock %}
+{% block scripts %}
+  <script type="module" src="{{ 'src/assets/scripts/pages/main.ts' | getAssetOutputPath | transformWithHtmlBase }}"></script>
+{% endblock %}
+
+{% block body %}
+  {% include "components/header/header.njk" %}
+  {% include "components/header/subheader.njk" %}
+
+  <main>
+    {{ content | safe }}
+  </main>
+
+  {% include "components/footer/footer.njk" %}
+{% endblock %}

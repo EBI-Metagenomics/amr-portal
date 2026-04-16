@@ -1,0 +1,10 @@
+{% macro homepageLink(params) %}
+<div class="homepage-link">
+  <a href="{{ params.href }}" {{ 'data-prerender=true' if params.prerender }}>
+    <span>
+      {{ params.linkText }}
+    </span>
+    <img src="/assets/images/icons/arrow-circle-right.svg" class="arrow-icon" alt="" />
+  </a>
+</div>
+{% endmacro %}

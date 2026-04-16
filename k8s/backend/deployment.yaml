@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amr-deployment
+spec:
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      ensembl.platform.app.name: amr
+  template:
+    metadata:
+      labels:
+        ensembl.platform.app.name: amr
+    spec:
+      imagePullSecrets:
+        - name: ensemblweb-pull-secret
+      containers:
+        - name: amr
+          args: ["--host", "0.0.0.0", "--port", "8000", "backend.main:app" ]
+          command: ["uvicorn"]
+          envFrom:
+          - configMapRef:
+              name: amr-api-configmap
+          image: DOCKER_IMAGE
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8000
+          volumeMounts:
+          - mountPath: /usr/data/
+            name: amrdata
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      volumes:
+      - name: amrdata
+        persistentVolumeClaim:
+          claimName: amr-portal-pv-claim-data

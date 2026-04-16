@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    ensembl.platform.app.name: amr
+  name: amr-portal-pv-claim-data
+spec:
+  storageClassName: standard-nfs-production
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10G

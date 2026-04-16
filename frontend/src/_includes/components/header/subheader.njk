@@ -1,0 +1,52 @@
+{% from "components/navigation-link/navigation-link.njk" import navigationLink %}
+
+<div class="subheader">
+  <div class="left-wrapper">
+    <a href="/">
+      <img src="/assets/images/icons/ensembl-icons/icon_home.svg" class="home-icon" alt="" />
+      <span class="visually-hidden">
+        Home page
+      </span>
+    </a>
+
+    <div class="title-wrapper">
+      <a href="/" aria-hidden="true" tabindex="-1">
+        <span class="portal-title">
+          Antimicrobial resistance portal
+        </span>
+      </a>
+
+      <span class="page-title">
+        {% call navigationLink({ href: "/data/", activeAnchorClass: "active", pageUrl: page.url }) -%}
+          Query AMR data
+        {%- endcall %}
+      </span>
+    </div>
+
+    <amr-header-release>
+      <span class="data-release">
+        <span class="data-release-label">
+          Latest data release
+        </span>
+        <span class="data-release-date">
+          yyyy-mm
+        </span>
+      </span>
+    </amr-header-release>
+  </div>
+
+  <div class="right-wrapper">
+    <a href="/usage/" class="link-with-icon">
+      <span>
+        How to use the portal
+      </span>
+      <img src="/assets/images/icons/ensembl-icons/icon_question_circle.svg" class="circle-icon" alt="" />
+    </a>
+    <a href="/about/" class="link-with-icon">
+      <span>
+        About the portal
+      </span>
+      <img src="/assets/images/icons/ensembl-icons/icon_info_circle.svg" class="circle-icon" alt="" />
+    </a>
+  </div>
+</div>

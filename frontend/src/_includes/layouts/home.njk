@@ -1,0 +1,22 @@
+{% extends "layouts/base.njk" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="{{ 'src/assets/css/home-page.css' | getAssetOutputPath | transformWithHtmlBase }}" />
+  <link rel="preload" fetchpriority="high" as="image" href="/assets/images/hero/hero.jpg">
+{% endblock %}
+
+{% block scripts %}
+<script type="speculationrules">
+  {
+    "prerender": [
+      {
+        "where": {
+          "selector_matches": "[data-prerender=true]"
+        },
+        "eagerness": "immediate"
+      }
+    ]
+  }
+
+</script>
+{% endblock %}

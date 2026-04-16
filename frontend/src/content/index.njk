@@ -1,0 +1,75 @@
+---
+title: Antimicrobial resistance portal
+description: Query, filter and download experimental AMR records and in silico predictions of antimicrobial resistance
+layout: "layouts/home.njk"
+---
+
+{% from "components/card-link/card-link.njk" import cardLink %}
+{% from "components/home/link/link.njk" import homepageLink %}
+
+{% include "components/header/header.njk" %}
+
+{% include "components/home/hero/hero.njk" %}
+
+{% set cardLinkText1 %}
+Query and filter AMR phenotype data based on antibiotic,
+resistance phenotype, species and other key attributes.
+Contains over 1.5 million entries across 170,000 samples and 100,000 assemblies.
+{% endset %}
+
+{% set cardLinkText2 %}
+Query and filter AMR genotypes providing access to AMR gene detection and annotation for over 100,000 genomes and samples.
+{% endset %}
+
+{% set cardLinkText3 %}
+A merged dataset of experimental evidence and in silico genotypes linked between identical samples, assemblies and antimicrobial compound
+{% endset %}
+
+
+<div class="card-links-container">
+  <div class="card-links-container-inner">
+    {{ cardLink({ href: '/data/?view=experiments', cardText: cardLinkText1, linkText: 'AMR phenotypes', prerender: true }) }}
+    {{ cardLink({ href: '/data/?view=predictions', cardText: cardLinkText2, linkText: 'AMR genotypes' }) }}
+    {{ cardLink({ href: '/data/?view=combined', cardText: cardLinkText3, linkText: 'Combined phenotypes and genotypes' }) }}
+  </div>
+</div>
+
+
+<div class="main-grid-wrapper">
+  <div class="main-grid">
+    <div>
+      <p>
+        Antimicrobial resistance (AMR) represents a major growing concern to public health
+        predicted to cause over 2M deaths per year by 2050, with the Global South facing
+        a disproportionate burden of AMR increasing the risk of untreatable bacterial infections.
+      </p>
+
+      <p>
+        The AMR Portal is a collaboration between EMBL-EBI research and service teams
+        alongside Imperial College London to deliver a new way to access and explore
+        AMR phenotype and genotype annotations through a user-friendly interface.
+        AMR antibiogram records can be filtered by an antibiotic compound, resistance phenotype,
+        testing methods and many more attributes.
+        The same data can be programmatically interrogated in a number of different programming languages.
+      </p>
+
+      <p>
+        Data within the portal was produced by the MRC project CABBAGE
+        (Comprehensive Assessment of Bacterial-Based AMR prediction from Genotypes).
+        CABBAGE represents the largest public AMR dataset in a reconciled, uniform format.
+      </p>
+    </div>
+
+    <div class="documentation-links">
+      {{ homepageLink({ href: '/usage/', linkText: 'How to use the portal' }) }}
+      {{ homepageLink({ href: '/about/', linkText: 'About the portal' }) }}
+      {{ homepageLink({ href: '/developers/', linkText: 'Download and developer documentation' }) }}
+      {{ homepageLink({ href: '/amr_submission_guide/', linkText: 'Submitting AMR antibiograms' }) }}
+    </div>
+  </div>
+</div>
+
+
+
+
+{% include "components/footer/footer.njk" %}

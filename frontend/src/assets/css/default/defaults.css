@@ -1,0 +1,8 @@
+@layer resets, base, components;
+
+@import url('./resets.css') layer(resets);
+
+@import url('./custom-properties.css') layer(base);
+@import url('./fonts.css') layer(base);
+@import url('./global.css') layer(base);
+@import url('./accessibility.css') layer(base);

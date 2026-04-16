@@ -1,0 +1,28 @@
+.homepage-link {
+  display: inline-flex;
+  white-space: nowrap;
+
+  a {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+    font-size: 17px;
+    color: var(--color-blue);
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  .arrow-icon {
+    width: 21px;
+    height: 21px;
+    filter: var(--filter-black-to-ensembl-blue);
+    transition: transform 0.125s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+  }
+
+  a:hover .arrow-icon {
+    transform: translateX(4px);
+  }
+
+}

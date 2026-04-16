@@ -1,0 +1,10 @@
+{% from "components/home/link/link.njk" import homepageLink %}
+
+{% macro cardLink(params) %}
+<div class="card-link">
+  <div class="description">
+    {{ params.cardText }}
+  </div>
+  {{ homepageLink(params) }}
+</div>
+{% endmacro %}

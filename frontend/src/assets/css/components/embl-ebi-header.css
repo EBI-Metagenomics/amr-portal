@@ -1,0 +1,91 @@
+header {
+  display: flex;
+  justify-content: center;
+  background-color: var(--vf-color--grey--darkest);
+  font-size: 14.4px;
+  white-space: nowrap;
+
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    padding: 2px 0;
+    height: 35px;
+    width: 100%;
+    max-width: 1280px;
+  }
+
+  ul {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+  }
+
+  li {
+    display: inline-flex;
+    height: 100%;
+  }
+
+  a {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+    height: 100%;
+    padding: 0 1rem;
+    color: var(--vf-ui-color--white);
+  }
+
+  a:hover,
+  a:focus-visible {
+    color: var(--vf-color--grey--darkest);
+    background-color: var(--vf-color--grey--lightest);
+  }
+
+  ul a img {
+    height: 15px;
+    width: 15px;
+    margin-right: 1ch;
+    filter: var(--filter-black-to-white);
+  }
+
+  ul a:hover img,
+  ul a:focus-visible img {
+    filter: var(--vf-color--grey--darkest);
+  }
+
+  .embl-ebi-logo {
+    display: inline-flex;
+    height: 100%;
+    align-items: center;
+    padding-left: 1rem;
+    margin-right: 120px;
+  }
+
+  .embl-ebi-logo img {
+    height: 90%;
+  }
+
+}
+
+@media (width < 870px) {
+
+  header .embl-ebi-logo {
+    margin-right: var(--standard-gutter);
+  }
+
+  header nav a {
+    flex-direction: column;
+    align-items: center;
+    row-gap: 2px;
+    font-size: 10px;
+  }
+
+  header nav a img {
+    height: 16px;
+    width: 16px;
+    margin-right: 0;
+  }
+}
