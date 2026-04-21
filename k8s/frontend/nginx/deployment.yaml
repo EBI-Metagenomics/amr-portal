@@ -16,7 +16,7 @@ spec:
         ensembl.platform.app.name: amr-portal-nginx
     spec:
       imagePullSecrets:
-        - name: ensemblweb-pull-secret
+        - name: regcred
       containers:
       - image: DOCKER_IMAGE
         imagePullPolicy: Always
