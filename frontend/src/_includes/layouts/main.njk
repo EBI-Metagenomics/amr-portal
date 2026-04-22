@@ -4,7 +4,8 @@
   <link rel="stylesheet" href="{{ 'src/assets/css/main-page.css' | getAssetOutputPath | transformWithHtmlBase }}" />
 {% endblock %}
 {% block scripts %}
-  <script src="{{ 'runtime-config.js' | transformWithHtmlBase }}"></script>
+  {# HtmlBasePlugin adds pathPrefix once; bare "runtime-config.js" stayed relative and broke loading under /amr/data/. #}
+  <script src="/runtime-config.js"></script>
   <script type="module" src="{{ 'src/assets/scripts/pages/main.ts' | getAssetOutputPath | transformWithHtmlBase }}"></script>
 {% endblock %}
 
