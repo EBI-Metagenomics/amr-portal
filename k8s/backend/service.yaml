@@ -8,8 +8,9 @@ metadata:
 spec:
   selector:
     ensembl.platform.app.name: amr
-  type: ClusterIP
+  type: NodePort
   ports:
   - port: 8000
     protocol: TCP
     targetPort: 8000
+    nodePort: 32027
