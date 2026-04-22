@@ -27,7 +27,13 @@ spec:
         volumeMounts:
         - mountPath: /usr/assets/
           name: amrassets
+        - mountPath: /usr/assets/dist/runtime-config.js
+          name: frontend-runtime-config
+          subPath: runtime-config.js
       volumes:
         - name: amrassets
           persistentVolumeClaim:
             claimName: amr-portal-assets-pvc-dev
+        - name: frontend-runtime-config
+          configMap:
+            name: amr-frontend-runtime-config

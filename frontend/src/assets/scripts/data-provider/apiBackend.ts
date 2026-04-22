@@ -1,5 +1,6 @@
 import type { BackendInterface, AMRRecordsFetchParams, AMRRecordsResponse } from './backendInterface';
 import type { FiltersConfig, FiltersView } from '../types/filters/filtersConfig';
+import appConfig from '../configs/app-config';
 
 type OldFiltersView = FiltersView & {
   otherCategoryGroups: FiltersView['categoryGroups'];
@@ -13,14 +14,7 @@ export class ApiBackend implements BackendInterface {
   apiUrl: string;
 
   constructor() {
-    const hostname = window.location.hostname;
-    const isDev = hostname === 'localhost';
-
-    // TODO: this should probably be read from the environment
-    const devApiUrl = 'http://localhost:8000/api';
-    const prodApiUrl = '/amr/api';
-
-    this.apiUrl = isDev ? devApiUrl : prodApiUrl;
+    this.apiUrl = appConfig.apiBaseUrl;
   }
 
   getFiltersConfig = async (): Promise<FiltersConfig> => {

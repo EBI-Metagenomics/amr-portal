@@ -4,6 +4,7 @@
   <link rel="stylesheet" href="{{ 'src/assets/css/main-page.css' | getAssetOutputPath | transformWithHtmlBase }}" />
 {% endblock %}
 {% block scripts %}
+  <script src="{{ 'runtime-config.js' | transformWithHtmlBase }}"></script>
   <script type="module" src="{{ 'src/assets/scripts/pages/main.ts' | getAssetOutputPath | transformWithHtmlBase }}"></script>
 {% endblock %}
 
