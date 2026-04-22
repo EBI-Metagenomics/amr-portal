@@ -10,7 +10,7 @@ const getRuntimeConfig = (): RuntimeConfig | undefined => {
   return extendedWindow.__AMR_CONFIG__;
 };
 
-const getApiBaseUrl = (): string => {
+export const getApiBaseUrl = (): string => {
   const runtimeApiBaseUrl = getRuntimeConfig()?.apiBaseUrl;
 
   if (runtimeApiBaseUrl) {
@@ -24,6 +24,22 @@ const getApiBaseUrl = (): string => {
   return DEFAULT_API_BASE_URL;
 };
 
+/**
+ * Build a full URL for an API path. Root-relative bases must use the browser origin
+ * (not document.baseURI), which can reflect nginx internal ports or a base tag href.
+ */
+export const resolveApiUrl = (subPath: string): string => {
+  const trimmed = subPath.replace(/^\//, '');
+  const base = getApiBaseUrl().replace(/\/$/, '');
+  if (base.startsWith('http://') || base.startsWith('https://')) {
+    return `${base}/${trimmed}`;
+  }
+  const rootPrefix = base.startsWith('/') ? base : `/${base}`;
+  return `${window.location.origin}${rootPrefix}/${trimmed}`;
+};
+
 export default {
-  apiBaseUrl: getApiBaseUrl()
+  get apiBaseUrl() {
+    return getApiBaseUrl();
+  }
 };

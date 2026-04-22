@@ -1,6 +1,6 @@
 import type { BackendInterface, AMRRecordsFetchParams, AMRRecordsResponse } from './backendInterface';
 import type { FiltersConfig, FiltersView } from '../types/filters/filtersConfig';
-import appConfig from '../configs/app-config';
+import { resolveApiUrl } from '../configs/app-config';
 
 type OldFiltersView = FiltersView & {
   otherCategoryGroups: FiltersView['categoryGroups'];
@@ -11,14 +11,8 @@ type OldFiltersConfig = Omit<FiltersConfig, 'filterViews'> & {
 };
 
 export class ApiBackend implements BackendInterface {
-  apiUrl: string;
-
-  constructor() {
-    this.apiUrl = appConfig.apiBaseUrl;
-  }
-
   getFiltersConfig = async (): Promise<FiltersConfig> => {
-    const response = await fetch(`${this.apiUrl}/filters-config`);
+    const response = await fetch(resolveApiUrl('filters-config'));
     if (!response.ok) {
       throw new Error(`Failed to fetch filters config: ${response.statusText}`);
     }
@@ -49,7 +43,7 @@ export class ApiBackend implements BackendInterface {
       payload.order_by = params.orderBy;
     }
 
-    const response = await fetch(`${this.apiUrl}/amr-records`, {
+    const response = await fetch(resolveApiUrl('amr-records'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
