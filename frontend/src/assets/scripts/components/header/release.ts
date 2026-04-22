@@ -1,4 +1,4 @@
-import appConfig from '../../configs/app-config';
+import { resolveApiUrl } from '../../configs/app-config';
 
 type ReleaseInfo = {
   label: string;
@@ -7,7 +7,7 @@ type ReleaseInfo = {
 export class AMRHeaderRelease extends HTMLElement {
 
   connectedCallback() {
-    const releaseEndpoint = `${appConfig.apiBaseUrl}/release`;
+    const releaseEndpoint = resolveApiUrl('release');
     fetch(releaseEndpoint)
       .then(response => response.json())
       .then((data: ReleaseInfo) => this.#onReleaseDataFetched(data));
