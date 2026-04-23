@@ -24,13 +24,3 @@ spec:
         ports:
         - containerPort: 8000
           protocol: TCP
-        volumeMounts:
-        - mountPath: /usr/assets/
-          name: amrassets
-        - mountPath: /etc/amr-runtime
-          name: frontend-runtime-config
-          readOnly: true
-      volumes:
-        - name: amrassets
-          persistentVolumeClaim:
-            claimName: amr-portal-assets-pvc-dev
