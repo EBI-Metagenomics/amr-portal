@@ -34,6 +34,3 @@ spec:
         - name: amrassets
           persistentVolumeClaim:
             claimName: amr-portal-assets-pvc-dev
-        - name: frontend-runtime-config
-          configMap:
-            name: amr-frontend-runtime-config

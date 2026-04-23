@@ -7,7 +7,7 @@ import '@ensembl/ensembl-elements-common/components/text-button/text-button.js';
 import '@ensembl/ensembl-elements-common/components/button-link/button-link.js';
 import '@ensembl/ensembl-elements-common/components/external-link/external-link.js';
 
-import { resolveApiUrl } from '../../../configs/app-config';
+import appConfig from '../../../configs/app-config';
 import { actionView, setActionView } from './state';
 import filtersStore from '../../../state/filtersStore';
 import { focusFirstEligibleChild } from '../../../utils/focus-utils';
@@ -186,7 +186,7 @@ export class ActionButtonsPopover extends SignalWatcher(LitElement) {
     };
     const stringifiedPayload = JSON.stringify(payload);
     const base64Payload = btoa(stringifiedPayload);
-    const url = new URL(resolveApiUrl('amr-records/download'));
+    const url = new URL(`${appConfig.apiBaseUrl}/amr-records/download`, document.baseURI);
     url.searchParams.set('payload', base64Payload);
 
     return url.toString();
