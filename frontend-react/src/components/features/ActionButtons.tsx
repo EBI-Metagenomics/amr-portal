@@ -28,9 +28,9 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
   if (disabled) {
     return (
       <aside className="action-rail disabled">
-        <button disabled aria-label="Table view">≡</button>
-        <button disabled aria-label="Clear filters">✕</button>
-        <button disabled aria-label="Download">↓</button>
+        <button className="rail-btn table" disabled aria-label="Table view">☰</button>
+        <button className="rail-btn clear" disabled aria-label="Clear filters">✕</button>
+        <button className="rail-btn download" disabled aria-label="Download">↓</button>
       </aside>
     );
   }
@@ -38,14 +38,25 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
   return (
     <>
       <aside className="action-rail">
-        <button className={view === null ? 'active' : ''} onClick={() => setView(null)} aria-label="Table view">
-          ≡
+        <button
+          className={`rail-btn table ${view === null ? 'active' : ''}`}
+          disabled={view === null}
+          onClick={() => setView(null)}
+          aria-label="Table view"
+        >
+          ☰
         </button>
-        <button className={view === 'clear' ? 'active' : ''} onClick={() => setView('clear')} aria-label="Clear filters">
+        <button
+          className={`rail-btn clear ${view === 'clear' ? 'active' : ''}`}
+          disabled={view === 'clear'}
+          onClick={() => setView('clear')}
+          aria-label="Clear filters"
+        >
           ✕
         </button>
         <button
-          className={view === 'download' ? 'active' : ''}
+          className={`rail-btn download ${view === 'download' ? 'active' : ''}`}
+          disabled={view === 'download'}
           onClick={() => setView('download')}
           aria-label="Download"
         >

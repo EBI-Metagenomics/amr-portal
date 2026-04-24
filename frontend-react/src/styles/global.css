@@ -187,6 +187,8 @@ code {
 
 .top-panel {
   position: relative;
+  width: calc(100% - 28px);
+  margin-right: 28px;
   min-height: var(--amr-top-panel-height);
   height: var(--amr-top-panel-height);
   overflow: hidden;
@@ -203,8 +205,8 @@ code {
 .top-panel-toggle {
   position: absolute;
   top: 14px;
-  right: 0;
-  transform: translateX(55%);
+  right: -2px;
+  transform: translateX(calc(100% - 4px));
   z-index: 4;
   border-radius: 0 6px 6px 0;
   background: #fff;
@@ -353,6 +355,8 @@ th, td {
 
 .bottom-panel {
   position: relative;
+  width: calc(100% - 28px);
+  margin-right: 28px;
   min-height: 240px;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -368,38 +372,48 @@ th, td {
 }
 
 .action-rail {
+  --buttons-column-color: #fff;
   position: absolute;
-  right: 4px;
+  right: -2px;
   top: 12px;
-  transform: none;
+  transform: translateX(calc(100% - 4px));
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 30px;
   z-index: 4;
-  background: #fff;
-  padding: 8px 6px;
-  border-radius: 0 8px 8px 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-
-.action-rail button {
-  width: 26px;
-  height: 26px;
-  border: 1px solid #cbd5e1;
-  border-radius: 0;
-  background: #fff;
-  padding: 0;
-  font-size: 15px;
-  font-weight: 700;
-  color: #0ea5e9;
+  background: var(--buttons-column-color);
+  padding: 18px 8px 18px 0;
+  border-radius: 8px;
 }
 
 .action-rail .active {
-  font-weight: 700;
+  color: #111;
 }
 
-.action-rail.disabled button {
+.action-rail.disabled {
   opacity: 0.6;
+}
+
+.rail-btn {
+  width: 20px;
+  height: 20px;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  line-height: 1;
+  font-size: 18px;
+  font-weight: 700;
+  color: #0ea5e9;
+  border-radius: 0;
+}
+
+.rail-btn.table {
+  color: #1f2937;
+  font-size: 15px;
+}
+
+.rail-btn:disabled {
+  opacity: 1;
 }
 
 .action-popover {
