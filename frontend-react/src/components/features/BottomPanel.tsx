@@ -12,6 +12,10 @@ type Props = {
   currentView: FiltersView | null;
   selectedFilters: Array<{ category: string; value: string }>;
   data?: AMRRecordsResponse;
+  /** True while any records fetch is in flight (including background refetch). */
+  isFetching?: boolean;
+  /** True when `data` is from the previous query key until the new request completes. */
+  isPlaceholderData?: boolean;
   isLoading: boolean;
   isError: boolean;
   hasSelectedFilters: boolean;
@@ -28,6 +32,8 @@ const BottomPanel = ({
   currentView,
   selectedFilters,
   data,
+  isFetching = false,
+  isPlaceholderData = false,
   isLoading,
   isError,
   hasSelectedFilters,
@@ -54,9 +60,34 @@ const BottomPanel = ({
       </section>
     );
   }
-  if (isLoading) return <section className="panel bottom-panel"><p>Loading...</p></section>;
-  if (isError) return <section className="panel bottom-panel"><p>Failed to retrieve data.</p></section>;
-  if (!data?.data.length) return <section className="panel bottom-panel"><p>No data.</p></section>;
+  if (isLoading && !data) {
+    return (
+      <section className="panel bottom-panel">
+        <p>Loading...</p>
+      </section>
+    );
+  }
+  if (isError && !data) {
+    return (
+      <section className="panel bottom-panel">
+        <p>Failed to retrieve data.</p>
+      </section>
+    );
+  }
+  if (data && !data.data.length && !isPlaceholderData) {
+    return (
+      <section className="panel bottom-panel">
+        <p>No data.</p>
+      </section>
+    );
+  }
+  if (!data) {
+    return (
+      <section className="panel bottom-panel">
+        <p>Loading...</p>
+      </section>
+    );
+  }
 
   const columns = [...(currentView?.columns ?? [])].sort((a, b) => a.rank - b.rank);
   const columnIds = columns.map(column => String(column.id));
@@ -90,19 +121,27 @@ const BottomPanel = ({
       </div>
 
       <div className="table-container">
-        <table>
+        <table className={isFetching && isPlaceholderData ? 'table-data-refreshing' : undefined}>
           <thead>
             <tr>
               {columns.map(column => {
+                const isSortedColumn = sort?.category === String(column.id);
                 return (
                 <th key={String(column.id)}>
                   {column.sortable ? (
-                    <button className="sort-button" onClick={() => onSortChange(String(column.id))}>
-                      <span>{column.label}</span>
-                      <span className="sort-arrows">
-                        <span className={sort?.category === String(column.id) && sort.order === 'asc' ? 'active' : ''}>▲</span>
-                        <span className={sort?.category === String(column.id) && sort.order === 'desc' ? 'active' : ''}>▼</span>
+                    <button
+                      className={`sort-button ${isSortedColumn ? 'active' : ''}`}
+                      onClick={() => onSortChange(String(column.id))}
+                    >
+                      <span
+                        className={`sort-arrow ${isSortedColumn ? 'active' : ''} ${
+                          sort?.order === 'asc' ? 'up' : ''
+                        }`}
+                        aria-hidden="true"
+                      >
+                        ▲
                       </span>
+                      <span>{column.label}</span>
                     </button>
                   ) : (
                     column.label
@@ -112,7 +151,7 @@ const BottomPanel = ({
               })}
             </tr>
           </thead>
-          <tbody>
+          <tbody aria-busy={isFetching && isPlaceholderData}>
             {data.data.map((record, index) => (
               <tr key={index}>
                 {columnIds.map(columnId => {

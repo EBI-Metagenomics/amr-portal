@@ -180,7 +180,7 @@ code {
 }
 
 .panel {
-  margin-top: 1rem;
+  margin-top: 0rem;
   padding: 1.2rem 1.5rem;
   border: 1px solid #d3dce6;
   border-radius: 8px;
@@ -331,6 +331,12 @@ table {
   color: #1b2c39;
 }
 
+/* While new page/sort data is loading, only the body visually softens (controls + header stay put). */
+.table-data-refreshing tbody {
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}
+
 th, td {
   border: 0;
   text-align: left;
@@ -349,21 +355,28 @@ th, td {
   font-weight: 300;
   font-size: 11px;
   color: #1b2c39;
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: auto auto;
   align-items: baseline;
   gap: 7px;
 }
 
-.sort-arrows {
-  display: inline-flex;
-  flex-direction: column;
-  line-height: 0.65;
-  color: #b7c0c8;
-  font-size: 7px;
-  margin-left: 0;
+.sort-button.active {
+  font-weight: 700;
 }
 
-.sort-arrows .active {
+.sort-arrow {
+  line-height: 1;
+  color: #b7c0c8;
+  font-size: 7px;
+  transform: rotate(180deg);
+}
+
+.sort-arrow.up {
+  transform: rotate(0deg);
+}
+
+.sort-arrow.active {
   color: #0099ff;
 }
 

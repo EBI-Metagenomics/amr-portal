@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { amrService } from '@services/amr/amrService';
 import TopPanel from '@components/features/TopPanel';
 import BottomPanel from '@components/features/BottomPanel';
@@ -32,6 +32,7 @@ const HomePage = () => {
           : undefined,
       }),
     enabled: Boolean(state.currentView?.id) && state.selectedFilters.length > 0,
+    placeholderData: keepPreviousData,
   });
 
   return (
@@ -52,6 +53,8 @@ const HomePage = () => {
             currentView={state.currentView}
             selectedFilters={state.selectedFilters}
             data={recordsQuery.data}
+            isFetching={recordsQuery.isFetching}
+            isPlaceholderData={recordsQuery.isPlaceholderData}
             isLoading={recordsQuery.isLoading}
             isError={recordsQuery.isError}
             hasSelectedFilters={state.selectedFilters.length > 0}
