@@ -6,6 +6,8 @@
   --amr-header-height: 35px;
   --amr-subheader-height: 50px;
   --amr-top-panel-height: 360px;
+  --amr-rail-gutter: 40px;
+  --amr-rail-anchor: -24px;
 }
 
 body {
@@ -187,11 +189,11 @@ code {
 
 .top-panel {
   position: relative;
-  width: calc(100% - 28px);
-  margin-right: 28px;
+  width: calc(100% - var(--amr-rail-gutter));
+  margin-right: var(--amr-rail-gutter);
   min-height: var(--amr-top-panel-height);
   height: var(--amr-top-panel-height);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .top-panel.collapsed {
@@ -204,16 +206,18 @@ code {
 
 .top-panel-toggle {
   position: absolute;
-  top: 14px;
-  right: -2px;
-  transform: translateX(calc(100% - 4px));
+  top: -1px;
+  right: var(--amr-rail-anchor);
+  transform: none;
   z-index: 4;
   border-radius: 0 6px 6px 0;
   background: #fff;
-  padding: 6px 8px;
+  padding: 4px 8px;
   color: #0ea5e9;
-  font-size: 16px;
+  font-size: 18px;
   line-height: 1;
+  border: 1px solid #dbe6ef;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .panel-layout {
@@ -355,8 +359,8 @@ th, td {
 
 .bottom-panel {
   position: relative;
-  width: calc(100% - 28px);
-  margin-right: 28px;
+  width: calc(100% - var(--amr-rail-gutter));
+  margin-right: var(--amr-rail-gutter);
   min-height: 240px;
   display: grid;
   grid-template-rows: auto 1fr;
@@ -374,16 +378,16 @@ th, td {
 .action-rail {
   --buttons-column-color: #fff;
   position: absolute;
-  right: -2px;
-  top: 12px;
-  transform: translateX(calc(100% - 4px));
+  right: var(--amr-rail-anchor);
+  top: -1px;
+  transform: none;
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 16px;
   z-index: 4;
   background: var(--buttons-column-color);
-  padding: 18px 8px 18px 0;
-  border-radius: 8px;
+  padding: 10px 4px 10px 2px;
+  border-radius: 6px;
 }
 
 .action-rail .active {
@@ -419,7 +423,7 @@ th, td {
 .action-popover {
   position: absolute;
   right: 14px;
-  top: 10px;
+  top: -1px;
   width: 420px;
   background: #f1f5f9;
   border: 1px solid #cbd5e1;
