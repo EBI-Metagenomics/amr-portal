@@ -1,7 +1,7 @@
 const EbiFooter = () => {
   return (
     <footer className="ebi-footer vf-footer" data-vf-google-analytics-region="embl-footer">
-      <div className="ebi-footer-inner">
+      <div className="vf-footer__inner">
         <p className="vf-footer__notice">
           <a className="vf-footer__link" href="//www.ebi.ac.uk/about/our-impact">
             EMBL-EBI is the home for big data in biology. We help scientists exploit complex

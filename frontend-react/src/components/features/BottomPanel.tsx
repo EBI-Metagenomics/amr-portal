@@ -139,9 +139,7 @@ const renderField = (field: AMRRecordField) => {
   if (isLinkArray(field)) {
     return field.values.map((link, index) => (
       <span key={`${link.url}-${index}`}>
-        <a href={link.url} target="_blank" rel="noreferrer">
-          {link.value}
-        </a>
+        <ExternalLink href={link.url}>{link.value}</ExternalLink>
         {index < field.values.length - 1 ? ', ' : ''}
       </span>
     ));
@@ -149,15 +147,26 @@ const renderField = (field: AMRRecordField) => {
   if (isLink(field)) {
     if (!field.value) return null;
     return field.url ? (
-      <a href={field.url} target="_blank" rel="noreferrer">
-        {field.value}
-      </a>
+      <ExternalLink href={field.url}>{field.value}</ExternalLink>
     ) : (
       field.value
     );
   }
   return field.value;
 };
+
+const ExternalLink = ({ href, children }: { href: string; children: string }) => (
+  <a className="cell-external-link" href={href} target="_blank" rel="noopener noreferrer">
+    <ExternalLinkIcon />
+    {children}
+  </a>
+);
+
+const ExternalLinkIcon = () => (
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M22,5.2l-0.1,0.1L13.4,14c-1,1-1,2.5,0,3.5l1.2,1.2c1,1,2.5,1,3.5,0l8.5-8.7l0.1-0.1l2.6,2.7c1,1,1.7,0.6,1.7-0.7V1.8C31,1.4,30.6,1,30.2,1h-9.8c-1.4,0-1.7,0.8-0.7,1.8L22,5.2z M6,1C3.2,1,1,3.2,1,6v20c0,2.8,2.2,5,5,5h20c2.8,0,5-2.2,5-5V13.1v7.1L26,16v7.5c0,1.4-1.1,2.5-2.5,2.5h-15C7.1,26,6,24.9,6,23.5v-15C6,7.1,7.1,6,8.5,6H16l-4.2-5h7.1H6z" />
+  </svg>
+);
 
 const isLink = (data: AMRRecordField): data is LinkData => data.type === 'link';
 const isLinkArray = (data: AMRRecordField): data is LinkArrayData => data.type === 'array-link';
