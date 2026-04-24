@@ -303,8 +303,10 @@ code {
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.75rem;
   font-size: 13px;
+  font-family: Lato, 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
+  color: #1b2c39;
 }
 
 .pager {
@@ -318,21 +320,25 @@ code {
   overflow: auto;
   white-space: nowrap;
   min-height: 0;
+  background: #fff;
 }
 
 table {
   border-collapse: collapse;
   width: 100%;
   min-width: 900px;
+  font-family: Lato, 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
+  color: #1b2c39;
 }
 
 th, td {
-  border: 1px solid #e5e7eb;
+  border: 0;
   text-align: left;
-  padding: 0.42rem 0.5rem;
-  vertical-align: top;
-  font-size: 12px;
-  color: #2d3748;
+  padding-left: 24px;
+  padding-right: 32px;
+  vertical-align: middle;
+  font-size: 13px;
+  color: #1b2c39;
 }
 
 .sort-button {
@@ -340,25 +346,25 @@ th, td {
   background: transparent;
   cursor: pointer;
   padding: 0;
-  font-weight: 500;
-  font-size: 12px;
-  color: #5f6b77;
+  font-weight: 300;
+  font-size: 11px;
+  color: #1b2c39;
   display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
+  align-items: baseline;
+  gap: 7px;
 }
 
 .sort-arrows {
   display: inline-flex;
   flex-direction: column;
-  line-height: 0.62;
-  color: #aab6c2;
-  font-size: 8px;
-  margin-left: 2px;
+  line-height: 0.65;
+  color: #b7c0c8;
+  font-size: 7px;
+  margin-left: 0;
 }
 
 .sort-arrows .active {
-  color: #6b7280;
+  color: #0099ff;
 }
 
 .bottom-panel {
@@ -435,13 +441,19 @@ th, td {
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
+  color: #0099ff;
+  text-decoration: none;
+}
+
+.cell-external-link:hover {
+  text-decoration: underline;
 }
 
 .cell-external-link svg {
-  width: 11px;
-  height: 11px;
-  fill: #f29400;
-  transform: translateY(-0.5px);
+  width: 10px;
+  height: 10px;
+  fill: #ff9900;
+  transform: translateY(-1px);
 }
 
 .action-popover {
@@ -466,9 +478,26 @@ thead th {
   position: sticky;
   top: 0;
   background: #fff;
-  border-bottom: 2px solid #2ba6df;
-  color: #687380;
-  font-weight: 500;
+  box-shadow: inset 0 -1.5px 0 #0099ff;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  font-size: 11px;
+  font-weight: 300;
+  color: #1b2c39;
+  z-index: 1;
+}
+
+tbody td {
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+
+tbody tr + tr {
+  border-top: 1px solid #b7c0c8;
+}
+
+tbody tr:last-of-type {
+  border-bottom: 1px solid #b7c0c8;
 }
 
 button {
