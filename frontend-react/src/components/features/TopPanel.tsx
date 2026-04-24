@@ -36,7 +36,15 @@ const TopPanel = ({
         onClick={() => setIsCollapsed(prev => !prev)}
         aria-label={isCollapsed ? 'Expand panel' : 'Collapse panel'}
       >
-        {isCollapsed ? '▾' : '▴'}
+        {isCollapsed ? (
+          <svg viewBox="0 0 16 16" width="23" height="23" aria-hidden="true">
+            <path d="M4 6.5 8 10.2 12 6.5" stroke="#0ea5e9" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 16 16" width="23" height="23" aria-hidden="true">
+            <path d="M4 9.5 8 5.8 12 9.5" stroke="#0ea5e9" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        )}
       </button>
       {isCollapsed ? (
         <aside className="left-nav collapsed-nav">
