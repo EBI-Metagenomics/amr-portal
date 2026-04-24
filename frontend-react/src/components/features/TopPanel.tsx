@@ -85,21 +85,23 @@ const TopPanel = ({
           </aside>
 
           <div>
-            <div className="filter-by-label">Filter by</div>
-            <div className="group-nav">
-              {currentView.categoryGroups.map(group => {
-                const active = group.name === activeGroup.name;
-                return (
-                  <button
-                    key={group.name}
-                    className="link-button"
-                    disabled={active}
-                    onClick={() => onGroupChange(group.name)}
-                  >
-                    {group.name}
-                  </button>
-                );
-              })}
+            <div className="filter-by-row">
+              <span className="filter-by-label">Filter by</span>
+              <div className="group-nav">
+                {currentView.categoryGroups.map(group => {
+                  const active = group.name === activeGroup.name;
+                  return (
+                    <button
+                      key={group.name}
+                      className="link-button"
+                      disabled={active}
+                      onClick={() => onGroupChange(group.name)}
+                    >
+                      {group.name}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div className="filters-grid">
@@ -108,7 +110,7 @@ const TopPanel = ({
                 if (!category) return null;
                 return (
                   <div key={category.id} className="filter-category">
-                    <h4>{category.label}</h4>
+                    {/* <h4>{category.label}</h4> */}
                     {category.filters.map(filter => {
                       const checked = selectedFilters.some(
                         selected =>
