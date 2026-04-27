@@ -39,8 +39,8 @@ variables:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
       changes:
         - portal-static/**/*
-        - portal-app/**/*
-        - portal-app/merge-frontend-dist.sh
+        - frontend/**/*
+        - frontend/merge-frontend-dist.sh
       when: always
 
 # Code changed rules for backend
@@ -51,7 +51,7 @@ variables:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
       changes:
         - portal-static/nginx-conf/**/*
-        - portal-app/nginx-conf/**/*
+        - frontend/nginx-conf/**/*
       when: always
 
 # template for deploy context
@@ -135,12 +135,12 @@ Build:FE:Assets:
     - cd portal-static
     - npm ci
     - npm run build
-    - cd ../portal-app
+    - cd ../frontend
     - npm ci
     - npm run build
     - cd ..
-    - chmod +x portal-app/merge-frontend-dist.sh
-    - ./portal-app/merge-frontend-dist.sh
+    - chmod +x frontend/merge-frontend-dist.sh
+    - ./frontend/merge-frontend-dist.sh
   after_script:
     - echo "BUILD_JOB_ID=${CI_JOB_ID}" >> build_static.env
   artifacts:
@@ -258,7 +258,7 @@ Publish:Assets:Live:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
       changes:
         - portal-static/**/*
-        - portal-app/**/*
+        - frontend/**/*
       when: manual
 
 # Deploy Nginx to Live to serve static assets
@@ -279,7 +279,7 @@ Deploy:Nginx:Live:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
       changes:
         - portal-static/nginx-conf/**/*
-        - portal-app/nginx-conf/**/*
+        - frontend/nginx-conf/**/*
       when: manual
 
 # Deploy Nginx to RC to serve static assets

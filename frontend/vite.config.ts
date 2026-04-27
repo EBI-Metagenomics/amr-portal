@@ -5,7 +5,7 @@ import { fileURLToPath, URL } from 'node:url'
 const appRoot = fileURLToPath(new URL('.', import.meta.url))
 
 export default defineConfig(({ mode }) => {
-  // Load .env from portal-app/ even when `npm run --prefix portal-app dev` leaves cwd at repo root.
+  // Load .env from frontend/ even when `npm run --prefix frontend dev` leaves cwd at repo root.
   const env = loadEnv(mode, appRoot, '');
   const portalPrefix = (env.VITE_PORTAL_PREFIX || '/amr').replace(/\/$/, '');
   const base = env.VITE_APP_BASE || `${portalPrefix}/data/`;

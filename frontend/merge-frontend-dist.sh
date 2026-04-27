@@ -7,7 +7,7 @@
 #
 # Usage (from repo root):
 #   ./scripts/merge-frontend-dist.sh [OUTPUT_DIR] [CONTENT_DIR] [APP_DIR]
-# Defaults: portal-static/dist  portal-static/content-dist  portal-app/app-dist
+# Defaults: portal-static/dist  portal-static/content-dist  frontend/app-dist
 
 set -euo pipefail
 
@@ -16,14 +16,14 @@ cd "$REPO_ROOT"
 
 MERGED="${1:-portal-static/dist}"
 CONTENT="${2:-portal-static/content-dist}"
-APP="${3:-portal-app/app-dist}"
+APP="${3:-frontend/app-dist}"
 
 if [[ ! -d "$CONTENT" ]]; then
   echo "merge-frontend-dist: missing content dir: $CONTENT (run Eleventy build in portal-static/)" >&2
   exit 1
 fi
 if [[ ! -d "$APP" ]]; then
-  echo "merge-frontend-dist: missing app dir: $APP (run Vite build in portal-app/)" >&2
+  echo "merge-frontend-dist: missing app dir: $APP (run Vite build in frontend/)" >&2
   exit 1
 fi
 

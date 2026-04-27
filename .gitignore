@@ -10,7 +10,7 @@ node_modules
 dist
 _site
 portal-static/content-dist
-portal-app/app-dist
+frontend/app-dist
 
 # Data files
 *.parquet

@@ -13,7 +13,7 @@ const PortalSubheader = () => {
     queryKey: ['release'],
     queryFn: () => amrService.getRelease(),
   });
-  // Use portal-app public assets so icons work in both Vite dev and merged nginx runtime.
+  // Use frontend public assets so icons work in both Vite dev and merged nginx runtime.
   const ensemblIconBasePath = `${import.meta.env.BASE_URL}assets/images/icons/ensembl-icons`;
 
   return (

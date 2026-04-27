@@ -9,12 +9,12 @@ React frontend for the AMR portal migration, following METT portal conventions:
 ## Local development
 
 1. Install dependencies:
-   - `npm install` (from `portal-app/`, or `npm install --prefix portal-app` from repo root)
+   - `npm install` (from `frontend/`, or `npm install --prefix frontend` from repo root)
 2. Copy env: `cp .env.example .env` and edit **`VITE_APP_BASE`** if you want a different URL prefix (default is **`/amr/data/`**).
 3. Start dev server:
-   - `npm run dev` from `portal-app/`, or from repo root: `npm run --prefix portal-app dev`
+   - `npm run dev` from `frontend/`, or from repo root: `npm run --prefix frontend dev`
 
-The dev URL path comes from **`VITE_APP_BASE`** (Vite `base` + React Router basename). If you still see `/amr-react/`, check for an old `VITE_APP_BASE` in a **repo-root** `.env` — env is read from `portal-app/` only.
+The dev URL path comes from **`VITE_APP_BASE`** (Vite `base` + React Router basename). If you still see `/amr-react/`, check for an old `VITE_APP_BASE` in a **repo-root** `.env` — env is read from `frontend/` only.
 
 ## Environment variables
 
@@ -30,7 +30,7 @@ Copy `.env.example` to `.env` and adjust as needed.
 
 ## Container build
 
-Dockerfile lives at `portal-app/Dockerfile` and builds static assets with Node, then serves them from Nginx on port `8000`.
+Dockerfile lives at `frontend/Dockerfile` and builds static assets with Node, then serves them from Nginx on port `8000`.
 
 ## Kubernetes test deployment
 

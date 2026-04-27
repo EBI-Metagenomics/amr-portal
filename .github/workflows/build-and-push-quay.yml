@@ -29,13 +29,13 @@ jobs:
       - name: Build backend Docker image
         run: |
           docker build \
-            -t quay.io/${{ env.QUAY_ORG }}/amr-backend:${{ env.IMAGE_TAG }} \
+            -t quay.io/${{ env.QUAY_ORG }}/amr-portal-backend:${{ env.IMAGE_TAG }} \
             -f backend/Dockerfile \
             backend/
 
       - name: Push backend Docker image
         run: |
-          docker push quay.io/${{ env.QUAY_ORG }}/amr-backend:${{ env.IMAGE_TAG }}
+          docker push quay.io/${{ env.QUAY_ORG }}/amr-portal-backend:${{ env.IMAGE_TAG }}
 
   build-and-push-frontend:
     name: Build and push frontend image
@@ -58,7 +58,7 @@ jobs:
         run: |
           docker build \
             -t quay.io/${{ env.QUAY_ORG }}/amr-portal-frontend:${{ env.IMAGE_TAG }} \
-            -f portal-app/Dockerfile \
+            -f frontend/Dockerfile \
             .
 
       - name: Push frontend Docker image
