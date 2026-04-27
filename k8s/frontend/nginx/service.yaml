@@ -4,10 +4,10 @@ metadata:
   name: amr-frontend-svc-dev
   namespace: amr-portal-dev
   labels:
-    ensembl.platform.app.name: amr-portal-nginx
+    ensembl.platform.app.name: amr-portal
 spec:
   selector:
-    ensembl.platform.app.name: amr-portal-nginx
+    ensembl.platform.app.name: amr-portal
   type: NodePort
   ports:
     - port: 8000

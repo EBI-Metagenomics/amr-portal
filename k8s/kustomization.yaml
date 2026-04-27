@@ -2,7 +2,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
 - backend
-- frontend/nginx
+- frontend
 configMapGenerator:
 - name: shared-image-config
   envs:
@@ -17,7 +17,7 @@ replacements:
   targets:
   - select:
       kind: Deployment
-      name: amr-deployment
+      name: amr-api-dev
     fieldPaths:
     - spec.template.spec.containers.0.image
 - source:

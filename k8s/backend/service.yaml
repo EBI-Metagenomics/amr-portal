@@ -10,7 +10,7 @@ spec:
     ensembl.platform.app.name: amr
   type: NodePort
   ports:
-  - port: 8000
-    protocol: TCP
-    targetPort: 8000
-    nodePort: 32027
+    - port: 8000
+      protocol: TCP
+      targetPort: 8000
+      nodePort: 32027

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   labels:
     app: amr-portal-nginx
-  name: amr-portal-nginx-deployment-dev
+  name: amr-portal-dev
   namespace: amr-portal-dev
 spec:
   replicas: 1
