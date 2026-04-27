@@ -3,7 +3,8 @@ kind: Ingress
 metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$2
-  name: amr-api-ingress-fe
+  name: amr-api-ingress-frontend
+  namespace: amr-portal-dev
 spec:
   ingressClassName: nginx
   rules:

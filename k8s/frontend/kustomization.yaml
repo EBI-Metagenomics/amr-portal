@@ -3,5 +3,5 @@ kind: Kustomization
 resources:
 - nginx/pvc.yaml
 - nginx/service.yaml
+- nginx/configmap.yaml
 - nginx/deployment.yaml
-- nginx/ingress.yaml

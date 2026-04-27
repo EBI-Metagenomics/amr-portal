@@ -3,11 +3,13 @@ kind: PersistentVolumeClaim
 metadata:
   labels:
     ensembl.platform.app.name: amr
-  name: amr-portal-pv-claim-data
+  name: amr-portal-pv-claim-data-dev
+  namespace: amr-portal-dev
 spec:
-  storageClassName: standard-nfs-production
   accessModes:
-  - ReadWriteMany
+  - ReadOnlyMany
   resources:
     requests:
-      storage: 10G
+      storage: 10Gi
+  volumeName: amr-portal-data-pv-dev
+  storageClassName: ""

@@ -20,7 +20,7 @@ The dev URL path comes from **`VITE_APP_BASE`** (Vite `base` + React Router base
 
 Copy `.env.example` to `.env` and adjust as needed.
 
-- `VITE_API_BASE_URL` - backend API base (default `/amr/api`)
+- `VITE_API_BASE_URL` - backend API base (default `/amr/api`). In Docker/Kubernetes runtime, this can be overridden via container env var `VITE_API_BASE_URL` without rebuilding the image.
 - `VITE_APP_BASE` - Vite asset base and React Router basename (default in `vite.config.ts` is `{VITE_PORTAL_PREFIX}/data/`, e.g. `/amr/data/`)
 
 ## Build

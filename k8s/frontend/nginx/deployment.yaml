@@ -3,7 +3,8 @@ kind: Deployment
 metadata:
   labels:
     app: amr-portal-nginx
-  name: amr-portal-nginx-deployment
+  name: amr-portal-nginx-deployment-dev
+  namespace: amr-portal-dev
 spec:
   replicas: 1
   selector:
@@ -15,18 +16,17 @@ spec:
         ensembl.platform.app.name: amr-portal-nginx
     spec:
       imagePullSecrets:
-        - name: ensemblweb-pull-secret
+        - name: regcred
       containers:
       - image: DOCKER_IMAGE
         imagePullPolicy: Always
         name: amr-portal-nginx
+        env:
+        - name: VITE_API_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: amr-frontend-configmap-dev
+              key: VITE_API_BASE_URL
         ports:
         - containerPort: 8000
           protocol: TCP
-        volumeMounts:
-        - mountPath: /usr/assets/
-          name: amrassets
-      volumes:
-        - name: amrassets
-          persistentVolumeClaim:
-            claimName: amr-portal-assets-pvc

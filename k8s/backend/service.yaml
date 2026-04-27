@@ -1,14 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: amr-api-svc
+  name: amr-api-svc-dev
+  namespace: amr-portal-dev
   labels:
     ensembl.platform.app.name: amr
 spec:
   selector:
     ensembl.platform.app.name: amr
-  type: ClusterIP
+  type: NodePort
   ports:
   - port: 8000
     protocol: TCP
     targetPort: 8000
+    nodePort: 32027

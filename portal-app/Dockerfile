@@ -14,7 +14,7 @@ WORKDIR /src/portal-app
 COPY portal-app/package*.json ./
 RUN npm ci
 COPY portal-app ./
-RUN npm run build
+RUN VITE_API_BASE_URL="VITE_API_BASE_URL_PLACEHOLDER" npm run build
 
 FROM alpine:3.20 AS merge
 COPY --from=content /src/portal-static/content-dist /tmp/content
@@ -32,3 +32,5 @@ RUN rm /etc/nginx/conf.d/*
 COPY portal-app/nginx-conf/local.conf /etc/nginx/conf.d/local.conf
 COPY portal-app/nginx-conf/mime.types /etc/nginx/conf.d/mime.types
 COPY --from=merge /html /usr/share/nginx/html
+
+CMD ["/bin/sh", "-c", "API_BASE_URL=\"${VITE_API_BASE_URL:-/amr/api}\"; find /usr/share/nginx/html/data/assets -type f -name '*.js' -exec sed -i \"s|VITE_API_BASE_URL_PLACEHOLDER|${API_BASE_URL}|g\" {} +; nginx -g 'daemon off;'"]

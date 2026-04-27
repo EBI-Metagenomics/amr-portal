@@ -1,14 +1,16 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: amr-frontend-svc
+  name: amr-frontend-svc-dev
+  namespace: amr-portal-dev
   labels:
     ensembl.platform.app.name: amr-portal-nginx
 spec:
   selector:
     ensembl.platform.app.name: amr-portal-nginx
-  type: ClusterIP
+  type: NodePort
   ports:
     - port: 8000
       protocol: TCP
       targetPort: 8000
+      nodePort: 32028
