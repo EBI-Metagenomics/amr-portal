@@ -4,23 +4,23 @@ metadata:
   labels:
     app: amr-portal-nginx
   name: amr-portal-dev
-  namespace: amr-portal-dev
+  namespace: amr-portal-ns-dev
 spec:
   replicas: 1
   selector:
     matchLabels:
-      ensembl.platform.app.name: amr-portal-nginx
+      ensembl.platform.app.name: amr-portal-dev
   template:
     metadata:
       labels:
-        ensembl.platform.app.name: amr-portal-nginx
+        ensembl.platform.app.name: amr-portal-dev
     spec:
       imagePullSecrets:
         - name: regcred
       containers:
       - image: DOCKER_IMAGE
         imagePullPolicy: Always
-        name: amr-portal-nginx
+        name: amr-portal-dev
         env:
         - name: VITE_API_BASE_URL
           valueFrom:

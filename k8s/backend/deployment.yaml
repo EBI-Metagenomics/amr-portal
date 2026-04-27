@@ -2,23 +2,23 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: amr-api-dev
-  namespace: amr-portal-dev
+  namespace: amr-portal-ns-dev
 spec:
   replicas: 1
   revisionHistoryLimit: 10
   selector:
     matchLabels:
-      ensembl.platform.app.name: amr
+      ensembl.platform.app.name: amr-api-dev
   template:
     metadata:
       labels:
-        ensembl.platform.app.name: amr
+        ensembl.platform.app.name: amr-api-dev
     spec:
       imagePullSecrets:
         - name: regcred
       containers:
-        - name: amr
-          args: ["--host", "0.0.0.0", "--port", "8000", "backend.main:app" ]
+        - name: amr-api-dev
+          args: ["--host", "0.0.0.0", "--port", "8000", "main:app" ]
           command: ["uvicorn"]
           envFrom:
           - configMapRef:

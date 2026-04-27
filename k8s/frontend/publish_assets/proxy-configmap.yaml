@@ -2,7 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: proxy-configmap-dev
-  namespace: amr-portal-dev
+  namespace: amr-portal-ns-dev
 data:
   PROJECT_ID: "<PROJECT_ID>"
   JOB_ID: "<JOB_ID>"

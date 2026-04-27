@@ -32,5 +32,7 @@ RUN rm /etc/nginx/conf.d/*
 COPY frontend/nginx-conf/local.conf /etc/nginx/conf.d/local.conf
 COPY frontend/nginx-conf/mime.types /etc/nginx/conf.d/mime.types
 COPY --from=merge /html /usr/share/nginx/html
+# Load API base before the Vite bundle: avoids fragile sed on minified JS (relative /amr/api would use the SPA port).
+RUN sed -i 's|<head>|<head><script src="./runtime-config.js"></script>|' /usr/share/nginx/html/data/index.html
 
-CMD ["/bin/sh", "-c", "API_BASE_URL=\"${VITE_API_BASE_URL:-/amr/api}\"; find /usr/share/nginx/html/data/assets -type f -name '*.js' -exec sed -i \"s|VITE_API_BASE_URL_PLACEHOLDER|${API_BASE_URL}|g\" {} +; nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "API_BASE_URL=\"${VITE_API_BASE_URL:-/amr/api}\"; B64=$(printf '%s' \"$API_BASE_URL\" | base64 | tr -d '\\n'); printf 'window.__AMR_API_BASE_URL__=atob(\"%s\");\\n' \"$B64\" > /usr/share/nginx/html/data/runtime-config.js && exec nginx -g 'daemon off;'"]

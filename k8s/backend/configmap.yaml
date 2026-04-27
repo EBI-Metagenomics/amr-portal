@@ -4,4 +4,4 @@ data:
 kind: ConfigMap
 metadata:
   name: amr-api-configmap-dev
-  namespace: amr-portal-dev
+  namespace: amr-portal-ns-dev

@@ -4,7 +4,7 @@ metadata:
   labels:
     ensembl.platform.app.name: amr
   name: amr-portal-pv-claim-data-dev
-  namespace: amr-portal-dev
+  namespace: amr-portal-ns-dev
 spec:
   accessModes:
   - ReadOnlyMany

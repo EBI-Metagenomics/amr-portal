@@ -27,6 +27,6 @@ replacements:
   targets:
   - select:
       kind: Deployment
-      name: amr-portal-nginx-deployment-dev
+      name: amr-portal-dev
     fieldPaths:
     - spec.template.spec.containers.0.image

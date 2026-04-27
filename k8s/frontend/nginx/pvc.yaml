@@ -2,7 +2,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: amr-portal-assets-pvc-dev
-  namespace: amr-portal-dev
+  namespace: amr-portal-ns-dev
 spec:
   accessModes:
   - ReadOnlyMany
