@@ -1,0 +1,5 @@
+# Build context is portal-static/; only nginx conf is needed for this image.
+*
+!Dockerfile
+!nginx-conf
+!nginx-conf/**

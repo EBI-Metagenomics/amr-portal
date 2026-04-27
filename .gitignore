@@ -9,6 +9,8 @@ venv
 node_modules
 dist
 _site
+portal-static/content-dist
+portal-app/app-dist
 
 # Data files
 *.parquet

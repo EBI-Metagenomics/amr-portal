@@ -1,0 +1,5 @@
+.main {
+  background: #a0acb8;
+  padding: 10px 8px 20px;
+  min-height: calc(100vh - var(--amr-header-height) - var(--amr-subheader-height));
+}

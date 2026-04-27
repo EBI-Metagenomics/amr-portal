@@ -15,7 +15,7 @@ spec:
         image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:1.0.1
         tty: true
         command: ["/usr/bin/download_artifacts.sh"]
-        args: [ "<PROJECT_ID>", "<JOB_ID>", "/usr/assets/downloads", "/usr/assets/dist", "frontend/dist"]
+        args: [ "<PROJECT_ID>", "<JOB_ID>", "/usr/assets/downloads", "/usr/assets/dist", "portal-static/dist"]
         imagePullPolicy: Always
         envFrom:
           - configMapRef:

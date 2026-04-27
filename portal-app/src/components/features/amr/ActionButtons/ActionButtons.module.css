@@ -1,0 +1,105 @@
+.rail {
+  --buttons-column-color: #fff;
+  position: absolute;
+  right: var(--amr-rail-anchor);
+  top: -1px;
+  width: 32px;
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 4;
+  background: var(--buttons-column-color);
+  padding: 10px 4px 10px 2px;
+  border-radius: 6px;
+}
+
+.railDisabled {
+  opacity: 1;
+}
+
+.iconButton {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1093df;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.iconButton svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.iconButton:disabled {
+  opacity: 1;
+  color: #1093df;
+}
+
+.iconButtonActive {
+  color: #1093df;
+}
+
+.railDisabled .iconButton {
+  color: #9ca3af;
+}
+
+.popover {
+  position: absolute;
+  right: 14px;
+  top: -1px;
+  width: 420px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  z-index: 5;
+}
+
+.popover a {
+  color: #1477c9;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.popoverButton {
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 2px;
+  padding: 0.14rem 0.42rem;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.popoverButton:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.popoverLink {
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 2px;
+  padding: 0.14rem 0.42rem;
+  font-size: 11px;
+  font-family: inherit;
+  color: #1477c9;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
