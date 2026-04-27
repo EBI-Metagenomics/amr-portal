@@ -1,10 +1,10 @@
 .root {
-  height: 50px;
+  min-height: 50px;
   background: #fff;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding: 0 20px;
   border-bottom: 1px solid #d3dce6;
 }
 
@@ -17,7 +17,7 @@
 
 .leftWrapper {
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.5rem;
 }
 
 .homeLink {
@@ -30,9 +30,10 @@
 }
 
 .homeIcon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: block;
+  filter: invert(44%) sepia(97%) saturate(1562%) hue-rotate(179deg) brightness(94%) contrast(89%);
 }
 
 .homeIconFallback {
@@ -54,25 +55,31 @@
 }
 
 .portalTitle {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
   padding-right: 18px;
   margin-right: 18px;
-  border-right: 1px solid #1c1c1c;
+  border-right: 1px solid #6b7280;
+  color: #253746;
+}
+
+.portalTitleLink {
+  color: inherit;
+  text-decoration: none;
 }
 
 .pageTitle {
-  font-size: 14px;
-  color: #222;
+  font-size: 15px;
+  color: #253746;
 }
 
 .dataRelease {
   margin-left: 28px;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .dataReleaseLabel {
-  color: #4b5563;
+  color: #6b7280;
   margin-right: 8px;
 }
 
@@ -88,7 +95,7 @@
 .root a {
   color: #1477c9;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 14px;
 }
 
 .linkWithIcon {
@@ -98,9 +105,10 @@
 }
 
 .circleIcon {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   display: block;
+  filter: invert(44%) sepia(97%) saturate(1562%) hue-rotate(179deg) brightness(94%) contrast(89%);
 }
 
 .circleIconFallback {

@@ -2,49 +2,58 @@ import styles from './EbiFooter.module.css';
 
 const EbiFooter = () => {
   return (
-    <footer
-      className={`${styles.root} ebi-footer vf-footer`}
-      data-vf-google-analytics-region="embl-footer"
-    >
+    <footer className={`${styles.root} vf-footer`} data-vf-google-analytics-region="embl-footer">
       <div className="vf-footer__inner">
         <p className="vf-footer__notice">
           <a className="vf-footer__link" href="//www.ebi.ac.uk/about/our-impact">
-            EMBL-EBI is the home for big data in biology. We help scientists exploit complex information to make
-            discoveries that benefit humankind.
+            EMBL-EBI is the home for big data in biology.
           </a>
         </p>
-        <div className="vf-footer__links-group | vf-grid">
+        <p className="vf-footer__notice">
+          We help scientists exploit complex information to make discoveries that benefit humankind.
+        </p>
+        <div className="vf-footer__links-group vf-grid">
           <div className="vf-links">
-            <h4 className="vf-links__heading">
+            <div className="vf-links__heading">
               <a className="vf-heading__link" href="//www.ebi.ac.uk/services">
                 Services
               </a>
-            </h4>
-            <ul className="vf-links__list | vf-list">
+            </div>
+            <ul className="vf-links__list vf-list">
               <li className="vf-list__item">
-                <a href="//www.ebi.ac.uk/services" className="vf-list__link">
-                  By topic
+                <a href="//www.ebi.ac.uk/services/data-resources-and-tools" className="vf-list__link">
+                  Data resources and tools
                 </a>
               </li>
               <li className="vf-list__item">
-                <a href="//www.ebi.ac.uk/services/all" className="vf-list__link">
-                  By name (A-Z)
+                <a href="//www.ebi.ac.uk/submission" className="vf-list__link">
+                  Data submission
                 </a>
               </li>
               <li className="vf-list__item">
                 <a href="//www.ebi.ac.uk/support" className="vf-list__link">
-                  Help &amp; Support
+                  Support and feedback
+                </a>
+              </li>
+              <li className="vf-list__item">
+                <a href="//www.ebi.ac.uk/licencing" className="vf-list__link">
+                  Licensing
+                </a>
+              </li>
+              <li className="vf-list__item">
+                <a href="//www.ebi.ac.uk/long-term-data-preservation" className="vf-list__link">
+                  Long-term data preservation
                 </a>
               </li>
             </ul>
           </div>
           <div className="vf-links">
-            <h4 className="vf-links__heading">
+            <div className="vf-links__heading">
               <a className="vf-heading__link" href="//www.ebi.ac.uk/research">
                 Research
               </a>
-            </h4>
-            <ul className="vf-links__list | vf-list">
+            </div>
+            <ul className="vf-links__list vf-list">
               <li className="vf-list__item">
                 <a href="//www.ebi.ac.uk/research/publications" className="vf-list__link">
                   Publications
@@ -55,15 +64,24 @@ const EbiFooter = () => {
                   Research groups
                 </a>
               </li>
+              <li className="vf-list__item">
+                <a href="//www.ebi.ac.uk/research/postdocs" className="vf-list__link">
+                  Postdocs
+                </a>{' '}
+                and{' '}
+                <a href="//www.ebi.ac.uk/research/eipp" className="vf-list__link">
+                  PhDs
+                </a>
+              </li>
             </ul>
           </div>
           <div className="vf-links">
-            <h4 className="vf-links__heading">
+            <div className="vf-links__heading">
               <a className="vf-heading__link" href="//www.ebi.ac.uk/training">
                 Training
               </a>
-            </h4>
-            <ul className="vf-links__list | vf-list">
+            </div>
+            <ul className="vf-links__list vf-list">
               <li className="vf-list__item">
                 <a href="//www.ebi.ac.uk/training/live-events" className="vf-list__link">
                   Live training
@@ -74,42 +92,72 @@ const EbiFooter = () => {
                   On-demand training
                 </a>
               </li>
+              <li className="vf-list__item">
+                <a href="//www.ebi.ac.uk/training/trainer-support" className="vf-list__link">
+                  Support for trainers
+                </a>
+              </li>
+              <li className="vf-list__item">
+                <a href="//www.ebi.ac.uk/training/contact-us" className="vf-list__link">
+                  Contact organisers
+                </a>
+              </li>
             </ul>
           </div>
           <div className="vf-links">
-            <h4 className="vf-links__heading">
+            <div className="vf-links__heading">
               <a className="vf-heading__link" href="//www.ebi.ac.uk/industry">
                 Industry
               </a>
-            </h4>
-            <ul className="vf-links__list | vf-list">
+            </div>
+            <ul className="vf-links__list vf-list">
               <li className="vf-list__item">
-                <a href="//www.ebi.ac.uk/industry/private" className="vf-list__link">
+                <a href="//www.ebi.ac.uk/industry/private/members-area/" className="vf-list__link">
                   Members Area
                 </a>
               </li>
               <li className="vf-list__item">
-                <a href="//www.ebi.ac.uk/industry/workshops" className="vf-list__link">
-                  Workshops
+                <a href="//www.ebi.ac.uk/industry/contact-us" className="vf-list__link">
+                  Contact Industry team
                 </a>
               </li>
             </ul>
           </div>
           <div className="vf-links">
-            <h4 className="vf-links__heading">
+            <div className="vf-links__heading">
               <a className="vf-heading__link" href="//www.ebi.ac.uk/about">
                 About
               </a>
-            </h4>
-            <ul className="vf-links__list | vf-list">
+            </div>
+            <ul className="vf-links__list vf-list">
               <li className="vf-list__item">
                 <a href="//www.ebi.ac.uk/about/contact" className="vf-list__link">
                   Contact us
                 </a>
               </li>
               <li className="vf-list__item">
+                <a href="//www.ebi.ac.uk/about/events" className="vf-list__link">
+                  Events
+                </a>
+              </li>
+              <li className="vf-list__item">
                 <a href="//www.ebi.ac.uk/about/jobs" className="vf-list__link">
                   Jobs
+                </a>
+              </li>
+              <li className="vf-list__item">
+                <a href="//www.ebi.ac.uk/about/news" className="vf-list__link">
+                  News
+                </a>
+              </li>
+              <li className="vf-list__item">
+                <a href="//www.ebi.ac.uk/about/people" className="vf-list__link">
+                  People and groups
+                </a>
+              </li>
+              <li className="vf-list__item">
+                <a href="//intranet.ebi.ac.uk" className="vf-list__link">
+                  Intranet for staff
                 </a>
               </li>
             </ul>
@@ -129,9 +177,14 @@ const EbiFooter = () => {
               Tel: +44 (0)1223 49 44 44
             </a>
           </span>
+          <span className="vf-footer__legal-text">
+            <a className="vf-footer__link" href="//www.ebi.ac.uk/about/contact">
+              Full contact details
+            </a>
+          </span>
         </p>
         <p className="vf-footer__legal">
-          <span className="vf-footer__legal-text">Copyright © EMBL 2021</span>
+          <span className="vf-footer__legal-text">Copyright © EMBL 2025</span>
           <span className="vf-footer__legal-text">
             EMBL-EBI is part of the{' '}
             <a className="vf-footer__link" href="//www.embl.org">

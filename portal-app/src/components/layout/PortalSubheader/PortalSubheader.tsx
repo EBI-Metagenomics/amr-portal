@@ -13,19 +13,22 @@ const PortalSubheader = () => {
     queryKey: ['release'],
     queryFn: () => amrService.getRelease(),
   });
-  const iconBasePath = `${import.meta.env.BASE_URL}assets/images/icons/ensembl-icons`;
+  // Use portal-app public assets so icons work in both Vite dev and merged nginx runtime.
+  const ensemblIconBasePath = `${import.meta.env.BASE_URL}assets/images/icons/ensembl-icons`;
 
   return (
     <div className={styles.root}>
       <div className={styles.leftWrapper}>
         <a href={`${PORTAL_PREFIX}/`} className={styles.homeLink} aria-label="Home page">
-          <img src={`${iconBasePath}/icon_home.svg`} className={styles.homeIcon} alt="" />
+          <img src={`${ensemblIconBasePath}/icon_home.svg`} className={styles.homeIcon} alt="" />
           <span className={styles.homeIconFallback} aria-hidden="true">
             ⌂
           </span>
         </a>
         <div className={styles.titleWrapper}>
-          <span className={styles.portalTitle}>Antimicrobial resistance portal</span>
+          <a href={`${PORTAL_PREFIX}/`} className={styles.portalTitleLink}>
+            <span className={styles.portalTitle}>Antimicrobial resistance portal</span>
+          </a>
           <span className={styles.pageTitle}>Query AMR data</span>
         </div>
         <span className={styles.dataRelease}>
@@ -40,8 +43,8 @@ const PortalSubheader = () => {
             <img
               src={
                 link.href.includes('usage')
-                  ? `${iconBasePath}/icon_question_circle.svg`
-                  : `${iconBasePath}/icon_info_circle.svg`
+                  ? `${ensemblIconBasePath}/icon_question_circle.svg`
+                  : `${ensemblIconBasePath}/icon_info_circle.svg`
               }
               className={styles.circleIcon}
               alt=""

@@ -40,7 +40,7 @@ variables:
       changes:
         - portal-static/**/*
         - portal-app/**/*
-        - scripts/merge-frontend-dist.sh
+        - portal-app/merge-frontend-dist.sh
       when: always
 
 # Code changed rules for backend
@@ -139,8 +139,8 @@ Build:FE:Assets:
     - npm ci
     - npm run build
     - cd ..
-    - chmod +x scripts/merge-frontend-dist.sh
-    - ./scripts/merge-frontend-dist.sh
+    - chmod +x portal-app/merge-frontend-dist.sh
+    - ./portal-app/merge-frontend-dist.sh
   after_script:
     - echo "BUILD_JOB_ID=${CI_JOB_ID}" >> build_static.env
   artifacts:
