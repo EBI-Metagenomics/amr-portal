@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: dockerhub.ebi.ac.uk
-  IMAGE_NAMESPACE: containers/amr-portal
+  IMAGE_NAMESPACE: containers
   IMAGE_TAG: ${{ github.ref_name }}
 
 jobs:
