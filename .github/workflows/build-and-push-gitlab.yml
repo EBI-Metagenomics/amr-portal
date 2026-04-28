@@ -24,8 +24,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.EBI_GITLAB_USERNAME }}
-          password: ${{ secrets.EBI_GITLAB_PASSWORD }}
+          username: ${{ secrets.GITLAB_CONTAINERS_USERNAME }}
+          password: ${{ secrets.GITLAB_CONTAINERS_PASSWORD }}
 
       - name: Build backend Docker image
         run: |
@@ -52,8 +52,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.EBI_GITLAB_USERNAME }}
-          password: ${{ secrets.EBI_GITLAB_PASSWORD }}
+          username: ${{ secrets.GITLAB_CONTAINERS_USERNAME }}
+          password: ${{ secrets.GITLAB_CONTAINERS_PASSWORD }}
 
       - name: Build frontend Docker image
         run: |
