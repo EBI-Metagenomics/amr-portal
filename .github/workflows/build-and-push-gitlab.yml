@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: dockerhub.ebi.ac.uk
-  IMAGE_NAMESPACE: microbiome-informatics/containers
+  IMAGE_NAMESPACE: microbiome-informatics/containers/amr-portal
   IMAGE_TAG: ${{ github.ref_name }}
 
 jobs:
