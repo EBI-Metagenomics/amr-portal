@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { API_BASE_URL, FTP_DOWNLOAD_URL } from '@utils/common/constants';
 import { getDownloadLink } from '@utils/download';
 import styles from './ActionButtons.module.css';
@@ -15,6 +15,7 @@ type Props = {
 const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Props) => {
   const [view, setView] = useState<ActionView>(null);
   const [downloadStarted, setDownloadStarted] = useState(false);
+  const popoverRef = useRef<HTMLDivElement | null>(null);
 
   const downloadLink = useMemo(
     () =>
@@ -25,6 +26,23 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
       }),
     [viewId, selectedFilters]
   );
+
+  useEffect(() => {
+    if (!view) return;
+
+    const onDocumentMouseDown = (event: MouseEvent) => {
+      const target = event.target as Node | null;
+      if (!popoverRef.current || !target) return;
+      if (!popoverRef.current.contains(target)) {
+        setView(null);
+      }
+    };
+
+    document.addEventListener('mousedown', onDocumentMouseDown);
+    return () => {
+      document.removeEventListener('mousedown', onDocumentMouseDown);
+    };
+  }, [view]);
 
   if (disabled) {
     return (
@@ -63,9 +81,12 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
       </aside>
 
       {view === 'clear' ? (
-        <div className={styles.popover}>
-          <h4>Clear all data</h4>
-          <p>Any table configuration will be lost if you clear the data.</p>
+        <div ref={popoverRef} className={[styles.popover, styles.clearPopover].join(' ')}>
+          <h4 className={styles.popoverTitle}>Clear all data</h4>
+          <p className={styles.clearMessage}>
+            Any configuration of the table will be lost if you clear the data — do you wish to
+            continue?
+          </p>
           <div className={styles.confirmActions}>
             <button
               type="button"
@@ -85,9 +106,15 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
       ) : null}
 
       {view === 'download' ? (
-        <div className={styles.popover}>
-          <h4>Download data</h4>
-          <a href={FTP_DOWNLOAD_URL} target="_blank" rel="noopener noreferrer">
+        <div ref={popoverRef} className={[styles.popover, styles.downloadPopover].join(' ')}>
+          <h4 className={styles.popoverTitle}>Download data</h4>
+          <a
+            className={styles.ftpLink}
+            href={FTP_DOWNLOAD_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLinkIcon />
             Get data from the ftp site
           </a>
           <div className={styles.confirmActions}>
@@ -102,7 +129,7 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
             >
               {downloadStarted ? 'Starting...' : 'Download'}
             </a>
-            <button type="button" className={styles.popoverButton} onClick={() => setView(null)}>
+            <button type="button" className={styles.cancelButton} onClick={() => setView(null)}>
               Cancel
             </button>
           </div>
@@ -158,6 +185,12 @@ const DownloadIcon = () => (
   <svg viewBox="0 0 32 32" aria-hidden="true">
     <path d="M3.5999999,2.7C3.5999999,2.8,3.5,2.9000001,3.5,3s0,0.2,0.0999999,0.3L15.5,19.5999985c0.1999998,0.2999992,0.6000004,0.2999992,0.7999992,0.2000008c0.1000004,0,0.1000004-0.1000004,0.2000008-0.2000008L28.3999996,3.3C28.6000004,3,28.5,2.6999998,28.1999989,2.5c-0.1000004-0.0999999-0.2000008-0.0999999-0.2999992-0.0999999H4.0999999C3.9000001,2.4000001,3.7,2.5,3.5999999,2.7z" />
     <path d="M29.3353596,29.6499996c1,0,1.666666-0.833334,1.666666-1.6666679v-1.7666645c0-1-0.833334-1.666666-1.666666-1.666666H2.6686926c-0.8333333,0-1.6666666,0.666666-1.6666666,1.666666v1.7666645c0,0.833334,0.6666669,1.6666679,1.6666666,1.6666679H29.3353596z" />
+  </svg>
+);
+
+const ExternalLinkIcon = () => (
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M22,5.2l-0.1,0.1L13.4,14c-1,1-1,2.5,0,3.5l1.2,1.2c1,1,2.5,1,3.5,0l8.5-8.7l0.1-0.1l2.6,2.7c1,1,1.7,0.6,1.7-0.7V1.8C31,1.4,30.6,1,30.2,1h-9.8c-1.4,0-1.7,0.8-0.7,1.8L22,5.2z M6,1C3.2,1,1,3.2,1,6v20c0,2.8,2.2,5,5,5h20c2.8,0,5-2.2,5-5V13.1v7.1L26,16v7.5c0,1.4-1.1,2.5-2.5,2.5h-15C7.1,26,6,24.9,6,23.5v-15C6,7.1,7.1,6,8.5,6H16l-4.2-5h7.1H6z" />
   </svg>
 );
 
