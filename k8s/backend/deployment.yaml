@@ -15,7 +15,7 @@ spec:
         ensembl.platform.app.name: amr-api-dev
     spec:
       imagePullSecrets:
-        - name: regcred
+        - name: containers-pull-secret
       containers:
         - name: amr-api-dev
           args: ["--host", "0.0.0.0", "--port", "8000", "main:app" ]
