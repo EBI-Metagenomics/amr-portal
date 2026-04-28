@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: dockerhub.ebi.ac.uk
-  IMAGE_NAMESPACE: ebi-metagenomics/amr-portal
+  IMAGE_NAMESPACE: amr-portal
   IMAGE_TAG: ${{ github.ref_name }}
 
 jobs:
@@ -24,8 +24,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.EBI_REGISTRY_USERNAME }}
-          password: ${{ secrets.EBI_REGISTRY_PASSWORD }}
+          username: ${{ secrets.EBI_GITLAB_USERNAME }}
+          password: ${{ secrets.EBI_GITLAB_PASSWORD }}
 
       - name: Build backend Docker image
         run: |
@@ -52,8 +52,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.EBI_REGISTRY_USERNAME }}
-          password: ${{ secrets.EBI_REGISTRY_PASSWORD }}
+          username: ${{ secrets.EBI_GITLAB_USERNAME }}
+          password: ${{ secrets.EBI_GITLAB_PASSWORD }}
 
       - name: Build frontend Docker image
         run: |
