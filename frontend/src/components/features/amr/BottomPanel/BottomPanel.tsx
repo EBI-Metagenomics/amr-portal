@@ -112,6 +112,16 @@ const BottomPanel = ({
   const columns = [...(currentView?.columns ?? [])].sort((a, b) => a.rank - b.rank);
   const columnIds = columns.map(column => String(column.id));
   const totalPages = Math.max(1, Math.ceil(data.meta.total_hits / data.meta.per_page));
+  const onPageInputCommit = (rawValue: string) => {
+    const value = rawValue.trim();
+    if (!value) return;
+    const parsed = Number(value);
+    if (Number.isNaN(parsed)) return;
+    const nextPage = Math.min(totalPages, Math.max(1, Math.floor(parsed)));
+    if (nextPage !== page) {
+      onPageChange(nextPage);
+    }
+  };
 
   const tableWrapClass = [
     styles.tableContainer,
@@ -148,7 +158,24 @@ const BottomPanel = ({
           >
             &#8249;
           </button>
-          <span className={styles.pageInput}>{page}</span>
+          <input
+            key={`page-input-${page}`}
+            className={styles.pageInput}
+            type="text"
+            inputMode="numeric"
+            defaultValue={String(page)}
+            aria-label="Current page"
+            onKeyDown={event => {
+              if (event.key === 'Enter') {
+                onPageInputCommit(event.currentTarget.value);
+                event.currentTarget.blur();
+              }
+            }}
+            onBlur={event => {
+              onPageInputCommit(event.currentTarget.value);
+              event.currentTarget.value = String(page);
+            }}
+          />
           <span className={styles.ofPages}>of {totalPages}</span>
           <button
             type="button"

@@ -85,14 +85,12 @@
   border: 1px solid #1e90ff;
   border-radius: 0;
   background: #fff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
   font-family: inherit;
   font-size: 13px;
   line-height: 1;
   color: #1b2c39;
   padding: 0 6px;
+  text-align: center;
 }
 
 .ofPages {
