@@ -4,7 +4,8 @@ resources:
 - backend
 - frontend
 configMapGenerator:
-- name: shared-image-config
+- name: shared-image-config-prod
+  namespace: amr-portal-ns-prod
   envs:
   - images.env
 generatorOptions:
@@ -12,7 +13,7 @@ generatorOptions:
 replacements:
 - source:
     kind: ConfigMap
-    name: shared-image-config
+    name: shared-image-config-prod
     fieldPath: data.BACKEND_IMAGE
   targets:
   - select:
@@ -22,7 +23,7 @@ replacements:
     - spec.template.spec.containers.0.image
 - source:
     kind: ConfigMap
-    name: shared-image-config
+    name: shared-image-config-prod
     fieldPath: data.FRONTEND_IMAGE
   targets:
   - select:
