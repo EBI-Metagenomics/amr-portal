@@ -154,8 +154,8 @@
 
 .popoverLink {
   cursor: pointer;
-  border: 1px solid #39b54a;
-  background: #39b54a;
+  border: 1px solid #47d147;
+  background: #47d147;
   border-radius: 4px;
   padding: 0.4rem 1.4rem;
   font-size: 13px;
@@ -169,8 +169,8 @@
 }
 
 .popoverLink:hover {
-  background: #2ea03e;
-  border-color: #2ea03e;
+  background: #3bb63b;
+  border-color: #3bb63b;
   text-decoration: none;
 }
 

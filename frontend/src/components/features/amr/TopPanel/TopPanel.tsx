@@ -68,7 +68,9 @@ const TopPanel = ({
                 onClick={() => onViewChange(view.id)}
               >
                 {view.name}
-                {active && appliedFilterCount > 0 ? ` (${appliedFilterCount})` : ''}
+                {active && appliedFilterCount > 0 ? (
+                  <span className={styles.filterCountCircle}>{appliedFilterCount}</span>
+                ) : null}
               </button>
             );
           })}
@@ -88,7 +90,9 @@ const TopPanel = ({
                   onClick={() => onViewChange(view.id)}
                 >
                   {view.name}
-                  {active && appliedFilterCount > 0 ? ` (${appliedFilterCount})` : ''}
+                  {active && appliedFilterCount > 0 ? (
+                    <span className={styles.filterCountCircle}>{appliedFilterCount}</span>
+                  ) : null}
                 </button>
               );
             })}

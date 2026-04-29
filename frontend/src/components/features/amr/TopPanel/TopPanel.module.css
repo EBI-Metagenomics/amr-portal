@@ -135,4 +135,48 @@
   font-size: 13px;
   line-height: 1.2;
   width: 220px;
+  align-items: center;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.checkboxRow span {
+  color: #6b7280;
+}
+
+.checkboxRow input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 2px;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.checkboxRow input[type='checkbox']:checked {
+  border-color: #47d147;
+  background: #47d147;
+}
+
+.checkboxRow:hover {
+  cursor: pointer;
+}
+
+.filterCountCircle {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #47d147;
+  color: #fff;
+  font-weight: 700;
+  padding: 2px;
+  font-size: 12px;
+  margin-left: 6px;
 }
