@@ -1,0 +1,19 @@
+@import './variables.css';
+@import './base.css';
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'IBM Plex Sans', Arial, sans-serif;
+  color: #1c1c1c;
+  background: #f8fafc;
+  min-width: 980px;
+  font-size: 14px;
+}
+
+code {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+}

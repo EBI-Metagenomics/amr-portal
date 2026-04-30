@@ -1,4 +1,4 @@
-from backend.core.config import get_settings
+from core.config import get_settings
 import duckdb
 
 settings = get_settings()

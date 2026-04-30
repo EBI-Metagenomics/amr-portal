@@ -1,7 +1,15 @@
+import sys
+from pathlib import Path
+
+# Ensure sibling packages (api, core, …) resolve when cwd is not backend/.
+_ROOT = Path(__file__).resolve().parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from backend.api.endpoints import router as api_router
+from api.endpoints import router as api_router
 
 app = FastAPI()
 

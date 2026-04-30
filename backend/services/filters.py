@@ -14,10 +14,9 @@ from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 import logging
 
-from backend.models.payload import Payload
-from backend.services.serializer import serialize_amr_record
-from backend.core.filters_config_parser import build_filters_config
-from backend.core.config import get_settings
+from models.payload import Payload
+from core.filters_config_parser import build_filters_config
+from core.config import get_settings
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -109,7 +108,7 @@ def get_display_column_details(view_id: int, db: duckdb.DuckDBPyConnection):
         return _display_columns_cache[view_id].copy()
 
     columns_to_display_query = f"""
-        SELECT cd.fullname, cd.name, cd.type, cd.sortable, cd.url, cd.delimiter
+        SELECT cd.fullname, cd.name, cd.label, cd.type, cd.sortable, cd.url, cd.delimiter
         FROM view as v
             JOIN view_column vc on v.view_id = vc.view_id
             JOIN column_definition cd on vc.column_id = cd.column_id
@@ -303,6 +302,54 @@ def _stream_prefixed_rows(
         conn.close()
 
 
+def _build_columns_metadata(display_column_details: dict) -> list[Dict[str, Any]]:
+    """Build response-level column metadata from DB display column details."""
+    columns_meta: list[Dict[str, Any]] = []
+    for column_id, details in display_column_details.items():
+        column_type = details.get("type") or "string"
+
+        column_meta: Dict[str, Any] = {
+            "id": column_id,
+            "label": details.get("label") or details.get("name") or column_id,
+            "type": column_type,
+            "sortable": bool(details.get("sortable")),
+        }
+        if column_type in {"link", "array-link"} and details.get("url"):
+            column_meta["url_template"] = details["url"]
+        columns_meta.append(column_meta)
+    return columns_meta
+
+
+def _serialize_record_row(
+    row: Dict[str, Any],
+    columns_meta: list[Dict[str, Any]],
+    display_column_details: dict,
+) -> Dict[str, Any]:
+    """Serialize one DB row into {column_id: value} based on column type metadata."""
+    result: Dict[str, Any] = {}
+
+    for column in columns_meta:
+        column_id = column["id"]
+        value = _normalize_value(row.get(column_id))
+        column_type = column["type"]
+
+        if value is None:
+            result[column_id] = None
+            continue
+
+        if column_type == "array-link":
+            delimiter = display_column_details[column_id].get("delimiter")
+            if delimiter and isinstance(value, str):
+                result[column_id] = [entry for entry in value.split(delimiter) if entry]
+            else:
+                result[column_id] = []
+            continue
+
+        result[column_id] = value
+
+    return result
+
+
 def filter_amr_records(payload: Payload, db: duckdb.DuckDBPyConnection):
     """Fetch a single page of AMR results for UI consumption.
 
@@ -334,13 +381,18 @@ def filter_amr_records(payload: Payload, db: duckdb.DuckDBPyConnection):
         res_df = db.execute(paginated_query).fetchdf()
         res_df = res_df.replace({np.nan: None, np.inf: None, -np.inf: None})
         res_df = res_df.add_prefix(f"{context.dataset}-")
-        result = [serialize_amr_record(row, context.display_column_details) for _, row in res_df.iterrows()]
+        columns_meta = _build_columns_metadata(context.display_column_details)
+        result = [
+            _serialize_record_row(row.to_dict(), columns_meta, context.display_column_details)
+            for _, row in res_df.iterrows()
+        ]
 
         return {
             "meta": {
                 "total_hits": total_hits,
                 "page": page,
                 "per_page": per_page,
+                "columns": columns_meta,
             },
             "data": result
         }
@@ -350,15 +402,15 @@ def filter_amr_records(payload: Payload, db: duckdb.DuckDBPyConnection):
         raise HTTPException(status_code=500, detail=f"Database query failed, see the logs for more details")
 
 def flatten_record(record):
-    """Convert list-of-dicts into {column_id: value}.
+    """Convert records into a flat object for download serializers.
 
     Args:
-        record (list[dict]): Serialized AMR record from the UI serializer.
+        record (dict[str, Any]): Serialized AMR record.
 
     Returns:
         dict: Flattened mapping used by CSV/JSON streaming helpers.
     """
-    return {entry["column_id"]: entry.get("value") for entry in record}
+    return record
 
 
 def stream_csv(rows: Iterable[Dict[str, Any]]):

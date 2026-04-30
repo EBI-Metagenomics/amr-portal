@@ -1,0 +1,182 @@
+.root {
+  position: relative;
+  width: calc(100% - var(--amr-rail-gutter));
+  margin-right: var(--amr-rail-gutter);
+  min-height: var(--amr-top-panel-height);
+  height: var(--amr-top-panel-height);
+  overflow: visible;
+}
+
+.collapsed {
+  --amr-top-panel-height: 130px;
+  min-height: var(--amr-top-panel-height);
+  height: var(--amr-top-panel-height);
+  display: flex;
+  align-items: center;
+}
+
+.toggle {
+  position: absolute;
+  top: -1px;
+  right: var(--amr-rail-anchor);
+  transform: none;
+  z-index: 4;
+  border-radius: 0 6px 6px 0;
+  background: #fff;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #0ea5e9;
+  line-height: 1;
+  border: 0;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.toggleIcon path {
+  stroke: #0ea5e9;
+  stroke-width: 2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.panelLayout {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 0.8rem;
+  height: auto;
+  align-items: start;
+}
+
+.leftNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  height: 100%;
+  border-right: 1px solid #e5e7eb;
+  padding-right: 1rem;
+  padding-top: 0.6rem;
+}
+
+.leftNav h3 {
+  margin: 0 0 0.25rem;
+  font-size: 13px;
+  font-weight: 600;
+  color: #1b2c39;
+}
+
+.leftNavCollapsed {
+  border-right: 0;
+  padding-right: 0;
+}
+
+.filterByRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 1rem;
+  row-gap: 0.35rem;
+  margin-bottom: 0;
+  padding-bottom: 0.85rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.groupNav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 1.35rem;
+  margin: 0;
+}
+
+.filterByLabel {
+  flex-shrink: 0;
+  font-size: 12px;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.filtersGrid {
+  display: flex;
+  gap: 28px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-height: 320px;
+  margin-top: -0.15rem;
+  padding-top: 0.85rem;
+  padding-bottom: 10px;
+  align-items: stretch;
+}
+
+.filterCategory {
+  flex: 0 0 auto;
+  min-width: 170px;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  column-gap: 50px;
+  row-gap: 8px;
+  height: 260px;
+  align-content: flex-start;
+}
+
+.checkboxRow {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.2;
+  width: 220px;
+  align-items: center;
+  cursor: pointer;
+  color: #6b7280;
+}
+
+.checkboxRow span {
+  color: #6b7280;
+}
+
+.checkboxRow input[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #cbd5e1;
+  border-radius: 2px;
+  background: #fff;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.checkboxRow input[type='checkbox']:checked {
+  border-color: #47d147;
+  background: #47d147;
+}
+
+.checkboxRow:hover {
+  cursor: pointer;
+}
+
+.filterCountCircle {
+  min-width: 18px;
+  height: 18px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #47d147;
+  color: #fff;
+  font-weight: 700;
+  padding: 2px;
+  font-size: 12px;
+  margin-left: 6px;
+}

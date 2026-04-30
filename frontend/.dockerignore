@@ -1,6 +1,0 @@
-# Ignore Everything
-*
-
-# Allowed only specific files
-!/frontend/Dockerfile
-!/frontend/nginx-conf/*

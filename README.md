@@ -31,16 +31,15 @@ export DUCKDB_PATH=path/to/duckdb/file.duckdb
 ```
 
 ```shell
-# make sure you're in the *root directory*
-cd ..
-uvicorn backend.main:app --reload
+# from backend (venv active)
+uvicorn main:app --reload
 ```
 
 Swagger UI: http://localhost:8000/docs
 
 For production use:
 ```shell
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --workers 4
+uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
 For testing:
@@ -52,7 +51,7 @@ DUCKDB_PATH=path/to/test_data.duckdb
 
 Then run:
 ```shell
-TESTING=true pytest backend/
+cd backend && TESTING=true pytest tests/
 ```
 
 #### API Calls Examples
@@ -146,7 +145,7 @@ curl -X 'POST' \
 Prerequisite: need to have Node installed. As a rule of thumb, always use the latest LTS version of Node.
 
 ```
-cd frontend
+cd portal-static
 npm install
 npm run dev
 ```
@@ -156,7 +155,7 @@ npm run dev
 ### Frontend
 
 ```
-cd frontend
+cd portal-static
 npm install
 npm run build
 ```
@@ -165,4 +164,4 @@ This will create a `dist` directory containing a static html file and all the as
 
 ## Further details
 
-The frontend combines a static site built with [Eleventy](https://www.11ty.dev/) with islands of interactivity built with web components and Lit. For more details about the build setup, see `frontend/eleventy.config.js`, and the documentation in the [`docs/decisions`](/docs//decisions/) directory.
+The frontend combines a static site built with [Eleventy](https://www.11ty.dev/) with islands of interactivity built with web components and Lit. For more details about the build setup, see `portal-static/eleventy.config.js`, and the documentation in the [`docs/decisions`](/docs//decisions/) directory.

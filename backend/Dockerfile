@@ -17,7 +17,11 @@ USER amr
 WORKDIR /usr/app/venv
 EXPOSE 8000
 COPY --chown=amr:amr --from=builder /usr/app/venv /usr/app/venv
-COPY --chown=amr:amr . ./backend
+COPY --chown=amr:amr main.py .
+COPY --chown=amr:amr api ./api
+COPY --chown=amr:amr core ./core
+COPY --chown=amr:amr models ./models
+COPY --chown=amr:amr services ./services
 
 ENV PATH="/usr/app/venv/bin:$PATH"
-CMD ["uvicorn", "--host", "0.0.0.0", "--port", "8000" ,"backend.main:app"]
+CMD ["uvicorn", "--host", "0.0.0.0", "--port", "8000", "main:app"]

@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: amr-portal-nginx
+  name: amr-portal-prod
+  namespace: amr-portal-ns-prod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      ensembl.platform.app.name: amr-portal-prod
+  template:
+    metadata:
+      labels:
+        ensembl.platform.app.name: amr-portal-prod
+    spec:
+      imagePullSecrets:
+        - name: containers-pull-secret
+      containers:
+      - image: DOCKER_IMAGE
+        imagePullPolicy: Always
+        name: amr-portal-prod
+        env:
+        - name: VITE_API_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: amr-frontend-configmap-prod
+              key: VITE_API_BASE_URL
+        ports:
+        - containerPort: 8000
+          protocol: TCP

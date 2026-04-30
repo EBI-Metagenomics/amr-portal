@@ -38,7 +38,9 @@ variables:
   rules:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
       changes:
+        - portal-static/**/*
         - frontend/**/*
+        - frontend/merge-frontend-dist.sh
       when: always
 
 # Code changed rules for backend
@@ -48,6 +50,7 @@ variables:
   rules:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
       changes:
+        - portal-static/nginx-conf/**/*
         - frontend/nginx-conf/**/*
       when: always
 
@@ -117,7 +120,7 @@ Build:FE:Docker:
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker build -t ${DOCKER_IMAGE} --no-cache -f frontend/Dockerfile .
+    - docker build -t ${DOCKER_IMAGE} --no-cache -f portal-static/Dockerfile portal-static/
     - docker push ${DOCKER_IMAGE}
     - docker rmi ${DOCKER_IMAGE}
     - docker logout $CI_REGISTRY
@@ -129,15 +132,21 @@ Build:FE:Assets:
   <<: *fe-code-change-rules
   image: node:24
   script:
-    - cd frontend
+    - cd portal-static
     - npm ci
     - npm run build
+    - cd ../frontend
+    - npm ci
+    - npm run build
+    - cd ..
+    - chmod +x frontend/merge-frontend-dist.sh
+    - ./frontend/merge-frontend-dist.sh
   after_script:
     - echo "BUILD_JOB_ID=${CI_JOB_ID}" >> build_static.env
   artifacts:
     name: build_artifacts
     paths:
-      - frontend/dist/
+      - portal-static/dist/
     reports:
       dotenv: build_static.env
 
@@ -248,6 +257,7 @@ Publish:Assets:Live:
   rules:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
       changes:
+        - portal-static/**/*
         - frontend/**/*
       when: manual
 
@@ -268,7 +278,8 @@ Deploy:Nginx:Live:
   rules:
     - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
       changes:
-        - frontend/**/*
+        - portal-static/nginx-conf/**/*
+        - frontend/nginx-conf/**/*
       when: manual
 
 # Deploy Nginx to RC to serve static assets

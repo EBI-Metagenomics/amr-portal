@@ -1,0 +1,189 @@
+.rail {
+  --buttons-column-color: #fff;
+  position: absolute;
+  right: var(--amr-rail-anchor);
+  top: -1px;
+  width: 32px;
+  transform: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 4;
+  background: var(--buttons-column-color);
+  padding: 10px 4px 10px 2px;
+  border-radius: 6px;
+}
+
+.railDisabled {
+  opacity: 1;
+}
+
+.iconButton {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1093df;
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.iconButton svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+.iconButton:disabled {
+  opacity: 1;
+  color: #1093df;
+}
+
+.iconButtonActive {
+  color: #1093df;
+}
+
+.railDisabled .iconButton {
+  color: #9ca3af;
+}
+
+.popover {
+  position: absolute;
+  right: 8px;
+  top: 0;
+  width: 600px;
+  background: #f1f5f9;
+  border-radius: 8px;
+  padding: 30px 70px 30px 40px;
+  z-index: 5;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto 1fr;
+  column-gap: 60px;
+  row-gap: 24px;
+  align-items: center;
+}
+
+.popoverTitle {
+  margin: 0;
+  grid-column: 1 / -1;
+  font-family: Lato, 'Helvetica Neue', Helvetica, Roboto, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: #1b2c39;
+}
+
+.popover a {
+  color: #1477c9;
+}
+
+.downloadPopover {
+  grid-template-areas:
+    'title title'
+    'ftp-link buttons';
+}
+
+.downloadPopover .popoverTitle {
+  grid-area: title;
+}
+
+.ftpLink {
+  grid-area: ftp-link;
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  text-decoration: none;
+}
+
+.ftpLink:hover {
+  text-decoration: underline;
+}
+
+.ftpLink svg {
+  width: 11px;
+  height: 11px;
+  fill: #f59e0b;
+  transform: translateY(-1px);
+}
+
+.clearPopover {
+  grid-template-areas:
+    'title title'
+    'message buttons';
+}
+
+.clearPopover .popoverTitle {
+  grid-area: title;
+}
+
+.clearMessage {
+  grid-area: message;
+  margin: 0;
+  color: #d64545;
+}
+
+.confirmActions {
+  grid-area: buttons;
+  display: flex;
+  gap: 40px;
+  margin-top: 0;
+  align-items: center;
+  align-self: center;
+}
+
+.popoverButton {
+  cursor: pointer;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 2px;
+  padding: 0.14rem 0.42rem;
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.popoverButton:disabled {
+  opacity: 0.65;
+  cursor: default;
+}
+
+.popoverLink {
+  cursor: pointer;
+  border: 1px solid #47d147;
+  background: #47d147;
+  border-radius: 4px;
+  padding: 0.4rem 1.4rem;
+  font-size: 13px;
+  line-height: 1.1;
+  font-weight: 700;
+  font-family: inherit;
+  color: #fff;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.popoverLink:hover {
+  background: #3bb63b;
+  border-color: #3bb63b;
+  text-decoration: none;
+}
+
+.cancelButton {
+  cursor: pointer;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  font-family: inherit;
+  color: #1477c9;
+}
+
+.cancelButton:hover {
+  text-decoration: underline;
+}
