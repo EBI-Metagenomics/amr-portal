@@ -1,0 +1,180 @@
+{
+  "info": {
+    "_postman_id": "c809bc90-c847-49af-9943-782d250d0096",
+    "name": "AMR Data Portal",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "19420352"
+  },
+  "item": [
+    {
+      "name": "AMR APIs",
+      "item": [
+        {
+          "name": "filters-config",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Accept-Language",
+                "value": "en-GB,en;q=0.9"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Referer",
+                "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/amr/data/?view=experiments"
+              },
+              {
+                "key": "User-Agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+              }
+            ],
+            "url": {
+              "raw": "http://{{amr_current}}/api/filters-config",
+              "protocol": "http",
+              "host": [
+                "{{amr_current}}"
+              ],
+              "path": [
+                "api",
+                "filters-config"
+              ]
+            },
+            "description": "Generated from cURL"
+          },
+          "response": []
+        },
+        {
+          "name": "AMR-Records",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "*/*"
+              },
+              {
+                "key": "Accept-Language",
+                "value": "en-GB,en;q=0.9"
+              },
+              {
+                "key": "Cache-Control",
+                "value": "no-cache"
+              },
+              {
+                "key": "Connection",
+                "value": "keep-alive"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Origin",
+                "value": "http://amr.review.ensembl.org"
+              },
+              {
+                "key": "Pragma",
+                "value": "no-cache"
+              },
+              {
+                "key": "Referer",
+                "value": "http://amr.review.ensembl.org/amr/data/?view=experiments"
+              },
+              {
+                "key": "User-Agent",
+                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://{{amr_current}}/api/amr-records",
+              "protocol": "http",
+              "host": [
+                "{{amr_current}}"
+              ],
+              "path": [
+                "api",
+                "amr-records"
+              ]
+            },
+            "description": "Generated from cURL"
+          },
+          "response": []
+        },
+        {
+          "name": "API Health",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://{{amr_current}}/api/health",
+              "protocol": "http",
+              "host": [
+                "{{amr_current}}"
+              ],
+              "path": [
+                "api",
+                "health"
+              ]
+            },
+            "description": "Generated from cURL"
+          },
+          "response": []
+        },
+        {
+          "name": "Data Release",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "http://{{amr_current}}/api/release",
+              "protocol": "http",
+              "host": [
+                "{{amr_current}}"
+              ],
+              "path": [
+                "api",
+                "release"
+              ]
+            },
+            "description": "Generated from cURL"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
