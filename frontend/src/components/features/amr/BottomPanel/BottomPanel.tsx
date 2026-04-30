@@ -1,4 +1,4 @@
-import type { AMRRecordField, LinkArrayData, LinkData } from '@interfaces/amrRecord';
+import type { AMRColumnMeta, AMRRecordValue } from '@interfaces/amrRecord';
 import type { AMRRecordsResponse } from '@interfaces/amrApi';
 import type { FiltersView } from '@interfaces/filtersConfig';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
@@ -109,8 +109,7 @@ const BottomPanel = ({
     );
   }
 
-  const columns = [...(currentView?.columns ?? [])].sort((a, b) => a.rank - b.rank);
-  const columnIds = columns.map(column => String(column.id));
+  const columns = data.meta.columns;
   const totalPages = Math.max(1, Math.ceil(data.meta.total_hits / data.meta.per_page));
   const onPageInputCommit = (rawValue: string) => {
     const value = rawValue.trim();
@@ -195,16 +194,16 @@ const BottomPanel = ({
           <thead>
             <tr>
               {columns.map(column => {
-                const isSortedColumn = sort?.category === String(column.id);
+                const isSortedColumn = sort?.category === column.id;
                 return (
-                  <th key={String(column.id)}>
+                  <th key={column.id}>
                     {column.sortable ? (
                       <button
                         type="button"
                         className={[styles.sortButton, isSortedColumn ? styles.sortButtonActive : '']
                           .filter(Boolean)
                           .join(' ')}
-                        onClick={() => onSortChange(String(column.id))}
+                        onClick={() => onSortChange(column.id)}
                       >
                         <span
                           className={[
@@ -231,11 +230,11 @@ const BottomPanel = ({
           <tbody aria-busy={isFetching && isPlaceholderData}>
             {data.data.map((record, index) => (
               <tr key={index}>
-                {columnIds.map(columnId => {
-                  const field = record.find(cell => String(cell.column_id) === columnId);
+                {columns.map(column => {
+                  const value = record[column.id];
                   return (
-                    <td key={String(columnId)}>
-                      {field ? renderField(field, styles.externalLink) : null}
+                    <td key={column.id}>
+                      {renderValue(value, column, styles.externalLink)}
                     </td>
                   );
                 })}
@@ -255,28 +254,68 @@ const BottomPanel = ({
   );
 };
 
-const renderField = (field: AMRRecordField, externalLinkClass: string) => {
-  if (isLinkArray(field)) {
-    return field.values.map((link, index) => (
-      <span key={`${link.url}-${index}`}>
-        <ExternalLink href={link.url} className={externalLinkClass}>
-          {link.value}
-        </ExternalLink>
-        {index < field.values.length - 1 ? ', ' : ''}
-      </span>
-    ));
+const renderValue = (value: AMRRecordValue | undefined, column: AMRColumnMeta, externalLinkClass: string) => {
+  if (value === null || value === undefined) return null;
+
+  if (column.type === 'array-link') {
+    if (!Array.isArray(value) || !value.length) return null;
+    return value.map((entry, index) => {
+      const displayValue = String(entry);
+      const link = formatUrl(column.url_template, displayValue);
+      return (
+        <span key={`${displayValue}-${index}`}>
+          {link ? (
+            <ExternalLink href={link} className={externalLinkClass}>
+              {displayValue}
+            </ExternalLink>
+          ) : (
+            displayValue
+          )}
+          {index < value.length - 1 ? ', ' : ''}
+        </span>
+      );
+    });
   }
-  if (isLink(field)) {
-    if (!field.value) return null;
-    return field.url ? (
-      <ExternalLink href={field.url} className={externalLinkClass}>
-        {field.value}
+
+  const displayValue = String(value);
+  if (!displayValue) return null;
+  if (column.type === 'link') {
+    const link = formatUrl(column.url_template, displayValue);
+    return link ? (
+      <ExternalLink href={link} className={externalLinkClass}>
+        {displayValue}
       </ExternalLink>
     ) : (
-      field.value
+      displayValue
     );
   }
-  return field.value;
+  if (column.type === 'labelled-link') {
+    const parsed = parseLabelledLink(displayValue);
+    if (!parsed) return displayValue;
+    return (
+      <ExternalLink href={parsed.url} className={externalLinkClass}>
+        {parsed.label}
+      </ExternalLink>
+    );
+  }
+
+  return displayValue;
+};
+
+const formatUrl = (urlTemplate: string | undefined, value: string) =>
+  urlTemplate
+    ? urlTemplate.includes('{value}')
+      ? urlTemplate.replace('{value}', value)
+      : urlTemplate.replace('{}', value)
+    : null;
+
+const parseLabelledLink = (value: string): { label: string; url: string } | null => {
+  const separatorIndex = value.indexOf('|');
+  if (separatorIndex <= 0 || separatorIndex >= value.length - 1) return null;
+  const label = value.slice(0, separatorIndex).trim();
+  const url = value.slice(separatorIndex + 1).trim();
+  if (!label || !url) return null;
+  return { label, url };
 };
 
 const ExternalLink = ({
@@ -325,8 +364,5 @@ const DownloadIcon = () => (
     <path d="M29.3353596,29.6499996c1,0,1.666666-0.833334,1.666666-1.6666679v-1.7666645c0-1-0.833334-1.666666-1.666666-1.666666H2.6686926c-0.8333333,0-1.6666666,0.666666-1.6666666,1.666666v1.7666645c0,0.833334,0.6666669,1.6666679,1.6666666,1.6666679H29.3353596z" />
   </svg>
 );
-
-const isLink = (data: AMRRecordField): data is LinkData => data.type === 'link';
-const isLinkArray = (data: AMRRecordField): data is LinkArrayData => data.type === 'array-link';
 
 export default BottomPanel;

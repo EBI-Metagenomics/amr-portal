@@ -1,4 +1,5 @@
-import type { AMRRecord } from './amrRecord';
+export type { AMRRecordsResponse } from './amrRecord';
+import type { AMRRecordsResponse } from './amrRecord';
 import type { FiltersConfig, FiltersView } from './filtersConfig';
 
 export type SelectedFilter = {
@@ -15,17 +16,6 @@ export type AMRRecordsFetchParams = {
     category: string;
     order: 'ASC' | 'DESC';
   };
-};
-
-type PaginatedMetadata = {
-  total_hits: number;
-  page: number;
-  per_page: number;
-};
-
-export type AMRRecordsResponse = {
-  meta: PaginatedMetadata;
-  data: AMRRecord[];
 };
 
 export type ReleaseInfo = {

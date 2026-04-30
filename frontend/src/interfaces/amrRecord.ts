@@ -1,33 +1,22 @@
-export type StringData = {
-  type: 'string';
-  column_id: string;
-  value: string | null;
+export type AMRColumnType = 'string' | 'link' | 'array-link' | 'labelled-link';
+
+export type AMRColumnMeta = {
+  id: string;
+  label: string;
+  type: AMRColumnType;
+  sortable: boolean;
+  url_template?: string;
 };
 
-export type LinkData = {
-  type: 'link';
-  column_id: string;
-  value: string | null;
-  url: string | null;
-};
-
-export type LinkArrayData = {
-  type: 'array-link';
-  column_id: string;
-  values: Array<{
-    value: string;
-    url: string;
-  }>;
-};
-
-export type AMRRecordField = StringData | LinkData | LinkArrayData;
-export type AMRRecord = Array<AMRRecordField>;
+export type AMRRecordValue = string | number | boolean | null | string[];
+export type AMRRecord = Record<string, AMRRecordValue>;
 
 export type AMRRecordsResponse = {
   meta: {
     page: number;
     per_page: number;
     total_hits: number;
+    columns: AMRColumnMeta[];
   };
   data: AMRRecord[];
 };
