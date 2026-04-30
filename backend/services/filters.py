@@ -14,10 +14,10 @@ from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 import logging
 
-from ..models.payload import Payload
-from ..services.serializer import serialize_amr_record
-from ..core.filters_config_parser import build_filters_config
-from ..core.config import get_settings
+from models.payload import Payload
+from services.serializer import serialize_amr_record
+from core.filters_config_parser import build_filters_config
+from core.config import get_settings
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)

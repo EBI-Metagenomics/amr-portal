@@ -1,6 +1,6 @@
 import numpy as np
 
-from ..services.serializer import serialize_amr_record
+from services.serializer import serialize_amr_record
 
 COLUMN_DETAILS = {
     "col_a":{

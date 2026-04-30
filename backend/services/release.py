@@ -1,5 +1,5 @@
 import duckdb
-from ..core.utils import query_to_records
+from core.utils import query_to_records
 
 
 def fetch_release(db: duckdb.DuckDBPyConnection) -> dict[str, str] | None:

@@ -4,7 +4,7 @@ from typing import Any, Iterable
 from collections import defaultdict, OrderedDict
 
 import duckdb
-from ..core.utils import query_to_records
+from core.utils import query_to_records
 
 
 def _build_filter_categories(rows: Iterable[dict[str, Any]]) -> dict[str, dict[str, Any]]:
