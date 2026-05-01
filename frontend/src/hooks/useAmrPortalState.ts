@@ -91,15 +91,6 @@ export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
         : current.filter(filter => !(filter.category === category && filter.value === value));
       return { ...prev, [key]: next };
     });
-    setFacetPagingByView(prev => {
-      const current = prev[key];
-      if (!current) return prev;
-      const reset: Record<string, FacetPageState> = {};
-      Object.entries(current).forEach(([facetId, paging]) => {
-        reset[facetId] = { ...paging, offset: 0 };
-      });
-      return { ...prev, [key]: reset };
-    });
     setPage(1);
   };
 

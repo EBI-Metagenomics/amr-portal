@@ -88,7 +88,18 @@ const FacetSidebar = ({
           {facets.map((facet, index) => {
             const expanded = hasFacetExpansionState ? isFacetExpanded(facet.id) : index === 0;
             const isAndMode = facetOperators[facet.id] === 'AND';
-            const sortedOptions = [...facet.options].sort((a, b) => {
+            const selectedValuesForFacet = selectedFilters
+              .filter(filter => filter.category === facet.id)
+              .map(filter => filter.value);
+            const missingSelectedOptions = selectedValuesForFacet
+              .filter(selectedValue => !facet.options.some(option => option.value === selectedValue))
+              .map(selectedValue => ({
+                value: selectedValue,
+                label: selectedValue,
+                count: 0,
+                selected: true,
+              }));
+            const sortedOptions = [...facet.options, ...missingSelectedOptions].sort((a, b) => {
               if (a.selected !== b.selected) return a.selected ? -1 : 1;
               return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' });
             });
