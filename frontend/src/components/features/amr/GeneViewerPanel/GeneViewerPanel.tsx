@@ -11,6 +11,7 @@ const GeneViewerPanel = ({ isCollapsed, onToggleCollapsed }: Props) => {
 
   return (
     <section className={sectionClass} aria-label="Gene viewer panel">
+      <p className={styles.placeholderText}>Genome browser placeholder</p>
       <button
         type="button"
         className={styles.toggle}

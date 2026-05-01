@@ -1,7 +1,19 @@
 .root {
   position: relative;
-  height: 44px;
-  min-height: 44px;
+  width: calc(100% - var(--amr-rail-gutter));
+  margin-right: var(--amr-rail-gutter);
+  min-height: var(--amr-top-panel-height);
+  height: var(--amr-top-panel-height);
+  overflow: visible;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.placeholderText {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
 }
 
 .toggle {
