@@ -5,7 +5,7 @@ import math
 from collections import defaultdict
 from dataclasses import dataclass
 from itertools import chain
-from typing import Any, Dict, Iterable, Iterator, Optional
+from typing import Any, Dict, Iterable, Iterator, List, Optional
 
 import duckdb
 import numpy as np
@@ -217,10 +217,14 @@ def _build_filter_query_context(payload: Payload, db: duckdb.DuckDBPyConnection)
     display_column_details = {r["fullname"]: r for r in columns_to_display_dict}
 
     # group them together and trim the first dataset name part
-    grouped_filters = defaultdict(list)
-    for f in payload.selected_filters:
-        trimmed_filter_category = f.category.split("-")[-1]
-        grouped_filters[trimmed_filter_category].append(f.value)
+    grouped_filters_with_operator = _group_selected_filters_with_operator(
+        payload.selected_filters,
+        payload.facet_operators if hasattr(payload, "facet_operators") else {},
+    )
+    grouped_filters = {
+        category: details["values"]
+        for category, details in grouped_filters_with_operator.items()
+    }
 
     are_filters_valid = check_selected_filters(grouped_filters, valid_columns)
     logger.info(f"are_filters_valid: {are_filters_valid}")
@@ -241,14 +245,7 @@ def _build_filter_query_context(payload: Payload, db: duckdb.DuckDBPyConnection)
         if order_by_col not in valid_columns:
             raise HTTPException(status_code=400, detail=f"Invalid order_by column: {order_by_col!r}")
 
-    where_clauses = []
-    for category, values in grouped_filters.items():
-        # Convert list to SQL tuple syntax: ('value1', 'value2')
-        quoted_values = [f"'{v}'" for v in values]
-        tuple_clause = f"({', '.join(quoted_values)})"
-        where_clauses.append(f"{category} IN {tuple_clause}")
-
-    where_sql = " AND ".join(where_clauses)
+    where_sql = _build_where_clause(grouped_filters_with_operator)
     base_query = f"SELECT {columns_to_display_str} FROM {selected_dataset}"
     count_query = f"SELECT COUNT(*) AS count FROM {selected_dataset}"
     if where_sql:
@@ -262,6 +259,204 @@ def _build_filter_query_context(payload: Payload, db: duckdb.DuckDBPyConnection)
         display_column_details=display_column_details,
         order_by_col=order_by_col,
     )
+
+
+def _escape_sql_string(value: str) -> str:
+    return value.replace("'", "''")
+
+
+def _group_selected_filters_with_operator(
+    selected_filters: List[Any],
+    facet_operators: Optional[Dict[str, str]] = None,
+    excluded_category: Optional[str] = None,
+) -> Dict[str, Dict[str, Any]]:
+    grouped_filters: Dict[str, Dict[str, Any]] = defaultdict(lambda: {"values": [], "operator": "OR"})
+    for selected in selected_filters:
+        if excluded_category and selected.category == excluded_category:
+            continue
+        trimmed_filter_category = selected.category.split("-")[-1]
+        operator = (facet_operators or {}).get(selected.category, "OR").upper()
+        grouped_filters[trimmed_filter_category]["values"].append(selected.value)
+        grouped_filters[trimmed_filter_category]["operator"] = "AND" if operator == "AND" else "OR"
+    return grouped_filters
+
+
+def _build_where_clause(grouped_filters: Dict[str, Dict[str, Any]]) -> str:
+    where_clauses = []
+    for category, details in grouped_filters.items():
+        values = details["values"]
+        operator = details.get("operator", "OR")
+        quoted_values = [f"'{_escape_sql_string(v)}'" for v in values]
+        if operator == "AND":
+            and_clause = " AND ".join([f'{quote_column_name(category)} = {qv}' for qv in quoted_values])
+            where_clauses.append(f"({and_clause})")
+        else:
+            tuple_clause = f"({', '.join(quoted_values)})"
+            where_clauses.append(f'{quote_column_name(category)} IN {tuple_clause}')
+    return " AND ".join(where_clauses)
+
+
+def _fetch_view_facet_definitions(view_id: int, db: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
+    query = """
+        SELECT
+            vc.column_fullname AS id,
+            vc.category_name AS label,
+            vc.category_group_is_primary AS is_primary,
+            vc.category_group_id AS group_id
+        FROM view_categories vc
+        WHERE vc.view_id = ?
+        ORDER BY vc.category_group_is_primary DESC, vc.category_group_id, vc.column_fullname
+    """
+    rows = db.execute(query, [view_id]).fetchall()
+    facets: List[Dict[str, Any]] = []
+    seen = set()
+    for row in rows:
+        facet_id = row[0]
+        if facet_id in seen:
+            continue
+        seen.add(facet_id)
+        facets.append({"id": facet_id, "label": row[1]})
+    return facets
+
+
+def _fetch_facet_option_labels(
+    facet_ids: List[str],
+    db: duckdb.DuckDBPyConnection,
+) -> Dict[str, Dict[str, str]]:
+    if not facet_ids:
+        return {}
+    placeholders = ", ".join(["?"] * len(facet_ids))
+    query = f"""
+        SELECT cd.fullname AS facet_id, f.value, f.label
+        FROM filter f
+        JOIN column_definition cd ON f.column_id = cd.column_id
+        WHERE cd.fullname IN ({placeholders})
+    """
+    rows = db.execute(query, facet_ids).fetchall()
+    result: Dict[str, Dict[str, str]] = defaultdict(dict)
+    for facet_id, value, label in rows:
+        result[facet_id][str(value)] = str(label)
+    return result
+
+
+def _fetch_data_type_summary(
+    selected_filters: List[Any],
+    current_view_id: int,
+    db: duckdb.DuckDBPyConnection,
+) -> List[Dict[str, Any]]:
+    query = "SELECT view_id, name FROM view ORDER BY view_id"
+    rows = db.execute(query).fetchall()
+    selected_by_dataset: Dict[str, int] = defaultdict(int)
+    for selected in selected_filters:
+        dataset_name = selected.category.split("-")[0]
+        selected_by_dataset[dataset_name] += 1
+    summaries = []
+    for view_id, name in rows:
+        dataset_name = get_dataset_from_view(int(view_id), db)
+        summaries.append(
+            {
+                "id": int(view_id),
+                "name": str(name),
+                "selected_count": int(selected_by_dataset.get(str(dataset_name), 0)),
+                "active": int(view_id) == int(current_view_id),
+            }
+        )
+    return summaries
+
+
+def fetch_amr_facets(payload: Any, db: duckdb.DuckDBPyConnection):
+    selected_view_id = payload.view_id
+    selected_dataset = get_dataset_from_view(selected_view_id, db)
+    valid_columns = get_table_columns(selected_dataset, db)
+    facet_definitions = _fetch_view_facet_definitions(selected_view_id, db)
+    facet_option_labels = _fetch_facet_option_labels([facet["id"] for facet in facet_definitions], db)
+    data_type_summary = _fetch_data_type_summary(payload.selected_filters, selected_view_id, db)
+
+    facets = []
+    for facet in facet_definitions:
+        facet_id = facet["id"]
+        trimmed_category = facet_id.split("-")[-1]
+        if trimmed_category not in valid_columns:
+            continue
+
+        facet_operator = (
+            payload.facet_operators.get(facet_id, "OR").upper()
+            if hasattr(payload, "facet_operators")
+            else "OR"
+        )
+        excluded_category = None if facet_operator == "AND" else facet_id
+        grouped_filters = _group_selected_filters_with_operator(
+            payload.selected_filters,
+            payload.facet_operators if hasattr(payload, "facet_operators") else {},
+            excluded_category=excluded_category,
+        )
+        where_sql = _build_where_clause(grouped_filters)
+        paging = payload.facet_paging.get(facet_id) if payload.facet_paging else None
+        limit = max(1, min(200, (paging.limit if paging else 10)))
+        offset = max(0, paging.offset if paging else 0)
+        search = (paging.search.strip() if paging and paging.search else "")
+
+        base_count_query = f"""
+            SELECT {quote_column_name(trimmed_category)} AS value, COUNT(*) AS count
+            FROM {selected_dataset}
+        """
+        if where_sql:
+            base_count_query += f" WHERE {where_sql}"
+            value_prefix = " AND "
+        else:
+            value_prefix = " WHERE "
+
+        base_count_query += f"{value_prefix}{quote_column_name(trimmed_category)} IS NOT NULL"
+        if search:
+            escaped_search = _escape_sql_string(search)
+            base_count_query += (
+                f" AND LOWER(CAST({quote_column_name(trimmed_category)} AS VARCHAR)) "
+                f"LIKE '%{escaped_search.lower()}%'"
+            )
+
+        grouped_query = (
+            f"{base_count_query} "
+            f"GROUP BY {quote_column_name(trimmed_category)} "
+            "ORDER BY LOWER(CAST(value AS VARCHAR)) ASC"
+        )
+        total_options_query = f"SELECT COUNT(*) FROM ({grouped_query}) facet_counts"
+        paged_query = f"{grouped_query} LIMIT {offset + limit} OFFSET 0"
+
+        total_options = int(db.execute(total_options_query).fetchone()[0])
+        rows = db.execute(paged_query).fetchall()
+
+        selected_values = {
+            selected.value
+            for selected in payload.selected_filters
+            if selected.category == facet_id
+        }
+        options = []
+        labels_for_facet = facet_option_labels.get(facet_id, {})
+        for value, count in rows:
+            normalized_value = str(value)
+            options.append(
+                {
+                    "value": normalized_value,
+                    "label": labels_for_facet.get(normalized_value, normalized_value),
+                    "count": int(count),
+                    "selected": normalized_value in selected_values,
+                }
+            )
+
+        has_more = len(options) < total_options
+        facets.append(
+            {
+                "id": facet_id,
+                "label": facet["label"],
+                "selected_count": len(selected_values),
+                "total_options": total_options,
+                "options": options,
+                "has_more": has_more,
+                "next_offset": len(options) if has_more else None,
+            }
+        )
+
+    return {"data_type": data_type_summary, "facets": facets}
 
 
 def _stream_prefixed_rows(

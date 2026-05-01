@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { FiltersConfig, FiltersView } from '@interfaces/filtersConfig';
-import type { SelectedFilter } from '@interfaces/amrApi';
+import type { FacetOperator, FacetPageState, SelectedFilter } from '@interfaces/amrApi';
 
 const DEFAULT_PER_PAGE = 100;
 
@@ -16,20 +16,29 @@ export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
   const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(DEFAULT_PER_PAGE);
   const [sort, setSort] = useState<SortState>(null);
+  const [expandedFacetsByView, setExpandedFacetsByView] = useState<Record<string, Record<string, boolean>>>(
+    {}
+  );
+  const [facetPagingByView, setFacetPagingByView] = useState<Record<string, Record<string, FacetPageState>>>(
+    {}
+  );
+  const [facetOperatorsByView, setFacetOperatorsByView] = useState<Record<string, Record<string, FacetOperator>>>(
+    {}
+  );
 
-  useEffect(() => {
-    if (!filtersConfig || viewId !== null) return;
+  const initialViewId = useMemo(() => {
+    if (!filtersConfig) return null;
     const fromUrl = new URL(window.location.href).searchParams.get('view');
     const matched = fromUrl
       ? filtersConfig.filterViews.find(view => view.url_name === fromUrl)
       : null;
-    const next = matched ?? filtersConfig.filterViews[0];
-    setViewId(next?.id ?? null);
-  }, [filtersConfig, viewId]);
+    return matched?.id ?? filtersConfig.filterViews[0]?.id ?? null;
+  }, [filtersConfig]);
+  const resolvedViewId = viewId ?? initialViewId;
 
   const currentView = useMemo(
-    () => filtersConfig?.filterViews.find(view => view.id === viewId) ?? null,
-    [filtersConfig, viewId]
+    () => filtersConfig?.filterViews.find(view => view.id === resolvedViewId) ?? null,
+    [filtersConfig, resolvedViewId]
   );
 
   useEffect(() => {
@@ -40,9 +49,9 @@ export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
   }, [currentView]);
 
   const selectedFilters = useMemo(() => {
-    if (!viewId) return [];
-    return selectedFiltersByView[String(viewId)] ?? [];
-  }, [viewId, selectedFiltersByView]);
+    if (!resolvedViewId) return [];
+    return selectedFiltersByView[String(resolvedViewId)] ?? [];
+  }, [resolvedViewId, selectedFiltersByView]);
 
   const activeGroupName = useMemo(() => {
     if (!currentView) return null;
@@ -68,19 +77,28 @@ export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
   };
 
   const setActiveGroup = (groupName: string) => {
-    if (!viewId) return;
-    setActiveGroupByView(prev => ({ ...prev, [String(viewId)]: groupName }));
+    if (!resolvedViewId) return;
+    setActiveGroupByView(prev => ({ ...prev, [String(resolvedViewId)]: groupName }));
   };
 
   const toggleFilter = (category: string, value: string, isSelected: boolean) => {
-    if (!viewId) return;
-    const key = String(viewId);
+    if (!resolvedViewId) return;
+    const key = String(resolvedViewId);
     setSelectedFiltersByView(prev => {
       const current = prev[key] ?? [];
       const next = isSelected
         ? [...current, { category, value }]
         : current.filter(filter => !(filter.category === category && filter.value === value));
       return { ...prev, [key]: next };
+    });
+    setFacetPagingByView(prev => {
+      const current = prev[key];
+      if (!current) return prev;
+      const reset: Record<string, FacetPageState> = {};
+      Object.entries(current).forEach(([facetId, paging]) => {
+        reset[facetId] = { ...paging, offset: 0 };
+      });
+      return { ...prev, [key]: reset };
     });
     setPage(1);
   };
@@ -96,12 +114,97 @@ export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
 
   const clearAllFilters = () => {
     setSelectedFiltersByView({});
+    setFacetPagingByView({});
+    setFacetOperatorsByView({});
     setPage(1);
     setSort(null);
   };
 
+  const facetPaging = useMemo(() => {
+    if (!resolvedViewId) return {};
+    return facetPagingByView[String(resolvedViewId)] ?? {};
+  }, [resolvedViewId, facetPagingByView]);
+
+  const facetOperators = useMemo(() => {
+    if (!resolvedViewId) return {};
+    return facetOperatorsByView[String(resolvedViewId)] ?? {};
+  }, [resolvedViewId, facetOperatorsByView]);
+
+  const setFacetSearch = (facetId: string, search: string) => {
+    if (!resolvedViewId) return;
+    const key = String(resolvedViewId);
+    setFacetPagingByView(prev => {
+      const current = prev[key] ?? {};
+      const currentFacet = current[facetId] ?? {};
+      return {
+        ...prev,
+        [key]: {
+          ...current,
+          [facetId]: { ...currentFacet, search, offset: 0 },
+        },
+      };
+    });
+  };
+
+  const loadMoreFacet = (facetId: string, nextOffset: number) => {
+    if (!resolvedViewId) return;
+    const key = String(resolvedViewId);
+    setFacetPagingByView(prev => {
+      const current = prev[key] ?? {};
+      const currentFacet = current[facetId] ?? {};
+      return {
+        ...prev,
+        [key]: {
+          ...current,
+          [facetId]: { ...currentFacet, offset: nextOffset },
+        },
+      };
+    });
+  };
+
+  const toggleFacetExpanded = (facetId: string) => {
+    if (!resolvedViewId) return;
+    const key = String(resolvedViewId);
+    setExpandedFacetsByView(prev => {
+      const current = prev[key] ?? {};
+      return {
+        ...prev,
+        [key]: { ...current, [facetId]: !current[facetId] },
+      };
+    });
+  };
+
+  const isFacetExpanded = (facetId: string) => {
+    if (!resolvedViewId) return false;
+    const key = String(resolvedViewId);
+    return expandedFacetsByView[key]?.[facetId] ?? false;
+  };
+
+  const hasFacetExpansionState = useMemo(() => {
+    if (!resolvedViewId) return false;
+    const key = String(resolvedViewId);
+    const viewFacetState = expandedFacetsByView[key];
+    return Boolean(viewFacetState && Object.keys(viewFacetState).length > 0);
+  }, [resolvedViewId, expandedFacetsByView]);
+
+  const setFacetOperator = (facetId: string, operator: FacetOperator) => {
+    if (!resolvedViewId) return;
+    const key = String(resolvedViewId);
+    setFacetOperatorsByView(prev => {
+      const current = prev[key] ?? {};
+      return {
+        ...prev,
+        [key]: {
+          ...current,
+          [facetId]: operator,
+        },
+      };
+    });
+    setPage(1);
+  };
+
   return {
-    viewId,
+    viewId: resolvedViewId,
     currentView,
     selectedFilters,
     activeGroup,
@@ -116,5 +219,13 @@ export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
     setPerPage,
     toggleSort,
     clearAllFilters,
+    facetPaging,
+    facetOperators,
+    setFacetSearch,
+    loadMoreFacet,
+    toggleFacetExpanded,
+    isFacetExpanded,
+    hasFacetExpansionState,
+    setFacetOperator,
   };
 };

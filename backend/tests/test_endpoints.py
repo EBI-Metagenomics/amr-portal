@@ -15,6 +15,19 @@ def test_amr_records_basic(client):
     assert "data" in response.json()
 
 
+def test_amr_facets_basic(client):
+    payload = {
+        "selected_filters": [],
+        "view_id": 1,
+        "facet_paging": {},
+    }
+    response = client.post("/amr-facets", json=payload)
+    assert response.status_code == 200
+    data = response.json()
+    assert "facets" in data
+    assert "data_type" in data
+
+
 def test_release(client):
     response = client.get("/release")
     assert response.status_code == 200

@@ -1,6 +1,6 @@
 @import './variables.css';
-@import './base.css';
 
+/* Minimal global primitives; component-specific controls use their own modules. */
 * {
   box-sizing: border-box;
 }

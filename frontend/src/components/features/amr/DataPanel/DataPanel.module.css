@@ -5,15 +5,7 @@
   min-height: 280px;
   display: grid;
   grid-template-rows: auto 1fr;
-  /* Fill viewport under header/subheader/top panel, minus main padding and the gap above this panel. */
-  height: calc(
-    100vh -
-    var(--amr-header-height) -
-    var(--amr-subheader-height) -
-    var(--amr-top-panel-height) -
-    var(--amr-panels-gap) -
-    var(--amr-main-vertical-padding)
-  );
+  height: 100%;
   overflow: visible;
 }
 

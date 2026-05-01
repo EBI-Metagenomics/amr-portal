@@ -4,9 +4,10 @@ import duckdb
 from fastapi import APIRouter, Query, HTTPException, Depends
 
 from models.filters_config import FiltersConfig
+from models.facets import FacetsPayload, FacetsResponse
 from models.release import Release
 from models.payload import Payload
-from services.filters import fetch_filters, filter_amr_records, fetch_filtered_records
+from services.filters import fetch_filters, filter_amr_records, fetch_filtered_records, fetch_amr_facets
 from services.release import fetch_release
 from core.database import get_db_connection
 from starlette.responses import StreamingResponse
@@ -25,6 +26,14 @@ def get_amr_records(
     db: duckdb.DuckDBPyConnection = Depends(get_db_connection)
 ):
     return filter_amr_records(payload, db)
+
+
+@router.post("/amr-facets", response_model=FacetsResponse)
+def get_amr_facets(
+    payload: FacetsPayload,
+    db: duckdb.DuckDBPyConnection = Depends(get_db_connection)
+):
+    return fetch_amr_facets(payload, db)
 
 @router.post("/amr-records/download")
 def download_filtered_records(

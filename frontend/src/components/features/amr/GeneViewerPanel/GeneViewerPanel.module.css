@@ -1,0 +1,26 @@
+.root {
+  position: relative;
+  height: 44px;
+  min-height: 44px;
+}
+
+.toggle {
+  position: absolute;
+  top: -1px;
+  right: var(--amr-rail-anchor);
+  transform: none;
+  z-index: 4;
+  border-radius: 0 6px 6px 0;
+  background: #fff;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  color: #0ea5e9;
+  line-height: 1;
+  border: 0;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}

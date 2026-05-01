@@ -1,5 +1,7 @@
 import apiClient from '@services/common/apiInstance';
 import type {
+  AMRFacetsFetchParams,
+  AMRFacetsResponse,
   AMRRecordsFetchParams,
   AMRRecordsResponse,
   BackendInterface,
@@ -39,6 +41,7 @@ class AMRService implements BackendInterface {
       view_id: params.viewId,
       page: params.page,
       per_page: params.perPage,
+      facet_operators: params.facetOperators ?? {},
     };
 
     if (params.orderBy) {
@@ -46,6 +49,17 @@ class AMRService implements BackendInterface {
     }
 
     const response = await apiClient.post<AMRRecordsResponse>('/amr-records', payload);
+    return response.data;
+  }
+
+  async getAMRFacets(params: AMRFacetsFetchParams): Promise<AMRFacetsResponse> {
+    const payload: Record<string, unknown> = {
+      selected_filters: params.filters,
+      view_id: params.viewId,
+      facet_paging: params.facetPaging ?? {},
+      facet_operators: params.facetOperators ?? {},
+    };
+    const response = await apiClient.post<AMRFacetsResponse>('/amr-facets', payload);
     return response.data;
   }
 }

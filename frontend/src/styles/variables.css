@@ -1,11 +1,10 @@
 :root {
   --amr-header-height: 35px;
   --amr-subheader-height: 50px;
-  --amr-top-panel-height: 360px;
   --amr-rail-gutter: 40px;
   --amr-rail-anchor: -24px;
-  /* Vertical gap between filter top panel and data bottom panel (HomePage). */
+  /* Vertical gap between gene viewer strip and main content (HomePage). */
   --amr-panels-gap: 14px;
-  /* Matches App main padding: 10px top + 20px bottom — used so bottom panel fills remaining viewport. */
+  /* Matches App main padding: 10px top + 20px bottom — used so data area fills remaining viewport. */
   --amr-main-vertical-padding: 30px;
 }

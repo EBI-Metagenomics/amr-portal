@@ -3,7 +3,7 @@ import type { AMRRecordsResponse } from '@interfaces/amrApi';
 import type { FiltersView } from '@interfaces/filtersConfig';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import ActionButtons from '@components/features/amr/ActionButtons/ActionButtons';
-import styles from './BottomPanel.module.css';
+import styles from './DataPanel.module.css';
 
 type SortState = {
   category: string;
@@ -33,7 +33,7 @@ type Props = {
 const panelSection = (extra?: string) =>
   [panelStyles.root, styles.root, extra].filter(Boolean).join(' ');
 
-const BottomPanel = ({
+const DataPanel = ({
   currentView,
   selectedFilters,
   data,
@@ -57,7 +57,7 @@ const BottomPanel = ({
           <span className={[styles.initialIcon, styles.initialIconStrong].join(' ')}>
             <TableIcon />
           </span>
-          <span className={styles.initialTextStrong}>Select data from the options above to start.</span>
+          <span className={styles.initialTextStrong}>Select data from the Faceted Filters</span>
 
           <span className={styles.initialIcon}>
             <DeleteIcon />
@@ -365,4 +365,4 @@ const DownloadIcon = () => (
   </svg>
 );
 
-export default BottomPanel;
+export default DataPanel;
