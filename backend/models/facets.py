@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Dict, List, Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -15,7 +15,7 @@ class FacetsPayload(BaseModel):
     selected_filters: List[SelectedFilter]
     view_id: int
     facet_paging: Dict[str, FacetPageRequest] = Field(default_factory=dict)
-    facet_operators: Dict[str, str] = Field(default_factory=dict)
+    facet_operators: Dict[str, Literal["AND", "OR"]] = Field(default_factory=dict)
 
 
 class FacetOption(BaseModel):

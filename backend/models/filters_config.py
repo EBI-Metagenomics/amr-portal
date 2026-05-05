@@ -1,4 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
+from models.release import Release
 
 
 class FilterOption(BaseModel):
@@ -44,4 +45,4 @@ class FiltersConfig(BaseModel):
 
     filter_categories: dict[str, FilterCategory] = Field(alias="filterCategories")
     filter_views: list[FilterView] = Field(alias="filterViews")
-    release: dict = Field()
+    release: Release = Field()
