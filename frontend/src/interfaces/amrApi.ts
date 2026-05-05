@@ -1,6 +1,5 @@
 export type { AMRRecordsResponse } from './amrRecord';
 import type { AMRRecordsResponse } from './amrRecord';
-import type { FiltersConfig, FiltersView } from './filtersConfig';
 
 export type SelectedFilter = {
   category: string;
@@ -11,7 +10,7 @@ export type FacetOperator = 'OR' | 'AND';
 
 export type AMRRecordsFetchParams = {
   filters: SelectedFilter[];
-  viewId: FiltersView['id'];
+  viewId: string | number;
   page: number;
   perPage: number;
   facetOperators?: Record<string, FacetOperator>;
@@ -29,7 +28,7 @@ export type FacetPageState = {
 
 export type AMRFacetsFetchParams = {
   filters: SelectedFilter[];
-  viewId: FiltersView['id'];
+  viewId?: string | number;
   facetPaging?: Record<string, FacetPageState>;
   facetOperators?: Record<string, FacetOperator>;
 };
@@ -69,7 +68,6 @@ export type ReleaseInfo = {
 
 export interface BackendInterface {
   getRelease: () => Promise<ReleaseInfo>;
-  getFiltersConfig: () => Promise<FiltersConfig>;
   getAMRRecords: (params: AMRRecordsFetchParams) => Promise<AMRRecordsResponse>;
   getAMRFacets: (params: AMRFacetsFetchParams) => Promise<AMRFacetsResponse>;
 }

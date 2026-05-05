@@ -1,11 +1,9 @@
 import { useMemo } from 'react';
-import type { FiltersConfig } from '@interfaces/filtersConfig';
 import type { AMRFacetsResponse, FacetOperator, SelectedFilter } from '@interfaces/amrApi';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import styles from './FacetSidebar.module.css';
 
 type Props = {
-  filtersConfig: FiltersConfig;
   facetsData?: AMRFacetsResponse;
   selectedFilters: SelectedFilter[];
   currentViewId: string | number;
@@ -22,7 +20,6 @@ type Props = {
 };
 
 const FacetSidebar = ({
-  filtersConfig,
   facetsData,
   selectedFilters,
   currentViewId,
@@ -38,14 +35,7 @@ const FacetSidebar = ({
   onFacetOperatorChange,
 }: Props) => {
   const showAnyAllControls = false;
-  const dataTypes = facetsData?.data_type?.length
-    ? facetsData.data_type
-    : filtersConfig.filterViews.map(view => ({
-        id: Number(view.id),
-        name: view.name,
-        selected_count: 0,
-        active: view.id === currentViewId,
-      }));
+  const dataTypes = facetsData?.data_type ?? [];
   const facets = facetsData?.facets ?? [];
   const selectedMap = useMemo(
     () => new Set(selectedFilters.map(filter => `${filter.category}::${filter.value}`)),
@@ -58,7 +48,7 @@ const FacetSidebar = ({
     <section className={sectionClass}>
       <div className={styles.content}>
         <div className={styles.headerRow}>
-          <h3 className={styles.heading}>Filter by Facets</h3>
+          <h3 className={styles.heading}>Filter Results</h3>
           <button type="button" className={styles.clearButton} onClick={onClearAllFilters}>
             Clear all
           </button>
@@ -171,9 +161,9 @@ const FacetSidebar = ({
                       <button
                         type="button"
                         className={styles.loadMoreButton}
-                        onClick={() => onFacetLoadMore(facet.id, Number(facet.next_offset))}
+                        onClick={() => onFacetLoadMore(facet.id, facet.total_options)}
                       >
-                        Load more
+                        Load all
                       </button>
                     ) : null}
                   </div>

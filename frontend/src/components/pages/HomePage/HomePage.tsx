@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { amrService } from '@services/amr/amrService';
 import FacetSidebar from '@components/features/amr/FacetSidebar/FacetSidebar';
@@ -9,60 +9,99 @@ import styles from './HomePage.module.css';
 
 const HomePage = () => {
   const [isGeneViewerCollapsed, setIsGeneViewerCollapsed] = useState(true);
-  const filtersConfigQuery = useQuery({
-    queryKey: ['filters-config'],
-    queryFn: () => amrService.getFiltersConfig(),
-  });
-
-  const state = useAmrPortalState(filtersConfigQuery.data);
-
-  const recordsQuery = useQuery({
-    queryKey: [
-      'amr-records',
-      state.currentView?.id,
-      state.selectedFilters,
-      state.facetOperators,
-      state.page,
-      state.perPage,
-      state.sort,
-    ],
-    queryFn: () =>
-      amrService.getAMRRecords({
-        filters: state.selectedFilters,
-        viewId: state.currentView!.id,
-        page: state.page,
-        perPage: state.perPage,
-        facetOperators: state.facetOperators,
-        orderBy: state.sort
-          ? { category: state.sort.category, order: state.sort.order.toUpperCase() as 'ASC' | 'DESC' }
-          : undefined,
-      }),
-    enabled: Boolean(state.currentView?.id) && state.selectedFilters.length > 0,
-    placeholderData: keepPreviousData,
-  });
+  const state = useAmrPortalState();
+  const {
+    viewId,
+    selectedFilters,
+    facetOperators,
+    page,
+    perPage,
+    sort,
+    facetPaging,
+    setCurrentView,
+    toggleFilter,
+    clearAllFilters,
+    setFacetSearch,
+    loadMoreFacet,
+    toggleFacetExpanded,
+    isFacetExpanded,
+    hasFacetExpansionState,
+    setFacetOperator,
+    setPage,
+    setPerPage,
+    toggleSort,
+  } = state;
+  const numericStateViewId =
+    typeof viewId === 'number'
+      ? viewId
+      : viewId !== null && /^\d+$/.test(String(viewId))
+        ? Number(viewId)
+        : null;
 
   const facetsQuery = useQuery({
     queryKey: [
       'amr-facets',
-      state.currentView?.id,
-      state.selectedFilters,
-      state.facetPaging,
-      state.facetOperators,
+      numericStateViewId,
+      selectedFilters,
+      facetPaging,
+      facetOperators,
     ],
     queryFn: () =>
       amrService.getAMRFacets({
-        filters: state.selectedFilters,
-        viewId: state.currentView!.id,
-        facetPaging: state.facetPaging,
-        facetOperators: state.facetOperators,
+        filters: selectedFilters,
+        viewId: numericStateViewId ?? undefined,
+        facetPaging,
+        facetOperators,
       }),
-    enabled: Boolean(state.currentView?.id),
     placeholderData: keepPreviousData,
   });
 
+  const resolvedViewId =
+    numericStateViewId ??
+    facetsQuery.data?.data_type.find(type => type.active)?.id ??
+    facetsQuery.data?.data_type[0]?.id ??
+    null;
+  const numericViewId =
+    typeof resolvedViewId === 'number'
+      ? resolvedViewId
+      : resolvedViewId !== null && /^\d+$/.test(String(resolvedViewId))
+        ? Number(resolvedViewId)
+        : null;
+
+  const recordsQuery = useQuery({
+    queryKey: [
+      'amr-records',
+      numericViewId,
+      selectedFilters,
+      facetOperators,
+      page,
+      perPage,
+      sort,
+    ],
+    queryFn: () =>
+      amrService.getAMRRecords({
+        filters: selectedFilters,
+        viewId: numericViewId!,
+        page,
+        perPage,
+        facetOperators,
+        orderBy: sort
+          ? { category: sort.category, order: sort.order.toUpperCase() as 'ASC' | 'DESC' }
+          : undefined,
+      }),
+    enabled: numericViewId !== null && selectedFilters.length > 0,
+    placeholderData: keepPreviousData,
+  });
+
+  useEffect(() => {
+    if (numericViewId !== null && numericStateViewId === null) {
+      setCurrentView(resolvedViewId);
+    }
+  }, [numericViewId, numericStateViewId, resolvedViewId, setCurrentView]);
+
   return (
     <div className={styles.root}>
-      {filtersConfigQuery.data && state.currentView ? (
+      {numericViewId !== null ? (
         <>
           <GeneViewerPanel
             isCollapsed={isGeneViewerCollapsed}
@@ -81,39 +120,38 @@ const HomePage = () => {
           >
             <aside className={styles.leftFacetPanel}>
               <FacetSidebar
-                filtersConfig={filtersConfigQuery.data}
                 facetsData={facetsQuery.data}
-                selectedFilters={state.selectedFilters}
-                currentViewId={state.currentView.id}
-                onViewChange={state.setCurrentView}
-                onFilterToggle={state.toggleFilter}
-                onClearAllFilters={state.clearAllFilters}
-                onFacetSearch={state.setFacetSearch}
-                onFacetLoadMore={state.loadMoreFacet}
-                onFacetToggleExpand={state.toggleFacetExpanded}
-                isFacetExpanded={state.isFacetExpanded}
-                hasFacetExpansionState={state.hasFacetExpansionState}
-                facetOperators={state.facetOperators}
-                onFacetOperatorChange={state.setFacetOperator}
+                selectedFilters={selectedFilters}
+                currentViewId={numericViewId}
+                onViewChange={setCurrentView}
+                onFilterToggle={toggleFilter}
+                onClearAllFilters={clearAllFilters}
+                onFacetSearch={setFacetSearch}
+                onFacetLoadMore={loadMoreFacet}
+                onFacetToggleExpand={toggleFacetExpanded}
+                isFacetExpanded={isFacetExpanded}
+                hasFacetExpansionState={hasFacetExpansionState}
+                facetOperators={facetOperators}
+                onFacetOperatorChange={setFacetOperator}
               />
             </aside>
             <div className={styles.resultsPanel}>
               <DataPanel
-                currentView={state.currentView}
-                selectedFilters={state.selectedFilters}
+                currentViewId={numericViewId}
+                selectedFilters={selectedFilters}
                 data={recordsQuery.data}
                 isFetching={recordsQuery.isFetching}
                 isPlaceholderData={recordsQuery.isPlaceholderData}
                 isLoading={recordsQuery.isLoading}
                 isError={recordsQuery.isError}
-                hasSelectedFilters={state.selectedFilters.length > 0}
-                page={state.page}
-                perPage={state.perPage}
-                sort={state.sort}
-                onPageChange={state.setPage}
-                onPerPageChange={state.setPerPage}
-                onSortChange={state.toggleSort}
-                onClearFilters={state.clearAllFilters}
+                hasSelectedFilters={selectedFilters.length > 0}
+                page={page}
+                perPage={perPage}
+                sort={sort}
+                onPageChange={setPage}
+                onPerPageChange={setPerPage}
+                onSortChange={toggleSort}
+                onClearFilters={clearAllFilters}
               />
             </div>
           </div>

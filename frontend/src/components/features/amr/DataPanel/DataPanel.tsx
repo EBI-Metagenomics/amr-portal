@@ -1,6 +1,5 @@
 import type { AMRColumnMeta, AMRRecordValue } from '@interfaces/amrRecord';
 import type { AMRRecordsResponse } from '@interfaces/amrApi';
-import type { FiltersView } from '@interfaces/filtersConfig';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import ActionButtons from '@components/features/amr/ActionButtons/ActionButtons';
 import styles from './DataPanel.module.css';
@@ -11,7 +10,7 @@ type SortState = {
 } | null;
 
 type Props = {
-  currentView: FiltersView | null;
+  currentViewId: string | number | null;
   selectedFilters: Array<{ category: string; value: string }>;
   data?: AMRRecordsResponse;
   /** True while any records fetch is in flight (including background refetch). */
@@ -34,7 +33,7 @@ const panelSection = (extra?: string) =>
   [panelStyles.root, styles.root, extra].filter(Boolean).join(' ');
 
 const DataPanel = ({
-  currentView,
+  currentViewId,
   selectedFilters,
   data,
   isFetching = false,
@@ -69,9 +68,9 @@ const DataPanel = ({
           </span>
           <span>Select to download</span>
         </div>
-        {currentView ? (
+        {currentViewId ? (
           <ActionButtons
-            viewId={currentView.id}
+            viewId={currentViewId}
             selectedFilters={selectedFilters}
             disabled
             onClearFilters={onClearFilters}
@@ -243,9 +242,9 @@ const DataPanel = ({
           </tbody>
         </table>
       </div>
-      {currentView ? (
+      {currentViewId ? (
         <ActionButtons
-          viewId={currentView.id}
+          viewId={currentViewId}
           selectedFilters={selectedFilters}
           onClearFilters={onClearFilters}
         />

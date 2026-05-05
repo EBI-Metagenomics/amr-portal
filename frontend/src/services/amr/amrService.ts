@@ -7,32 +7,11 @@ import type {
   BackendInterface,
   ReleaseInfo,
 } from '@interfaces/amrApi';
-import type { FiltersConfig, FiltersView } from '@interfaces/filtersConfig';
-
-type OldFiltersView = FiltersView & {
-  otherCategoryGroups: FiltersView['categoryGroups'];
-};
-
-type OldFiltersConfig = Omit<FiltersConfig, 'filterViews'> & {
-  filterViews: OldFiltersView[];
-};
 
 class AMRService implements BackendInterface {
   async getRelease(): Promise<ReleaseInfo> {
     const response = await apiClient.get<ReleaseInfo>('/release');
     return response.data;
-  }
-
-  async getFiltersConfig(): Promise<FiltersConfig> {
-    const response = await apiClient.get<OldFiltersConfig>('/filters-config');
-    const config = response.data;
-
-    config.filterViews = config.filterViews.map(view => ({
-      ...view,
-      categoryGroups: [...view.categoryGroups, ...view.otherCategoryGroups],
-    }));
-
-    return config;
   }
 
   async getAMRRecords(params: AMRRecordsFetchParams): Promise<AMRRecordsResponse> {
@@ -55,10 +34,12 @@ class AMRService implements BackendInterface {
   async getAMRFacets(params: AMRFacetsFetchParams): Promise<AMRFacetsResponse> {
     const payload: Record<string, unknown> = {
       selected_filters: params.filters,
-      view_id: params.viewId,
       facet_paging: params.facetPaging ?? {},
       facet_operators: params.facetOperators ?? {},
     };
+    if (params.viewId !== undefined) {
+      payload.view_id = params.viewId;
+    }
     const response = await apiClient.post<AMRFacetsResponse>('/amr-facets', payload);
     return response.data;
   }

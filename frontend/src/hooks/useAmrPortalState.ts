@@ -1,16 +1,21 @@
-import { useEffect, useMemo, useState } from 'react';
-import type { FiltersConfig, FiltersView } from '@interfaces/filtersConfig';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FacetOperator, FacetPageState, SelectedFilter } from '@interfaces/amrApi';
 
 const DEFAULT_PER_PAGE = 100;
+const DEFAULT_VIEW_ID = 1;
+const VIEW_SLUG_TO_ID: Record<string, number> = {
+  experiments: 1,
+  predictions: 2,
+  combined: 3,
+};
 
 export type SortState = {
   category: string;
   order: 'asc' | 'desc';
 } | null;
 
-export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
-  const [viewId, setViewId] = useState<FiltersView['id'] | null>(null);
+export const useAmrPortalState = () => {
+  const [viewId, setViewId] = useState<string | number | null>(null);
   const [selectedFiltersByView, setSelectedFiltersByView] = useState<Record<string, SelectedFilter[]>>({});
   const [activeGroupByView, setActiveGroupByView] = useState<Record<string, string | null>>({});
   const [page, setPage] = useState(1);
@@ -27,54 +32,39 @@ export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
   );
 
   const initialViewId = useMemo(() => {
-    if (!filtersConfig) return null;
     const fromUrl = new URL(window.location.href).searchParams.get('view');
-    const matched = fromUrl
-      ? filtersConfig.filterViews.find(view => view.url_name === fromUrl)
-      : null;
-    return matched?.id ?? filtersConfig.filterViews[0]?.id ?? null;
-  }, [filtersConfig]);
+    if (!fromUrl) return DEFAULT_VIEW_ID;
+    const parsed = Number(fromUrl);
+    if (Number.isInteger(parsed)) return parsed;
+    return VIEW_SLUG_TO_ID[fromUrl] ?? DEFAULT_VIEW_ID;
+  }, []);
   const resolvedViewId = viewId ?? initialViewId;
 
-  const currentView = useMemo(
-    () => filtersConfig?.filterViews.find(view => view.id === resolvedViewId) ?? null,
-    [filtersConfig, resolvedViewId]
-  );
-
   useEffect(() => {
-    if (!currentView) return;
+    if (!resolvedViewId) return;
     const url = new URL(window.location.href);
-    url.searchParams.set('view', currentView.url_name);
+    url.searchParams.set('view', String(resolvedViewId));
     window.history.replaceState(null, '', url);
-  }, [currentView]);
+  }, [resolvedViewId]);
 
   const selectedFilters = useMemo(() => {
     if (!resolvedViewId) return [];
     return selectedFiltersByView[String(resolvedViewId)] ?? [];
   }, [resolvedViewId, selectedFiltersByView]);
 
-  const activeGroupName = useMemo(() => {
-    if (!currentView) return null;
-    const saved = activeGroupByView[String(currentView.id)];
-    return saved ?? currentView.categoryGroups[0]?.name ?? null;
-  }, [activeGroupByView, currentView]);
-
   const activeGroup = useMemo(() => {
-    if (!currentView || !activeGroupName) return null;
-    return currentView.categoryGroups.find(group => group.name === activeGroupName) ?? null;
-  }, [currentView, activeGroupName]);
+    if (!resolvedViewId) return null;
+    const saved = activeGroupByView[String(resolvedViewId)];
+    return saved ? { name: saved, categories: [] } : null;
+  }, [activeGroupByView, resolvedViewId]);
 
-  const appliedFilterCount = useMemo(() => {
-    if (!currentView) return 0;
-    const primaryIds = currentView.categoryGroups.flatMap(group => group.categories);
-    return selectedFilters.filter(filter => primaryIds.includes(filter.category)).length;
-  }, [currentView, selectedFilters]);
+  const appliedFilterCount = selectedFilters.length;
 
-  const setCurrentView = (nextViewId: FiltersView['id']) => {
+  const setCurrentView = useCallback((nextViewId: string | number) => {
     setViewId(nextViewId);
     setPage(1);
     setSort(null);
-  };
+  }, []);
 
   const setActiveGroup = (groupName: string) => {
     if (!resolvedViewId) return;
@@ -196,7 +186,6 @@ export const useAmrPortalState = (filtersConfig?: FiltersConfig) => {
 
   return {
     viewId: resolvedViewId,
-    currentView,
     selectedFilters,
     activeGroup,
     appliedFilterCount,
