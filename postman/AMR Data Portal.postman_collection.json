@@ -11,168 +11,368 @@
       "item": [
         {
           "name": "filters-config",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "*/*"
+          "item": [
+            {
+              "name": "filters-config",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/amr/data/?view=experiments"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+                  }
+                ],
+                "url": {
+                  "raw": "http://{{amr_current}}/api/filters-config",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "filters-config"
+                  ]
+                },
+                "description": "Generated from cURL: curl 'http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/amr/api/filters-config' \\\n  -H 'Accept: */*' \\\n  -H 'Accept-Language: en-GB,en;q=0.9' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/amr/data/?view=experiments' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36' \\\n  --insecure"
               },
-              {
-                "key": "Accept-Language",
-                "value": "en-GB,en;q=0.9"
-              },
-              {
-                "key": "Cache-Control",
-                "value": "no-cache"
-              },
-              {
-                "key": "Connection",
-                "value": "keep-alive"
-              },
-              {
-                "key": "Pragma",
-                "value": "no-cache"
-              },
-              {
-                "key": "Referer",
-                "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/amr/data/?view=experiments"
-              },
-              {
-                "key": "User-Agent",
-                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
-              }
-            ],
-            "url": {
-              "raw": "http://{{amr_current}}/api/filters-config",
-              "protocol": "http",
-              "host": [
-                "{{amr_current}}"
-              ],
-              "path": [
-                "api",
-                "filters-config"
-              ]
-            },
-            "description": "Generated from cURL"
-          },
-          "response": []
+              "response": []
+            }
+          ]
         },
         {
-          "name": "AMR-Records",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Accept",
-                "value": "*/*"
+          "name": "amr-facets",
+          "item": [
+            {
+              "name": "amr-facets",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/plain, */*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "http://localhost:5173"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://localhost:5173/"
+                  },
+                  {
+                    "key": "Sec-Fetch-Dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "Sec-Fetch-Mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "Sec-Fetch-Site",
+                    "value": "same-site"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\"selected_filters\":[],\"facet_paging\":{},\"facet_operators\":{},\"view_id\":1}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-facets",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-facets"
+                  ]
+                },
+                "description": "Generated from cURL: curl 'http://localhost:8000/api/amr-facets' \\\n  -H 'Accept: application/json, text/plain, */*' \\\n  -H 'Accept-Language: en-GB,en;q=0.9' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Origin: http://localhost:5173' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:5173/' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-site' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"' \\\n  --data-raw '{\"selected_filters\":[],\"facet_paging\":{},\"facet_operators\":{},\"view_id\":1}'"
               },
-              {
-                "key": "Accept-Language",
-                "value": "en-GB,en;q=0.9"
-              },
-              {
-                "key": "Cache-Control",
-                "value": "no-cache"
-              },
-              {
-                "key": "Connection",
-                "value": "keep-alive"
-              },
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Origin",
-                "value": "http://amr.review.ensembl.org"
-              },
-              {
-                "key": "Pragma",
-                "value": "no-cache"
-              },
-              {
-                "key": "Referer",
-                "value": "http://amr.review.ensembl.org/amr/data/?view=experiments"
-              },
-              {
-                "key": "User-Agent",
-                "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "http://{{amr_current}}/api/amr-records",
-              "protocol": "http",
-              "host": [
-                "{{amr_current}}"
-              ],
-              "path": [
-                "api",
-                "amr-records"
-              ]
-            },
-            "description": "Generated from cURL"
-          },
-          "response": []
+              "response": []
+            }
+          ]
         },
         {
-          "name": "API Health",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://{{amr_current}}/api/health",
-              "protocol": "http",
-              "host": [
-                "{{amr_current}}"
-              ],
-              "path": [
-                "api",
-                "health"
-              ]
+          "name": "amr-records",
+          "item": [
+            {
+              "name": "amr-records-phenotype-01",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/plain, */*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "http://localhost:5173"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://localhost:5173/"
+                  },
+                  {
+                    "key": "Sec-Fetch-Dest",
+                    "value": "empty"
+                  },
+                  {
+                    "key": "Sec-Fetch-Mode",
+                    "value": "cors"
+                  },
+                  {
+                    "key": "Sec-Fetch-Site",
+                    "value": "same-site"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+                  },
+                  {
+                    "key": "sec-ch-ua",
+                    "value": "\"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\""
+                  },
+                  {
+                    "key": "sec-ch-ua-mobile",
+                    "value": "?0"
+                  },
+                  {
+                    "key": "sec-ch-ua-platform",
+                    "value": "\"macOS\""
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        },\n        {\n            \"category\": \"phenotype-species\",\n            \"value\": \"Acinetobacter baumannii\"\n        },\n        {\n            \"category\": \"phenotype-genus\",\n            \"value\": \"Acinetobacter\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100,\n    \"facet_operators\": {}\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-records",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records"
+                  ]
+                },
+                "description": "Generated from cURL: curl 'http://localhost:8000/api/amr-records' \\\n  -H 'Accept: application/json, text/plain, */*' \\\n  -H 'Accept-Language: en-GB,en;q=0.9' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Origin: http://localhost:5173' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://localhost:5173/' \\\n  -H 'Sec-Fetch-Dest: empty' \\\n  -H 'Sec-Fetch-Mode: cors' \\\n  -H 'Sec-Fetch-Site: same-site' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36' \\\n  -H 'sec-ch-ua: \"Google Chrome\";v=\"147\", \"Not.A/Brand\";v=\"8\", \"Chromium\";v=\"147\"' \\\n  -H 'sec-ch-ua-mobile: ?0' \\\n  -H 'sec-ch-ua-platform: \"macOS\"' \\\n  --data-raw '{\"selected_filters\":[{\"category\":\"phenotype-antibiotic_name\",\"value\":\"amikacin\"},{\"category\":\"phenotype-species\",\"value\":\"Acinetobacter baumannii\"},{\"category\":\"phenotype-genus\",\"value\":\"Acinetobacter\"}],\"view_id\":1,\"page\":1,\"per_page\":100,\"facet_operators\":{}}'"
+              },
+              "response": []
             },
-            "description": "Generated from cURL"
-          },
-          "response": []
+            {
+              "name": "AMR-Records",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "*/*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "http://amr.review.ensembl.org"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://amr.review.ensembl.org/amr/data/?view=experiments"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-records",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records"
+                  ]
+                },
+                "description": "Generated from cURL: curl 'http://amr.review.ensembl.org/amr/api/amr-records' \\\n  -H 'Accept: */*' \\\n  -H 'Accept-Language: en-GB,en;q=0.9' \\\n  -H 'Cache-Control: no-cache' \\\n  -H 'Connection: keep-alive' \\\n  -H 'Content-Type: application/json' \\\n  -H 'Origin: http://amr.review.ensembl.org' \\\n  -H 'Pragma: no-cache' \\\n  -H 'Referer: http://amr.review.ensembl.org/amr/data/?view=experiments' \\\n  -H 'User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/147.0.0.0 Safari/537.36' \\\n  --data-raw '{\"selected_filters\":[{\"category\":\"phenotype-antibiotic_name\",\"value\":\"amikacin\"}],\"view_id\":1,\"page\":1,\"per_page\":100}' \\\n  --insecure"
+              },
+              "response": []
+            }
+          ]
         },
         {
-          "name": "Data Release",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "accept",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "http://{{amr_current}}/api/release",
-              "protocol": "http",
-              "host": [
-                "{{amr_current}}"
-              ],
-              "path": [
-                "api",
-                "release"
-              ]
+          "name": "meta-data",
+          "item": [
+            {
+              "name": "API Health",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://{{amr_current}}/api/health",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "health"
+                  ]
+                },
+                "description": "Generated from cURL: curl -X 'GET' \\\n  'http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32027/api/health' \\\n  -H 'accept: application/json'"
+              },
+              "response": []
             },
-            "description": "Generated from cURL"
-          },
-          "response": []
+            {
+              "name": "Data Release",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://{{amr_current}}/api/release",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "release"
+                  ]
+                },
+                "description": "Generated from cURL: curl -X 'GET' \\\n  'http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32027/api/release' \\\n  -H 'accept: application/json'"
+              },
+              "response": []
+            }
+          ]
         }
       ]
     }
