@@ -3,9 +3,6 @@
 {% block styles %}
   <link rel="stylesheet" href="{{ 'src/assets/css/main-page.css' | getAssetOutputPath | transformWithHtmlBase }}" />
 {% endblock %}
-{% block scripts %}
-  <script type="module" src="{{ 'src/assets/scripts/pages/main.ts' | getAssetOutputPath | transformWithHtmlBase }}"></script>
-{% endblock %}
 
 {% block body %}
   {% include "components/header/header.njk" %}

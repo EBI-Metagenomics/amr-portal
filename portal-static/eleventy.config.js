@@ -25,8 +25,7 @@ export default async function(eleventyConfig) {
     return assetsManifest;
   });
 
-  // Trigger rebuild if script or style files have been updated
-  eleventyConfig.addWatchTarget('src/assets/scripts');
+  // Trigger rebuild if style files have been updated
   eleventyConfig.addWatchTarget('src/assets/css');
 
   eleventyConfig.addPassthroughCopy({

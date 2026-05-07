@@ -26,25 +26,6 @@ export async function buildAssets({
   pathPrefix,
   outputRoot = ''
 }) {
-  // Build scripts
-  const scriptsBuildOutput = await esbuild.build({
-    entryPoints: [
-      'src/assets/scripts/pages/main.ts'
-    ],
-    outdir: `${outputRoot}/assets/scripts`,
-    loader: {
-      '.svg': 'text'
-    },
-    format: 'esm',
-    bundle: true,
-    splitting: true,
-    entryNames: isProductionBuild ? '[dir]/[name]-[hash]' : '[dir]/[name]',
-    sourcemap: true,
-    minify: isProductionBuild,
-    metafile: true, // <-- will output a json manifest for the build
-    external: pathPrefix ? [`${pathPrefix}*`] : ['/assets/*']
-  });
-
   // Build styles: concatenate imports, and, if needed, add prefix to urls referenced from css
   const stylesBuildOutput = await esbuild.build({
     entryPoints: [
@@ -87,10 +68,7 @@ export async function buildAssets({
     ],
   });
 
-  const buildOutput = {
-    ...scriptsBuildOutput.metafile.outputs,
-    ...stylesBuildOutput.metafile.outputs
-  };
+  const buildOutput = stylesBuildOutput.metafile.outputs;
   const assetsManifest = {};
 
   for (const [outputPath, { entryPoint }] of Object.entries(buildOutput)) {
