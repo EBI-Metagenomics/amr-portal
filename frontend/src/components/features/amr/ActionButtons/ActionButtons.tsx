@@ -3,19 +3,31 @@ import { API_BASE_URL, FTP_DOWNLOAD_URL } from '@utils/common/constants';
 import { getDownloadLink } from '@utils/download';
 import styles from './ActionButtons.module.css';
 
-type ActionView = 'clear' | 'download' | null;
+type ActionView = 'columns' | 'clear' | 'download' | null;
 
 type Props = {
   viewId: string | number;
   selectedFilters: Array<{ category: string; value: string }>;
+  columns: Array<{ id: string; label: string }>;
+  hiddenColumnIds: string[];
   disabled?: boolean;
   onClearFilters: () => void;
+  onHiddenColumnsChange: (columnIds: string[]) => void;
 };
 
-const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Props) => {
+const ActionButtons = ({
+  viewId,
+  selectedFilters,
+  columns,
+  hiddenColumnIds,
+  disabled,
+  onClearFilters,
+  onHiddenColumnsChange,
+}: Props) => {
   const [view, setView] = useState<ActionView>(null);
   const [downloadStarted, setDownloadStarted] = useState(false);
   const popoverRef = useRef<HTMLDivElement | null>(null);
+  const selectableColumnIds = useMemo(() => columns.map(column => column.id), [columns]);
 
   const downloadLink = useMemo(
     () =>
@@ -48,6 +60,7 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
     return (
       <aside className={`${styles.rail} ${styles.railDisabled}`}>
         <ActionIconButton type="table" label="View table" disabled />
+        <ActionIconButton type="columns" label="Select columns" disabled />
         <ActionIconButton type="clear" label="Clear filters" disabled />
         <ActionIconButton type="download" label="Download" disabled />
       </aside>
@@ -65,6 +78,13 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
           label="View table"
         />
         <ActionIconButton
+          type="columns"
+          active={view === 'columns'}
+          disabled={view === 'columns'}
+          onClick={() => setView('columns')}
+          label="Select columns"
+        />
+        <ActionIconButton
           type="clear"
           active={view === 'clear'}
           disabled={view === 'clear'}
@@ -79,6 +99,46 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
           label="Download"
         />
       </aside>
+
+      {view === 'columns' ? (
+        <div ref={popoverRef} className={[styles.popover, styles.columnsPopover].join(' ')}>
+          <h4 className={styles.popoverTitle}>Select columns to display</h4>
+          <div className={styles.columnsActions}>
+            <button
+              type="button"
+              className={styles.popoverButton}
+              onClick={() => onHiddenColumnsChange([])}
+            >
+              Select all
+            </button>
+            <button
+              type="button"
+              className={styles.popoverButton}
+              onClick={() => onHiddenColumnsChange(selectableColumnIds)}
+            >
+              Deselect all
+            </button>
+          </div>
+          <div className={styles.columnsList}>
+            {columns.map(column => (
+              <label key={column.id} className={styles.columnOption}>
+                <input
+                  type="checkbox"
+                  checked={!hiddenColumnIds.includes(column.id)}
+                  onChange={() =>
+                    onHiddenColumnsChange(
+                      hiddenColumnIds.includes(column.id)
+                        ? hiddenColumnIds.filter(id => id !== column.id)
+                        : [...hiddenColumnIds, column.id]
+                    )
+                  }
+                />
+                <span>{column.label}</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {view === 'clear' ? (
         <div ref={popoverRef} className={[styles.popover, styles.clearPopover].join(' ')}>
@@ -140,7 +200,7 @@ const ActionButtons = ({ viewId, selectedFilters, disabled, onClearFilters }: Pr
 };
 
 type ActionIconButtonProps = {
-  type: 'table' | 'clear' | 'download';
+  type: 'table' | 'columns' | 'clear' | 'download';
   label: string;
   disabled?: boolean;
   active?: boolean;
@@ -157,9 +217,16 @@ const ActionIconButton = ({ type, label, disabled, active, onClick }: ActionIcon
     title={label}
   >
     {type === 'table' ? <TableIcon /> : null}
+    {type === 'columns' ? <ColumnsIcon /> : null}
     {type === 'clear' ? <DeleteIcon /> : null}
     {type === 'download' ? <DownloadIcon /> : null}
   </button>
+);
+
+const ColumnsIcon = () => (
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M3.5 4.5h7v23h-7zM12.5 4.5h7v23h-7zM21.5 4.5h7v23h-7z" />
+  </svg>
 );
 
 const TableIcon = () => (

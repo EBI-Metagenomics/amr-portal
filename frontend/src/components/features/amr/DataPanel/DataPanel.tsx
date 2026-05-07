@@ -1,3 +1,4 @@
+import { useMemo, useState } from 'react';
 import type { AMRColumnMeta, AMRRecordValue } from '@interfaces/amrRecord';
 import type { AMRRecordsResponse } from '@interfaces/amrApi';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
@@ -49,6 +50,17 @@ const DataPanel = ({
   onSortChange,
   onClearFilters,
 }: Props) => {
+  const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
+  const columns = useMemo(() => data?.meta.columns ?? [], [data]);
+  const visibleColumns = useMemo(
+    () => columns.filter(column => !hiddenColumnIds.includes(column.id)),
+    [columns, hiddenColumnIds]
+  );
+  const handleClearFilters = () => {
+    setHiddenColumnIds([]);
+    onClearFilters();
+  };
+
   if (!hasSelectedFilters) {
     return (
       <section className={panelSection()}>
@@ -57,6 +69,11 @@ const DataPanel = ({
             <TableIcon />
           </span>
           <span className={styles.initialTextStrong}>Select data from the Faceted Filters</span>
+
+          <span className={styles.initialIcon}>
+            <ColumnsIcon />
+          </span>
+          <span>Select columns to display</span>
 
           <span className={styles.initialIcon}>
             <DeleteIcon />
@@ -72,8 +89,11 @@ const DataPanel = ({
           <ActionButtons
             viewId={currentViewId}
             selectedFilters={selectedFilters}
+            columns={columns}
+            hiddenColumnIds={hiddenColumnIds}
             disabled
-            onClearFilters={onClearFilters}
+            onClearFilters={handleClearFilters}
+            onHiddenColumnsChange={setHiddenColumnIds}
           />
         ) : null}
       </section>
@@ -108,7 +128,6 @@ const DataPanel = ({
     );
   }
 
-  const columns = data.meta.columns;
   const totalPages = Math.max(1, Math.ceil(data.meta.total_hits / data.meta.per_page));
   const onPageInputCommit = (rawValue: string) => {
     const value = rawValue.trim();
@@ -192,7 +211,7 @@ const DataPanel = ({
         <table>
           <thead>
             <tr>
-              {columns.map(column => {
+              {visibleColumns.map(column => {
                 const isSortedColumn = sort?.category === column.id;
                 return (
                   <th key={column.id}>
@@ -229,7 +248,7 @@ const DataPanel = ({
           <tbody aria-busy={isFetching && isPlaceholderData}>
             {data.data.map((record, index) => (
               <tr key={index}>
-                {columns.map(column => {
+                {visibleColumns.map(column => {
                   const value = record[column.id];
                   return (
                     <td key={column.id}>
@@ -246,7 +265,10 @@ const DataPanel = ({
         <ActionButtons
           viewId={currentViewId}
           selectedFilters={selectedFilters}
-          onClearFilters={onClearFilters}
+          columns={columns}
+          hiddenColumnIds={hiddenColumnIds}
+          onClearFilters={handleClearFilters}
+          onHiddenColumnsChange={setHiddenColumnIds}
         />
       ) : null}
     </section>
@@ -354,6 +376,12 @@ const TableIcon = () => (
 const DeleteIcon = () => (
   <svg viewBox="0 0 32 32" aria-hidden="true">
     <path d="M4.8000002,28.2000008C4.8000002,29.7000008,6,31,7.5999999,31l0,0H24.5c1.6000004,0,2.7999992-1.2999992,2.7999992-2.7999992l0,0V8.5h-22.5V28.2000008z M20.7000008,13.1999998c0-0.5,0.3999996-0.8999996,0.8999996-0.8999996S22.5,12.6999998,22.5,13.1999998v13.0999994c0,0.5-0.3999996,0.8999996-0.8999996,0.8999996s-0.8999996-0.3999996-0.8999996-0.8999996V13.1999998z M15.1000004,13.1999998c0-0.5,0.3999996-0.8999996,0.8999996-0.8999996s0.8999996,0.3999996,0.8999996,0.8999996v13.0999994c0,0.5-0.3999996,0.8999996-0.8999996,0.8999996s-0.8999996-0.3999996-0.8999996-0.8999996V13.1999998z M9.3999996,13.1999998c0-0.5,0.3999996-0.8999996,0.8999996-0.8999996s0.8999996,0.3999996,0.8999996,0.8999996v13.0999994c0,0.5-0.3999996,0.8999996-0.8999996,0.8999996s-0.8999996-0.3999996-0.8999996-0.8999996V13.1999998z M28.2000008,2.9000001h-7l-0.6000004-1.1C20.3999996,1.3,19.8999996,1,19.2999992,1h-6.6999998c-0.5,0-1,0.3-1.3000002,0.8l-0.6000004,1.1000001h-7c-0.5,0-0.9000001,0.4000001-0.9000001,0.9000001v1.9000001c0,0.5,0.4000001,0.9000001,0.9000001,0.9000001h24.3999996c0.5,0,0.8999996-0.4000001,0.8999996-0.9000001V3.8C29.1000004,3.3,28.7000008,2.9000001,28.2000008,2.9000001z" />
+  </svg>
+);
+
+const ColumnsIcon = () => (
+  <svg viewBox="0 0 32 32" aria-hidden="true">
+    <path d="M3.5 4.5h7v23h-7zM12.5 4.5h7v23h-7zM21.5 4.5h7v23h-7z" />
   </svg>
 );
 

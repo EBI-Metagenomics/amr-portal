@@ -96,6 +96,80 @@
   font-weight: 300;
 }
 
+.controlsRight {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.columnsMenuWrap {
+  position: relative;
+}
+
+.columnsButton {
+  cursor: pointer;
+  border: 1px solid #1e90ff;
+  background: #fff;
+  color: #1b2c39;
+  border-radius: 6px;
+  height: 28px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.columnsPopover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 4;
+  width: 280px;
+  max-height: 360px;
+  overflow: auto;
+  border: 1px solid #d5dbe1;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(27, 44, 57, 0.18);
+  padding: 12px;
+}
+
+.columnsPopoverTitle {
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.columnsBulkActions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.columnsBulkButton {
+  cursor: pointer;
+  border: 1px solid #1e90ff;
+  background: #fff;
+  color: #1b2c39;
+  border-radius: 4px;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.columnsList {
+  display: grid;
+  gap: 7px;
+}
+
+.columnOption {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
 .tableContainer {
   overflow: auto;
   white-space: nowrap;
