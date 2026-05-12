@@ -10,13 +10,13 @@ cd amr-portal
 
 ### Backend
 
-1. Install requirements
+1. Install [uv](https://docs.astral.sh/uv/getting-started/installation/) and sync dependencies
 ```
 cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+uv sync
 ```
+
+For local runs with dev tools (e.g. pytest), use `uv sync --extra dev`.
 
 2. Create a .env File
 ```
@@ -31,15 +31,15 @@ export DUCKDB_PATH=path/to/duckdb/file.duckdb
 ```
 
 ```shell
-# from backend (venv active)
-uvicorn main:app --reload
+# from backend
+uv run uvicorn main:app --reload
 ```
 
 Swagger UI: http://localhost:8000/docs
 
 For production use:
 ```shell
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+uv run uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
 For testing:
@@ -51,7 +51,7 @@ DUCKDB_PATH=path/to/test_data.duckdb
 
 Then run:
 ```shell
-cd backend && TESTING=true pytest tests/
+cd backend && uv sync --extra dev && TESTING=true uv run pytest tests/
 ```
 
 #### API Calls Examples

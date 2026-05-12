@@ -4,6 +4,7 @@
 # Python directories
 __pycache__
 venv
+.venv
 
 # Frontend directories to ignore
 node_modules
