@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { AMRColumnMeta, AMRRecordValue } from '@interfaces/amrRecord';
+import type { AMRColumnMeta, AMRRecord, AMRRecordValue } from '@interfaces/amrRecord';
 import type { AMRRecordsResponse } from '@interfaces/amrApi';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import ActionButtons from '@components/features/amr/ActionButtons/ActionButtons';
@@ -28,6 +28,9 @@ type Props = {
   onPerPageChange: (value: number) => void;
   onSortChange: (category: string) => void;
   onClearFilters: () => void;
+  /** When set, rows are selectable for actions such as opening the genome browser. */
+  selectedRowIndex?: number | null;
+  onRowSelect?: (rowIndex: number, record: AMRRecord) => void;
 };
 
 const panelSection = (extra?: string) =>
@@ -49,6 +52,8 @@ const DataPanel = ({
   onPerPageChange,
   onSortChange,
   onClearFilters,
+  selectedRowIndex = null,
+  onRowSelect,
 }: Props) => {
   const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
   const columns = useMemo(() => data?.meta.columns ?? [], [data]);
@@ -247,7 +252,23 @@ const DataPanel = ({
           </thead>
           <tbody aria-busy={isFetching && isPlaceholderData}>
             {data.data.map((record, index) => (
-              <tr key={index}>
+              <tr
+                key={index}
+                aria-selected={onRowSelect ? selectedRowIndex === index : undefined}
+                className={[
+                  onRowSelect ? styles.clickableRow : '',
+                  selectedRowIndex === index ? styles.rowSelected : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                onClick={
+                  onRowSelect
+                    ? () => {
+                        onRowSelect(index, record);
+                      }
+                    : undefined
+                }
+              >
                 {visibleColumns.map(column => {
                   const value = record[column.id];
                   return (

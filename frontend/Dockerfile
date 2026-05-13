@@ -14,7 +14,7 @@ WORKDIR /src/frontend
 COPY frontend/package*.json ./
 RUN npm ci
 COPY frontend ./
-RUN VITE_API_BASE_URL="VITE_API_BASE_URL_PLACEHOLDER" npm run build
+RUN VITE_API_BASE_URL="VITE_API_BASE_URL_PLACEHOLDER" VITE_GENOME_FASTA_BASE_URL="VITE_GENOME_FASTA_BASE_URL_PLACEHOLDER" VITE_GENOME_GFF_BASE_URL="VITE_GENOME_GFF_BASE_URL_PLACEHOLDER" npm run build
 
 FROM alpine:3.20 AS merge
 COPY --from=content /src/portal-static/content-dist /tmp/content
@@ -35,4 +35,4 @@ COPY --from=merge /html /usr/share/nginx/html
 # Load API base before the Vite bundle: avoids fragile sed on minified JS (relative /amr/api would use the SPA port).
 RUN sed -i 's|<head>|<head><script src="./runtime-config.js"></script>|' /usr/share/nginx/html/data/index.html
 
-CMD ["/bin/sh", "-c", "API_BASE_URL=\"${VITE_API_BASE_URL:-/amr/api}\"; B64=$(printf '%s' \"$API_BASE_URL\" | base64 | tr -d '\\n'); printf 'window.__AMR_API_BASE_URL__=atob(\"%s\");\\n' \"$B64\" > /usr/share/nginx/html/data/runtime-config.js && exec nginx -g 'daemon off;'"]
+CMD ["/bin/sh", "-c", "API_BASE_URL=\"${VITE_API_BASE_URL:-/amr/api}\"; B64=$(printf '%s' \"$API_BASE_URL\" | base64 | tr -d '\\n'); printf 'window.__AMR_API_BASE_URL__=atob(\"%s\");\\n' \"$B64\" > /usr/share/nginx/html/data/runtime-config.js; FA=\"${VITE_GENOME_FASTA_BASE_URL:-}\"; if [ -n \"$FA\" ]; then B64FA=$(printf '%s' \"$FA\" | base64 | tr -d '\\n'); printf 'window.__AMR_GENOME_FASTA_BASE_URL__=atob(\"%s\");\\n' \"$B64FA\" >> /usr/share/nginx/html/data/runtime-config.js; fi; GF=\"${VITE_GENOME_GFF_BASE_URL:-}\"; if [ -n \"$GF\" ]; then B64GF=$(printf '%s' \"$GF\" | base64 | tr -d '\\n'); printf 'window.__AMR_GENOME_GFF_BASE_URL__=atob(\"%s\");\\n' \"$B64GF\" >> /usr/share/nginx/html/data/runtime-config.js; fi; GV=\"${VITE_ENABLE_GENOME_VIEWER:-}\"; if [ -n \"$GV\" ]; then printf 'window.__AMR_ENABLE_GENOME_VIEWER__=\"%s\";\\n' \"$GV\" >> /usr/share/nginx/html/data/runtime-config.js; fi; exec nginx -g 'daemon off;'"]

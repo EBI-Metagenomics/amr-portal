@@ -27,6 +27,16 @@ spec:
             configMapKeyRef:
               name: amr-frontend-configmap-dev
               key: VITE_API_BASE_URL
+        - name: VITE_GENOME_FASTA_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: amr-frontend-configmap-dev
+              key: VITE_GENOME_FASTA_BASE_URL
+        - name: VITE_GENOME_GFF_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: amr-frontend-configmap-dev
+              key: VITE_GENOME_GFF_BASE_URL
         ports:
         - containerPort: 8000
           protocol: TCP

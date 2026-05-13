@@ -1,0 +1,17 @@
+.loading {
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.jbrowseViewer {
+  width: 100%;
+  max-width: none;
+}
+
+.jbrowseContainer {
+  width: 100%;
+  max-width: none;
+  min-height: 360px;
+}

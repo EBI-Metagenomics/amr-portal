@@ -4,6 +4,31 @@ import { fileURLToPath, URL } from 'node:url'
 
 const appRoot = fileURLToPath(new URL('.', import.meta.url))
 
+/** Serve bgzip sidecars without wrong Content-Encoding (same idea as METT dataportal). */
+const bgzipHeadersPlugin = () => ({
+  name: 'amr-bgzip-headers',
+  configureServer(server) {
+    server.middlewares.use((req, res, next) => {
+      if (req.url?.includes('.fa.gz') || req.url?.includes('.gff.gz')) {
+        res.setHeader('Content-Type', 'application/octet-stream')
+        res.setHeader('Content-Encoding', 'identity')
+      }
+      next()
+    })
+  },
+})
+
+/** Avoid worker bundle issues in dev; RPC uses MainThreadRpcDriver in viewer config. */
+const jbrowseWorkerStubPlugin = () => ({
+  name: 'amr-jbrowse-worker-stub',
+  load(id: string) {
+    if (id.includes('makeWorkerInstance.js')) {
+      return `export default function makeWorkerInstance() { return null }\n`
+    }
+    return null
+  },
+})
+
 export default defineConfig(({ mode }) => {
   // Load .env from frontend/ even when `npm run --prefix frontend dev` leaves cwd at repo root.
   const env = loadEnv(mode, appRoot, '');
@@ -12,10 +37,22 @@ export default defineConfig(({ mode }) => {
 
   return {
     root: appRoot,
-    plugins: [react()],
+    plugins: [react(), bgzipHeadersPlugin(), jbrowseWorkerStubPlugin()],
     base,
+    define: {
+      global: 'globalThis',
+    },
+    optimizeDeps: {
+      include: ['file-saver'],
+      esbuildOptions: {
+        loader: {
+          '.js': 'jsx',
+        },
+      },
+    },
     build: {
       outDir: 'app-dist',
+      target: 'es2015',
     },
     resolve: {
       alias: {
@@ -24,6 +61,7 @@ export default defineConfig(({ mode }) => {
         '@services': fileURLToPath(new URL('./src/services', import.meta.url)),
         '@interfaces': fileURLToPath(new URL('./src/interfaces', import.meta.url)),
         '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
+        buffer: 'buffer/',
       },
     },
   };

@@ -3,25 +3,67 @@
   width: calc(100% - var(--amr-rail-gutter));
   margin-right: var(--amr-rail-gutter);
   min-height: var(--amr-top-panel-height);
-  height: var(--amr-top-panel-height);
+  height: auto;
   overflow: visible;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
 }
 
-.placeholderText {
+.rootExpanded {
+  min-height: var(--amr-gene-viewer-expanded-total);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: var(--amr-top-panel-height);
+  padding: 0 10px;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.viewerBody {
+  flex: 1;
+  min-height: var(--amr-gene-viewer-browser-min-height);
+  min-width: 0;
+}
+
+.hint {
   margin: 0;
+  padding: 12px;
   font-size: 13px;
   color: #64748b;
 }
 
+.error {
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.code {
+  font-size: 12px;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
 .toggle {
-  position: absolute;
-  top: -1px;
-  right: var(--amr-rail-anchor);
-  transform: none;
-  z-index: 4;
+  margin-left: auto;
   border-radius: 0 6px 6px 0;
   background: #fff;
   width: 32px;
@@ -35,4 +77,5 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
 }

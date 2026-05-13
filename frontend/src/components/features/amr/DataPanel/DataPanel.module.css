@@ -268,6 +268,22 @@
   padding-bottom: 9px;
 }
 
+.tableContainer tbody tr.clickableRow {
+  cursor: pointer;
+}
+
+.tableContainer tbody tr.clickableRow:hover {
+  background: #f8fafc;
+}
+
+.tableContainer tbody tr.rowSelected {
+  background: #e0f2fe;
+}
+
+.tableContainer tbody tr.rowSelected:hover {
+  background: #bae6fd;
+}
+
 .tableContainer tbody tr + tr {
   border-top: 1px solid #b7c0c8;
 }

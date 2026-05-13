@@ -7,4 +7,11 @@
   --amr-panels-gap: 14px;
   /* Matches App main padding: 10px top + 20px bottom — used so data area fills remaining viewport. */
   --amr-main-vertical-padding: 30px;
+  /* Gene / JBrowse strip */
+  --amr-top-panel-height: 44px;
+  --amr-gene-viewer-browser-min-height: 380px;
+  /* Toolbar + JBrowse minimum (used by HomePage layout when expanded). */
+  --amr-gene-viewer-expanded-total: calc(
+    var(--amr-top-panel-height) + var(--amr-gene-viewer-browser-min-height)
+  );
 }

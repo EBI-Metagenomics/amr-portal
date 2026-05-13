@@ -7,13 +7,6 @@
   gap: var(--amr-panels-gap);
 }
 
-.geneViewerExpandedFill {
-  height: 180px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  background: #fff;
-}
-
 .contentLayout {
   display: grid;
   grid-template-columns: 360px 1fr;
@@ -29,7 +22,7 @@
     var(--amr-subheader-height) -
     var(--amr-main-vertical-padding) -
     var(--amr-panels-gap) -
-    44px
+    var(--amr-top-panel-height)
   );
 }
 
@@ -40,8 +33,14 @@
     var(--amr-subheader-height) -
     var(--amr-main-vertical-padding) -
     (var(--amr-panels-gap) * 2) -
-    180px -
-    44px
+    var(--amr-gene-viewer-expanded-total)
+  );
+}
+
+/* Genome viewer strip not mounted (feature flag off): fill main area without top strip or extra gap. */
+.contentLayoutGeneViewerDisabled {
+  height: calc(
+    100dvh - var(--amr-header-height) - var(--amr-subheader-height) - var(--amr-main-vertical-padding)
   );
 }
 
