@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import GeneViewerContent from './GeneViewer/GeneViewerContent';
 import useGeneViewerState from './GeneViewer/geneViewerState';
@@ -14,6 +15,19 @@ type Props = {
   loadData: boolean;
 };
 
+function formatSelectionSummary(rowContext: GenomeViewerRowContext | null): string | null {
+  if (!rowContext) return null;
+  if (rowContext.viewMode === 'phenotype') {
+    return `Selected row: phenotype | assembly_id=${rowContext.assemblyId}`;
+  }
+
+  const focused = rowContext.focusedRegion
+    ? `${rowContext.focusedRegion.refName}:${rowContext.focusedRegion.start + 1}-${rowContext.focusedRegion.end}${rowContext.focusedRegion.reversed ? ' (-)' : ''}`
+    : 'no region coordinates';
+
+  return `Selected row: genotype | assembly_id=${rowContext.assemblyId} | region=${focused}${rowContext.locusTag ? ` | locus=${rowContext.locusTag}` : ''}`;
+}
+
 const GeneViewerPanel = ({
   isCollapsed,
   onToggleCollapsed,
@@ -22,24 +36,32 @@ const GeneViewerPanel = ({
   loadData,
 }: Props) => {
   const {
-    fastaBaseUrl,
-    gffBaseUrl,
-    fastaAssemblyDirectoryUrl,
-    gffAssemblyDirectoryUrl,
-    assemblyId,
+    baseUrlConfigError,
+    isUsingTempTestFiles,
+    fastaUri,
+    gffUri,
     faiUrl,
     faiQuery,
     sessionPlan,
-    genomeMeta,
-    gffUriReady,
-    sessionOptions,
     initKey,
   } = useGenomeBrowserResources(loadData, hasSelectedTableRow, rowContext);
 
+  const readySessionPlan = sessionPlan?.kind === 'ready' ? sessionPlan : null;
+  const sessionOptions = useMemo(
+    () =>
+      readySessionPlan
+        ? {
+            displayedRegions: readySessionPlan.displayedRegions,
+            bpPerPx: readySessionPlan.bpPerPx,
+          }
+        : undefined,
+    [readySessionPlan]
+  );
+
   const { assembly, tracks, sessionConfig } = useAmrGeneViewerConfig(
-    genomeMeta,
-    fastaAssemblyDirectoryUrl,
-    gffUriReady,
+    readySessionPlan?.genomeMeta ?? null,
+    fastaUri,
+    readySessionPlan?.gffUri ?? gffUri ?? null,
     sessionOptions
   );
 
@@ -59,8 +81,8 @@ const GeneViewerPanel = ({
     loadData &&
     hasSelectedTableRow &&
     Boolean(rowContext) &&
-    Boolean(fastaAssemblyDirectoryUrl) &&
-    Boolean(gffAssemblyDirectoryUrl) &&
+    Boolean(fastaUri) &&
+    Boolean(gffUri) &&
     sessionReady &&
     !isCollapsed &&
     !faiQuery.isLoading &&
@@ -68,6 +90,7 @@ const GeneViewerPanel = ({
     !initializationError;
 
   const highlightLocusId = showBrowser ? (rowContext?.locusTag ?? null) : null;
+  const selectionSummary = formatSelectionSummary(rowContext);
 
   return (
     <section className={sectionClass} aria-label="Gene viewer panel">
@@ -84,16 +107,16 @@ const GeneViewerPanel = ({
       </div>
       {!isCollapsed ? (
         <div className={styles.viewerBody}>
-          {!fastaBaseUrl || !gffBaseUrl ? (
+          {baseUrlConfigError ? (
             <p className={styles.error} role="alert">
               Genome file roots are not fully configured.
-              {!fastaBaseUrl ? (
+              {baseUrlConfigError === 'fasta' || baseUrlConfigError === 'both' ? (
                 <>
                   {' '}
                   Set <code className={styles.code}>VITE_GENOME_FASTA_BASE_URL</code> for FASTA / FAI.
                 </>
               ) : null}
-              {!gffBaseUrl ? (
+              {baseUrlConfigError === 'gff' || baseUrlConfigError === 'both' ? (
                 <>
                   {' '}
                   Set <code className={styles.code}>VITE_GENOME_GFF_BASE_URL</code> for GFF / tabix index.
@@ -113,11 +136,12 @@ const GeneViewerPanel = ({
               ).
             </p>
           ) : null}
-          {rowContext && (!fastaAssemblyDirectoryUrl || !gffAssemblyDirectoryUrl) && fastaBaseUrl && gffBaseUrl ? (
-            <p className={styles.error} role="alert">
-              Could not derive genome paths from assembly id{' '}
-              <code className={styles.code}>{rowContext.assemblyId}</code>. Expected a value like{' '}
-              <code className={styles.code}>GCA_000214965.2</code>.
+          {selectionSummary ? <p className={styles.selectionSummary}>{selectionSummary}</p> : null}
+          {isUsingTempTestFiles ? (
+            <p className={styles.overrideNotice}>
+              Temporary test-file override active. Remove after rendering check. Using{' '}
+              <code className={styles.code}>{fastaUri ?? ''}</code> and{' '}
+              <code className={styles.code}>{gffUri ?? ''}</code>.
             </p>
           ) : null}
           {sessionPlan?.kind === 'invalid' && sessionPlan.code === 'genotype_missing_region' ? (
@@ -138,7 +162,7 @@ const GeneViewerPanel = ({
               Invalid region interval for this assembly.
             </p>
           ) : null}
-          {loadData && rowContext && fastaAssemblyDirectoryUrl && faiQuery.isLoading ? (
+          {loadData && rowContext && fastaUri && faiQuery.isLoading ? (
             <p className={styles.hint}>Loading assembly index…</p>
           ) : null}
           {loadData && faiQuery.isError ? (
@@ -151,10 +175,10 @@ const GeneViewerPanel = ({
           !faiQuery.isLoading &&
           !faiQuery.isError &&
           rowContext &&
-          fastaAssemblyDirectoryUrl &&
+          fastaUri &&
           faiQuery.data?.length === 0 ? (
             <p className={styles.error} role="alert">
-              Assembly index (FAI) was empty for <code className={styles.code}>{assemblyId ?? ''}</code>.
+              Assembly index (FAI) was empty for <code className={styles.code}>{rowContext.assemblyId}</code>.
             </p>
           ) : null}
           {loadData && sessionReady && initializationError ? (

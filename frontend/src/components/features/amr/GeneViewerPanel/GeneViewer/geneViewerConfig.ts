@@ -13,7 +13,7 @@ export type { GenomeMeta, DisplayedRegionInput };
 
 export const useAmrGeneViewerConfig = (
   genomeMeta: GenomeMeta | null,
-  fastaAssemblyDirectoryUrl: string | null,
+  fastaUri: string | null,
   gffUri: string | null,
   sessionOptions?: {
     displayedRegions?: DisplayedRegionInput[];
@@ -21,9 +21,9 @@ export const useAmrGeneViewerConfig = (
   }
 ) => {
   const assembly = useMemo(() => {
-    if (!genomeMeta || !fastaAssemblyDirectoryUrl) return null;
-    return getAssembly(genomeMeta, fastaAssemblyDirectoryUrl);
-  }, [genomeMeta, fastaAssemblyDirectoryUrl]);
+    if (!genomeMeta || !fastaUri) return null;
+    return getAssembly(genomeMeta, fastaUri);
+  }, [genomeMeta, fastaUri]);
 
   const tracks = useMemo((): Track[] => {
     if (!genomeMeta || !gffUri) return [];

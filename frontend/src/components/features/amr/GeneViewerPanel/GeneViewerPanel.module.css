@@ -48,6 +48,20 @@
   color: #64748b;
 }
 
+.selectionSummary {
+  margin: 0;
+  padding: 12px 12px 0;
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.overrideNotice {
+  margin: 0;
+  padding: 8px 12px 12px;
+  font-size: 12px;
+  color: #92400e;
+}
+
 .error {
   margin: 0;
   padding: 12px;

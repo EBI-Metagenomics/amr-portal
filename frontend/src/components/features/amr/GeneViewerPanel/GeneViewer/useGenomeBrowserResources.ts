@@ -6,6 +6,25 @@ import { buildGenomeAssemblyDirectoryUrl, buildGenomeGffUri } from './assemblyPa
 import { bpPerPxForGenotypeFocus, type DisplayedRegionInput } from './defaultSessionConfig';
 import type { GenomeMeta } from './assembly';
 
+function publicAssetUrl(path: string): string {
+  const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+  const normalizedPath = path.replace(/^\//, '');
+  return `${base}/${normalizedPath}`;
+}
+
+// TODO(amr): REMOVE after local rendering check with the sample files in `frontend/public/`.
+const TEMP_TEST_FILE_OVERRIDE = {
+  enabled: true,
+  fastaUri: publicAssetUrl('/fasta/ABC/000/ABC_0008492/BU_ATCC8492VPI0062_NT5002.1.fa.gz'),
+  gffUri: publicAssetUrl('/gff/ABC/000/ABC_0008492/BU_ATCC8492_annotations.gff.gz'),
+  genotypeDisplayedRegion: {
+    refName: 'contig_1',
+    start: 0,
+    end: 500000,
+    reversed: false,
+  },
+} as const;
+
 type FaiSequence = { name: string; length: number };
 
 function parseFaiText(text: string): FaiSequence[] {
@@ -74,6 +93,17 @@ export function useGenomeBrowserResources(
 ) {
   const fastaBaseUrl = getGenomeFastaBaseUrl();
   const gffBaseUrl = getGenomeGffBaseUrl();
+  const isUsingTempTestFiles = TEMP_TEST_FILE_OVERRIDE.enabled;
+  const baseUrlConfigError =
+    isUsingTempTestFiles
+      ? null
+      : !fastaBaseUrl && !gffBaseUrl
+        ? 'both'
+        : !fastaBaseUrl
+          ? 'fasta'
+          : !gffBaseUrl
+            ? 'gff'
+            : null;
 
   const fastaAssemblyDirectoryUrl = useMemo(() => {
     if (!fastaBaseUrl || !rowContext?.assemblyId) return null;
@@ -86,9 +116,16 @@ export function useGenomeBrowserResources(
   }, [gffBaseUrl, rowContext]);
 
   const assemblyId = rowContext?.assemblyId ?? null;
-  const faiUrl =
-    fastaAssemblyDirectoryUrl && assemblyId
-      ? `${fastaAssemblyDirectoryUrl.replace(/\/$/, '')}/${assemblyId}.fa.gz.fai`
+  const fastaUri = isUsingTempTestFiles
+    ? TEMP_TEST_FILE_OVERRIDE.fastaUri
+    : fastaAssemblyDirectoryUrl && assemblyId
+      ? `${fastaAssemblyDirectoryUrl.replace(/\/$/, '')}/${assemblyId}.fa.gz`
+      : null;
+  const faiUrl = fastaUri ? `${fastaUri}.fai` : null;
+  const gffUri = isUsingTempTestFiles
+    ? TEMP_TEST_FILE_OVERRIDE.gffUri
+    : gffAssemblyDirectoryUrl && assemblyId
+      ? buildGenomeGffUri(gffAssemblyDirectoryUrl, assemblyId)
       : null;
 
   const genotypeNeedsCoords = rowContext?.viewMode === 'genotype' && !rowContext.focusedRegion;
@@ -100,29 +137,31 @@ export function useGenomeBrowserResources(
       return fetchFaiSequences(faiUrl);
     },
     enabled: Boolean(
-      loadData && hasSelectedTableRow && rowContext && fastaAssemblyDirectoryUrl && faiUrl && !genotypeNeedsCoords
+      loadData && hasSelectedTableRow && rowContext && faiUrl && (isUsingTempTestFiles || !genotypeNeedsCoords)
     ),
   });
 
   const sessionPlan = useMemo((): GenomeSessionPlan | null => {
-    if (!rowContext || !fastaAssemblyDirectoryUrl || !gffAssemblyDirectoryUrl || !assemblyId) return null;
+    if (!rowContext || !assemblyId || !fastaUri || !gffUri) return null;
 
-    if (rowContext.viewMode === 'genotype' && !rowContext.focusedRegion) {
+    if (!isUsingTempTestFiles && rowContext.viewMode === 'genotype' && !rowContext.focusedRegion) {
       return { kind: 'invalid', code: 'genotype_missing_region' };
     }
 
     if (!faiQuery.data?.length) return null;
 
     const contigs = faiQuery.data.map(s => ({ name: s.name, length: s.length }));
-    const gffUri = buildGenomeGffUri(gffAssemblyDirectoryUrl, assemblyId);
 
     let displayedRegions: DisplayedRegionInput[] | undefined;
     let bpPerPx: number | undefined;
 
     if (rowContext.viewMode === 'genotype') {
-      const seq = findFaiEntry(faiQuery.data, rowContext.focusedRegion!.refName);
+      const selectedRegion = isUsingTempTestFiles
+        ? TEMP_TEST_FILE_OVERRIDE.genotypeDisplayedRegion
+        : rowContext.focusedRegion;
+      const seq = findFaiEntry(faiQuery.data, selectedRegion!.refName);
       if (!seq) return { kind: 'invalid', code: 'genotype_unknown_contig' };
-      const clamped = clampDisplayedRegion(rowContext.focusedRegion, seq.length);
+      const clamped = clampDisplayedRegion(selectedRegion, seq.length);
       if (!clamped) return { kind: 'invalid', code: 'genotype_bad_interval' };
       displayedRegions = [{ ...clamped, assemblyName: assemblyId, refName: seq.name }];
       bpPerPx = bpPerPxForGenotypeFocus(clamped.start, clamped.end);
@@ -135,24 +174,13 @@ export function useGenomeBrowserResources(
       displayedRegions,
       bpPerPx,
     };
-  }, [rowContext, fastaAssemblyDirectoryUrl, gffAssemblyDirectoryUrl, assemblyId, faiQuery.data]);
-
-  const sessionOptions = useMemo(() => {
-    if (sessionPlan?.kind !== 'ready') return undefined;
-    return {
-      displayedRegions: sessionPlan.displayedRegions,
-      bpPerPx: sessionPlan.bpPerPx,
-    };
-  }, [sessionPlan]);
-
-  const genomeMeta = sessionPlan?.kind === 'ready' ? sessionPlan.genomeMeta : null;
-  const gffUriReady = sessionPlan?.kind === 'ready' ? sessionPlan.gffUri : null;
+  }, [rowContext, assemblyId, fastaUri, gffUri, faiQuery.data, isUsingTempTestFiles]);
 
   const initKey = useMemo(() => {
     const parts = [
       assemblyId ?? '',
-      fastaAssemblyDirectoryUrl ?? '',
-      gffAssemblyDirectoryUrl ?? '',
+      fastaUri ?? '',
+      gffUri ?? '',
       rowContext?.viewMode ?? '',
       rowContext?.focusedRegion
         ? `${rowContext.focusedRegion.refName}:${rowContext.focusedRegion.start}-${rowContext.focusedRegion.end}:${rowContext.focusedRegion.reversed ? '1' : '0'}`
@@ -163,26 +191,20 @@ export function useGenomeBrowserResources(
     return parts.join('|');
   }, [
     assemblyId,
-    fastaAssemblyDirectoryUrl,
-    gffAssemblyDirectoryUrl,
-    rowContext?.viewMode,
-    rowContext?.focusedRegion,
-    rowContext?.locusTag,
+    fastaUri,
+    gffUri,
+    rowContext,
     faiQuery.dataUpdatedAt,
   ]);
 
   return {
-    fastaBaseUrl,
-    gffBaseUrl,
-    fastaAssemblyDirectoryUrl,
-    gffAssemblyDirectoryUrl,
-    assemblyId,
+    baseUrlConfigError,
+    isUsingTempTestFiles,
+    fastaUri,
+    gffUri,
     faiUrl,
     faiQuery,
     sessionPlan,
-    genomeMeta,
-    gffUriReady,
-    sessionOptions,
     initKey,
   };
 }

@@ -1,7 +1,7 @@
 /**
  * AMR portal — mirrors METT `dataportal-app/.../gene-viewer/GeneViewer/assembly.ts`.
- * Bgzip FASTA + sidecars under one assembly directory, e.g.
- * `{dir}/{assembly}.fa.gz`, `.fa.gz.fai`, `.fa.gz.gzi`.
+ * Bgzip FASTA + sidecars from a direct FASTA URI, e.g.
+ * `/path/sample.fa.gz`, `/path/sample.fa.gz.fai`, `/path/sample.fa.gz.gzi`.
  */
 
 export type GenomeMeta = {
@@ -9,10 +9,7 @@ export type GenomeMeta = {
   contigs: { name: string; length: number }[];
 };
 
-const getAssembly = (genomeMeta: GenomeMeta, assemblyDirectoryUrl: string) => {
-  const dir = assemblyDirectoryUrl.replace(/\/$/, '');
-  const asm = genomeMeta.assembly_name;
-  const faUri = `${dir}/${asm}.fa.gz`;
+const getAssembly = (genomeMeta: GenomeMeta, fastaUri: string) => {
   return {
     name: genomeMeta.assembly_name,
     sequence: {
@@ -25,13 +22,13 @@ const getAssembly = (genomeMeta: GenomeMeta, assemblyDirectoryUrl: string) => {
           length: contig.length,
         })),
         fastaLocation: {
-          uri: faUri,
+          uri: fastaUri,
         },
         faiLocation: {
-          uri: `${faUri}.fai`,
+          uri: `${fastaUri}.fai`,
         },
         gziLocation: {
-          uri: `${faUri}.gzi`,
+          uri: `${fastaUri}.gzi`,
         },
       },
     },

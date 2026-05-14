@@ -42,10 +42,6 @@ function triggerTrackReload(viewState: ViewState) {
         }
       });
     });
-    if (view?.setWidth && typeof view.width === 'number') {
-      view.setWidth(view.width + 0.001);
-      setTimeout(() => view.setWidth?.(view.width! - 0.001), 10);
-    }
   } catch (err) {
     console.warn('Could not trigger JBrowse re-render:', err);
   }
@@ -143,7 +139,7 @@ const GeneViewerContent = ({ viewState, highlightLocusId }: Props) => {
     const id = highlightLocusId?.trim();
     if (id) window.selectedGeneId = id;
     else delete window.selectedGeneId;
-    triggerTrackReload(viewState);
+    if (id) triggerTrackReload(viewState);
   }, [viewState, highlightLocusId]);
 
   useEffect(() => {
