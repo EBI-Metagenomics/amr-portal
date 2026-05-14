@@ -5,5 +5,6 @@ metadata:
   namespace: amr-portal-ns-prod
 data:
     VITE_API_BASE_URL: http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32025/api
-    VITE_GENOME_FASTA_BASE_URL: http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32025/genome/fasta
-    VITE_GENOME_GFF_BASE_URL: http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32025/genome/gff
+    VITE_ENABLE_GENOME_VIEWER: false
+    VITE_GENOME_FASTA_BASE_URL: http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/fasta
+    VITE_GENOME_GFF_BASE_URL: http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/gff

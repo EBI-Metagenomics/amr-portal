@@ -37,6 +37,11 @@ spec:
             configMapKeyRef:
               name: amr-frontend-configmap-dev
               key: VITE_GENOME_GFF_BASE_URL
+        - name: VITE_ENABLE_GENOME_VIEWER
+          valueFrom:
+            configMapKeyRef:
+              name: amr-frontend-configmap-dev
+              key: VITE_ENABLE_GENOME_VIEWER
         ports:
         - containerPort: 8000
           protocol: TCP
