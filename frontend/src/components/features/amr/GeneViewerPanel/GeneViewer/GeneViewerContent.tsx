@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { JBrowseApp, createViewState } from '@jbrowse/react-app2';
 import styles from './GeneViewerContent.module.css';
 
@@ -18,6 +18,13 @@ type Props = {
   viewState: ViewState | null;
   /** When set, highlights the matching gene / locus in track renderers (`window.selectedGeneId`). */
   highlightLocusId?: string | null;
+  onFeatureSelect?: (locusTag: string) => void;
+};
+
+type HoveredFeature = {
+  id: string;
+  left: number;
+  top: number;
 };
 
 function triggerTrackReload(viewState: ViewState) {
@@ -50,7 +57,10 @@ function triggerTrackReload(viewState: ViewState) {
 /**
  * Embedded JBrowse linear genome view with METT-style chrome suppression (no app bar / feature drawer).
  */
-const GeneViewerContent = ({ viewState, highlightLocusId }: Props) => {
+const GeneViewerContent = ({ viewState, highlightLocusId, onFeatureSelect }: Props) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const [hoveredFeature, setHoveredFeature] = useState<HoveredFeature | null>(null);
+
   useEffect(() => {
     const hideMenuBarAndFeaturePanel = () => {
       const buttons = Array.from(document.querySelectorAll('button[data-testid="dropDownMenuButton"]'));
@@ -147,6 +157,7 @@ const GeneViewerContent = ({ viewState, highlightLocusId }: Props) => {
 
     const handleFeatureClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
+      if (!containerRef.current?.contains(target)) return;
       const featureElement = target.closest('[data-testid]') as HTMLElement | null;
       if (!featureElement) return;
       const featureId = featureElement.getAttribute('data-testid');
@@ -156,10 +167,12 @@ const GeneViewerContent = ({ viewState, highlightLocusId }: Props) => {
       event.preventDefault();
       window.selectedGeneId = featureId;
       triggerTrackReload(viewState);
+      onFeatureSelect?.(featureId);
     };
 
     const handleDoubleClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
+      if (!containerRef.current?.contains(target)) return;
       const featureElement = target.closest('[data-testid]') as HTMLElement | null;
       if (!featureElement) return;
       const featureId = featureElement.getAttribute('data-testid');
@@ -202,6 +215,57 @@ const GeneViewerContent = ({ viewState, highlightLocusId }: Props) => {
       document.removeEventListener('click', handleFeatureClick, true);
       document.removeEventListener('dblclick', handleDoubleClick, true);
     };
+  }, [onFeatureSelect, viewState]);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!viewState || !container) return;
+
+    const updateHoverCard = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!container.contains(target)) {
+        setHoveredFeature(null);
+        return;
+      }
+
+      const featureElement = target.closest('[data-testid]') as HTMLElement | null;
+      const featureId = featureElement?.getAttribute('data-testid');
+      if (!featureElement || !featureId || !isLikelyGeneId(featureId)) {
+        setHoveredFeature(null);
+        return;
+      }
+
+      const containerRect = container.getBoundingClientRect();
+      const featureRect = featureElement.getBoundingClientRect();
+      const maxLeft = Math.max(8, containerRect.width - 190);
+      const maxTop = Math.max(8, containerRect.height - 60);
+      const preferredTop = featureRect.top - containerRect.top - 44;
+      const fallbackTop = featureRect.bottom - containerRect.top + 8;
+      const nextHover = {
+        id: featureId,
+        left: Math.min(Math.max(8, featureRect.left - containerRect.left), maxLeft),
+        top: Math.min(preferredTop >= 8 ? preferredTop : fallbackTop, maxTop),
+      };
+
+      setHoveredFeature(prev =>
+        prev &&
+        prev.id === nextHover.id &&
+        prev.left === nextHover.left &&
+        prev.top === nextHover.top
+          ? prev
+          : nextHover
+      );
+    };
+
+    const clearHoverCard = () => setHoveredFeature(null);
+
+    container.addEventListener('mousemove', updateHoverCard);
+    container.addEventListener('mouseleave', clearHoverCard);
+
+    return () => {
+      container.removeEventListener('mousemove', updateHoverCard);
+      container.removeEventListener('mouseleave', clearHoverCard);
+    };
   }, [viewState]);
 
   if (!viewState) {
@@ -210,9 +274,19 @@ const GeneViewerContent = ({ viewState, highlightLocusId }: Props) => {
 
   return (
     <div className={styles.jbrowseViewer}>
-      <div className={styles.jbrowseContainer}>
+      <div ref={containerRef} className={styles.jbrowseContainer}>
         <JBrowseApp viewState={viewState} />
       </div>
+      {hoveredFeature ? (
+        <div
+          className={styles.hoverCard}
+          style={{ left: `${hoveredFeature.left}px`, top: `${hoveredFeature.top}px` }}
+          role="tooltip"
+        >
+          <div className={styles.hoverCardLabel}>Gene</div>
+          <div className={styles.hoverCardValue}>{hoveredFeature.id}</div>
+        </div>
+      ) : null}
     </div>
   );
 };

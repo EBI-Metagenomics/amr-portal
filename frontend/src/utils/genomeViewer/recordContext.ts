@@ -32,19 +32,48 @@ const STRAND_KEYS = ['strand', 'Strand'];
 
 const LOCUS_KEYS = ['id', 'locus_tag', 'Locus_tag', 'genotype-id', 'locus'];
 
+function hasUsableValue(v: AMRRecordValue | undefined): boolean {
+  return v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0);
+}
+
+function normalizeLookupKey(value: string): string {
+  return value.replace(/[^a-zA-Z0-9]+/g, '').toLowerCase();
+}
+
+function getLookupVariants(value: string): string[] {
+  const variants = new Set<string>();
+  variants.add(normalizeLookupKey(value));
+
+  const hyphenParts = value.split('-').filter(Boolean);
+  for (let index = 1; index < hyphenParts.length; index += 1) {
+    variants.add(normalizeLookupKey(hyphenParts.slice(index).join('-')));
+  }
+
+  return Array.from(variants);
+}
+
+function matchesLookupKey(value: string, normalizedKeys: Set<string>): boolean {
+  return getLookupVariants(value).some(variant => normalizedKeys.has(variant));
+}
+
 function getMappedValue(record: AMRRecord, columns: AMRColumnMeta[], keys: string[]): AMRRecordValue | undefined {
   const byId = new Map(columns.map(c => [c.id, c] as const));
   for (const k of keys) {
     if (byId.has(k)) {
       const v = record[k];
-      if (v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0)) return v;
+      if (hasUsableValue(v)) return v;
     }
   }
-  const lowerKeys = new Set(keys.map(k => k.toLowerCase()));
+  const normalizedKeys = new Set(keys.map(normalizeLookupKey));
   for (const col of columns) {
-    if (lowerKeys.has(col.id.toLowerCase())) {
+    if (matchesLookupKey(col.id, normalizedKeys)) {
       const v = record[col.id];
-      if (v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0)) return v;
+      if (hasUsableValue(v)) return v;
+    }
+  }
+  for (const [recordKey, recordValue] of Object.entries(record)) {
+    if (matchesLookupKey(recordKey, normalizedKeys) && hasUsableValue(recordValue)) {
+      return recordValue;
     }
   }
   return undefined;
@@ -85,18 +114,17 @@ export function buildGenomeViewerRowContext(
   const assemblyId = asTrimmedString(getMappedValue(record, columns, ASSEMBLY_KEYS));
   if (!assemblyId) return null;
 
-  const isGenotype = currentViewId === AMR_VIEW_ID_GENOTYPE;
-
-  if (!isGenotype) {
-    return { viewMode: 'phenotype', assemblyId };
-  }
-
   const refName = asTrimmedString(getMappedValue(record, columns, REGION_KEYS));
   const rs = asPositiveInt(getMappedValue(record, columns, START_KEYS));
   const re = asPositiveInt(getMappedValue(record, columns, END_KEYS));
   const strandRaw = asTrimmedString(getMappedValue(record, columns, STRAND_KEYS));
   const reversed = strandRaw === '-' || strandRaw === '-1' || strandRaw === '−';
   const locusTag = asTrimmedString(getMappedValue(record, columns, LOCUS_KEYS)) ?? undefined;
+
+  const isGenotypeLike = currentViewId === AMR_VIEW_ID_GENOTYPE || (refName && rs !== null && re !== null);
+  if (!isGenotypeLike) {
+    return { viewMode: 'phenotype', assemblyId };
+  }
 
   let focusedRegion: GenomeViewerRowContext['focusedRegion'];
   if (refName && rs !== null && re !== null) {

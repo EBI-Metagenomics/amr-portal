@@ -1,9 +1,10 @@
-import { useMemo } from 'react';
-import panelStyles from '@components/ui/Panel/Panel.module.css';
+import { useMemo, useState } from 'react';
 import GeneViewerContent from './GeneViewer/GeneViewerContent';
 import useGeneViewerState from './GeneViewer/geneViewerState';
 import { useAmrGeneViewerConfig } from './GeneViewer/geneViewerConfig';
 import { useGenomeBrowserResources } from './GeneViewer/useGenomeBrowserResources';
+import FeaturePanel from './FeaturePanel/FeaturePanel';
+import { useFeatureDetails } from './FeaturePanel/useFeatureDetails';
 import type { GenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
 import styles from './GeneViewerPanel.module.css';
 
@@ -15,19 +16,6 @@ type Props = {
   loadData: boolean;
 };
 
-function formatSelectionSummary(rowContext: GenomeViewerRowContext | null): string | null {
-  if (!rowContext) return null;
-  if (rowContext.viewMode === 'phenotype') {
-    return `Selected row: phenotype | assembly_id=${rowContext.assemblyId}`;
-  }
-
-  const focused = rowContext.focusedRegion
-    ? `${rowContext.focusedRegion.refName}:${rowContext.focusedRegion.start + 1}-${rowContext.focusedRegion.end}${rowContext.focusedRegion.reversed ? ' (-)' : ''}`
-    : 'no region coordinates';
-
-  return `Selected row: genotype | assembly_id=${rowContext.assemblyId} | region=${focused}${rowContext.locusTag ? ` | locus=${rowContext.locusTag}` : ''}`;
-}
-
 const GeneViewerPanel = ({
   isCollapsed,
   onToggleCollapsed,
@@ -35,9 +23,10 @@ const GeneViewerPanel = ({
   hasSelectedTableRow,
   loadData,
 }: Props) => {
+  const [manualSelection, setManualSelection] = useState<{ key: string; locusTag: string | null } | null>(null);
+
   const {
     baseUrlConfigError,
-    isUsingTempTestFiles,
     fastaUri,
     gffUri,
     faiUrl,
@@ -47,6 +36,7 @@ const GeneViewerPanel = ({
   } = useGenomeBrowserResources(loadData, hasSelectedTableRow, rowContext);
 
   const readySessionPlan = sessionPlan?.kind === 'ready' ? sessionPlan : null;
+
   const sessionOptions = useMemo(
     () =>
       readySessionPlan
@@ -72,9 +62,7 @@ const GeneViewerPanel = ({
     loadData ? initKey : 'idle'
   );
 
-  const sectionClass = [panelStyles.root, styles.root, !isCollapsed ? styles.rootExpanded : '']
-    .filter(Boolean)
-    .join(' ');
+  const sectionClass = [styles.root, !isCollapsed ? styles.rootExpanded : ''].filter(Boolean).join(' ');
 
   const sessionReady = sessionPlan?.kind === 'ready';
   const showBrowser =
@@ -89,22 +77,39 @@ const GeneViewerPanel = ({
     !faiQuery.isError &&
     !initializationError;
 
-  const highlightLocusId = showBrowser ? (rowContext?.locusTag ?? null) : null;
-  const selectionSummary = formatSelectionSummary(rowContext);
+  const rowSelectionKey = rowContext
+    ? [
+        rowContext.viewMode,
+        rowContext.assemblyId,
+        rowContext.locusTag ?? '',
+        rowContext.focusedRegion?.refName ?? '',
+        rowContext.focusedRegion?.start ?? '',
+        rowContext.focusedRegion?.end ?? '',
+        rowContext.focusedRegion?.reversed ? '1' : '0',
+      ].join('|')
+    : 'no-row';
+  const rowLocusTag = rowContext?.locusTag ?? null;
+  const selectedLocusTag = manualSelection?.key === rowSelectionKey ? manualSelection.locusTag : rowLocusTag;
+  const highlightLocusId = showBrowser ? selectedLocusTag : null;
+  const featureDetails = useFeatureDetails(
+    showBrowser ? readySessionPlan?.gffUri ?? gffUri ?? null : null,
+    highlightLocusId
+  );
 
   return (
     <section className={sectionClass} aria-label="Gene viewer panel">
-      <div className={styles.toolbar}>
-        <span className={styles.title}>Genome viewer (JBrowse 2)</span>
+      <aside className={styles.rail}>
         <button
           type="button"
           className={styles.toggle}
           onClick={onToggleCollapsed}
           aria-label={isCollapsed ? 'Expand gene viewer panel' : 'Collapse gene viewer panel'}
+          title={isCollapsed ? 'Expand genome viewer' : 'Collapse genome viewer'}
         >
           {isCollapsed ? '▾' : '▴'}
         </button>
-      </div>
+      </aside>
+
       {!isCollapsed ? (
         <div className={styles.viewerBody}>
           {baseUrlConfigError ? (
@@ -134,14 +139,6 @@ const GeneViewerPanel = ({
             <p className={styles.error} role="alert">
               The selected row does not include an assembly identifier (<code className={styles.code}>assembly_id</code>
               ).
-            </p>
-          ) : null}
-          {selectionSummary ? <p className={styles.selectionSummary}>{selectionSummary}</p> : null}
-          {isUsingTempTestFiles ? (
-            <p className={styles.overrideNotice}>
-              Temporary test-file override active. Remove after rendering check. Using{' '}
-              <code className={styles.code}>{fastaUri ?? ''}</code> and{' '}
-              <code className={styles.code}>{gffUri ?? ''}</code>.
             </p>
           ) : null}
           {sessionPlan?.kind === 'invalid' && sessionPlan.code === 'genotype_missing_region' ? (
@@ -186,7 +183,25 @@ const GeneViewerPanel = ({
               Genome viewer failed to start: {initializationError.message}
             </p>
           ) : null}
-          {showBrowser ? <GeneViewerContent viewState={viewState} highlightLocusId={highlightLocusId} /> : null}
+          {showBrowser ? (
+            <div className={styles.viewerLayout}>
+              <div className={styles.browserPane}>
+                <GeneViewerContent
+                  viewState={viewState}
+                  highlightLocusId={highlightLocusId}
+                  onFeatureSelect={locusTag => setManualSelection({ key: rowSelectionKey, locusTag })}
+                />
+              </div>
+              <div className={styles.featurePane}>
+                <FeaturePanel
+                  feature={featureDetails.selectedFeature}
+                  isLoading={featureDetails.isLoading}
+                  error={featureDetails.error instanceof Error ? featureDetails.error : null}
+                  onClose={() => setManualSelection({ key: rowSelectionKey, locusTag: rowLocusTag })}
+                />
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
     </section>
