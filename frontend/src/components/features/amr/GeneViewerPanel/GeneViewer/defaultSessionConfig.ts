@@ -95,14 +95,28 @@ const getDefaultSessionConfig = (
               },
             ],
           },
-          ...tracks.map(track => ({
-            id: track.trackId,
-            type: track.type,
-            configuration: track.trackId,
-            minimized: false,
-            visible: true,
-            displays: track.displays,
-          })),
+          ...tracks.map(track => {
+            const trackDisplays = Array.isArray(track.displays) ? track.displays : [];
+            const display = trackDisplays[0] as
+              | { displayId?: string; type?: string; height?: number }
+              | undefined;
+            return {
+              id: track.trackId,
+              type: track.type,
+              configuration: track.trackId,
+              minimized: false,
+              visible: true,
+              displays: display?.displayId
+                ? [
+                    {
+                      type: display.type ?? 'LinearBasicDisplay',
+                      configuration: display.displayId,
+                      height: display.height,
+                    },
+                  ]
+                : [],
+            };
+          }),
         ],
         hideHeaderOverview: true,
         hideNoTracksActive: false,

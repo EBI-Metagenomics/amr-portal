@@ -5,7 +5,12 @@
 
 import { JBROWSE_TRACK_HEIGHTS } from '@utils/jbrowse/constants';
 
+export function getStructuralAnnotationDisplayId(assemblyName: string): string {
+  return `structural_annotation-${assemblyName}-LinearBasicDisplay`;
+}
+
 const getTracks = (assemblyName: string, gffUri: string) => {
+  const displayId = getStructuralAnnotationDisplayId(assemblyName);
   const tracks = [];
 
   tracks.push({
@@ -27,7 +32,7 @@ const getTracks = (assemblyName: string, gffUri: string) => {
     visible: true,
     displays: [
       {
-        displayId: `structural_annotation-${assemblyName}-LinearBasicDisplay`,
+        displayId,
         type: 'LinearBasicDisplay',
         height: JBROWSE_TRACK_HEIGHTS.STRUCTURAL_ANNOTATION,
         onClick: null,
@@ -35,18 +40,20 @@ const getTracks = (assemblyName: string, gffUri: string) => {
         onDoubleClick: null,
         renderer: {
           type: 'SvgFeatureRenderer',
-          color1: `jexl:getGeneColor(feature)`,
+          displayMode: 'normal',
+          color1: 'jexl:getGeneColor(feature)',
           labels: {
-            name: `jexl:
-              (get(feature, 'gene') && get(feature, 'gene') + ' / ' + get(feature, 'locus_tag'))
-              || get(feature, 'locus_tag')
-            `,
+            name: 'jexl:getGeneLabel(feature)',
+            nameColor: '#0f172a',
+            fontSize: 10,
           },
           height: JBROWSE_TRACK_HEIGHTS.GENE_FEATURE_HEIGHT,
+          maxFeatureGlyphExpansion: 500,
           showForward: true,
           showReverse: true,
           showTranslation: true,
           showLabels: true,
+          showDescriptions: false,
         },
         mouseover: `jexl:
           (get(feature, 'gene') && 'Gene: ' + get(feature, 'gene')  + '<br/>'  || '') +

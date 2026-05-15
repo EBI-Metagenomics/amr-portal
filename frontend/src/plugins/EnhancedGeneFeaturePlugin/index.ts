@@ -2,6 +2,7 @@ import AdapterType from '@jbrowse/core/pluggableElementTypes/AdapterType';
 import Plugin from '@jbrowse/core/Plugin';
 import type PluginManager from '@jbrowse/core/PluginManager';
 import configSchema from './configSchema';
+import { getGeneLabel } from './geneLabel';
 import { VIEWPORT_SYNC_CONSTANTS } from '@utils/jbrowse/viewportSyncConstants';
 
 export default class EnhancedGeneFeaturePlugin extends Plugin {
@@ -11,6 +12,8 @@ export default class EnhancedGeneFeaturePlugin extends Plugin {
     pluginManager.jexl.addFunction('selectedGeneId', () => {
       return (typeof window !== 'undefined' && window.selectedGeneId) || null;
     });
+
+    pluginManager.jexl.addFunction('getGeneLabel', getGeneLabel);
 
     pluginManager.jexl.addFunction(
       'getGeneColor',

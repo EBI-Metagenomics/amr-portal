@@ -54,20 +54,10 @@ const useGeneViewerState = (
 
         const config = {
           assemblies: [assembly],
-          tracks: tracks.map(track => {
-            const baseDisplay =
-              track.display && typeof track.display === 'object' && !Array.isArray(track.display)
-                ? (track.display as Record<string, unknown>)
-                : {};
-            return {
-              ...track,
-              visible: true,
-              display: {
-                ...baseDisplay,
-                type: (baseDisplay.type as string | undefined) ?? 'LinearBasicDisplay',
-              },
-            };
-          }),
+          tracks: tracks.map(track => ({
+            ...track,
+            visible: true,
+          })),
           configuration: {
             disableAnalytics: true,
             rpc: {
