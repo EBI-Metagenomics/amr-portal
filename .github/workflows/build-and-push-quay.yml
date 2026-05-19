@@ -10,6 +10,8 @@ env:
 
 jobs:
   build-and-push-backend:
+    permissions:
+      contents: read
     name: Build and push backend image
     runs-on: ubuntu-latest
     steps:
@@ -38,6 +40,8 @@ jobs:
           docker push quay.io/${{ env.QUAY_ORG }}/amr-portal-backend:${{ env.IMAGE_TAG }}
 
   build-and-push-frontend:
+    permissions:
+      contents: read
     name: Build and push frontend image
     runs-on: ubuntu-latest
     steps:
