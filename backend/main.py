@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from backend.api.endpoints import router as api_router
+from api.endpoints import router as api_router
 
 app = FastAPI()
 

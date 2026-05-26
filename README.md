@@ -31,16 +31,15 @@ export DUCKDB_PATH=path/to/duckdb/file.duckdb
 ```
 
 ```shell
-# make sure you're in the *root directory*
-cd ..
-uvicorn backend.main:app --reload
+cd backend
+uvicorn main:app --reload
 ```
 
 Swagger UI: http://localhost:8000/docs
 
 For production use:
 ```shell
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --workers 4
+uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
 ```
 
 For testing:
