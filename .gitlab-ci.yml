@@ -1,11 +1,24 @@
 # Build and publish images to this project's GitLab container registry.
 # Auth: CI_REGISTRY, CI_REGISTRY_USER, CI_JOB_TOKEN
 #
-# Example tags (project microbiome-informatics/amr-portal, branch orig_0.9f):
-#   dockerhub.ebi.ac.uk/microbiome-informatics/amr-portal/amr-portal-backend:orig_0.9f
-#   dockerhub.ebi.ac.uk/microbiome-informatics/amr-portal/amr-portal-frontend:orig_0.9f
+# Run pipeline (CI/CD → Pipelines → Run pipeline):
+#   1. Optional: run "list-git-tags" to see tags in the job log
+#   2. Set "image_tag" (or leave empty to use the branch/tag you run from)
+#   3. Run build-and-push-backend / build-and-push-frontend
+
+spec:
+  inputs:
+    image_tag:
+      description: >
+        Docker image tag to publish (e.g. v0.0.9f). Leave empty to use the
+        current pipeline ref (branch name or git tag). Run list-git-tags for ideas.
+      type: string
+      default: ""
+
+---
 
 stages:
+  - prepare
   - build
 
 variables:
@@ -13,16 +26,46 @@ variables:
   BACKEND_CONTEXT: backend
   FRONTEND_DOCKERFILE: frontend/Dockerfile
   FRONTEND_CONTEXT: .
+  IMAGE_TAG_INPUT: $[[ inputs.image_tag ]]
 
 .build-image-rules: &build-image-rules
   rules:
     - when: manual
 
+# Lists git tags in the job log (GitLab cannot load git tags into the Run pipeline dropdown)
+list-git-tags:
+  stage: prepare
+  <<: *build-image-rules
+  variables:
+    GIT_DEPTH: 0
+  script:
+    - echo "=== Git tags (newest first) ==="
+    - git tag -l --sort=-version:refname | head -40
+    - echo ""
+    - echo "=== Current pipeline ref ==="
+    - echo "Branch/ref : ${CI_COMMIT_REF_NAME}"
+    - echo "Git tag    : ${CI_COMMIT_TAG:-<none>}"
+    - echo ""
+    - echo "Copy a tag into 'image_tag' when you Run pipeline, or leave empty to use the ref above."
+
 .docker-build:
+  <<: *build-image-rules
   before_script:
-    - export IMAGE_TAG="$(printf '%s' "${CI_COMMIT_REF_NAME}" | tr -d '[:space:]')"
-    - export BACKEND_IMAGE="${CI_REGISTRY_IMAGE}/amr-portal-backend:${IMAGE_TAG}"
-    - export FRONTEND_IMAGE="${CI_REGISTRY_IMAGE}/amr-portal-frontend:${IMAGE_TAG}"
+    - |
+      _tag="$(printf '%s' "${IMAGE_TAG_INPUT}" | tr -d '[:space:]')"
+      if [ -z "${_tag}" ]; then
+        if [ -n "${CI_COMMIT_TAG:-}" ]; then
+          _tag="${CI_COMMIT_TAG}"
+        else
+          _tag="${CI_COMMIT_REF_NAME}"
+        fi
+      fi
+      export IMAGE_TAG="$(printf '%s' "${_tag}" | tr -d '[:space:]')"
+      export BACKEND_IMAGE="${CI_REGISTRY_IMAGE}/amr-portal-backend:${IMAGE_TAG}"
+      export FRONTEND_IMAGE="${CI_REGISTRY_IMAGE}/amr-portal-frontend:${IMAGE_TAG}"
+      echo "Using image tag: ${IMAGE_TAG}"
+      echo "Backend:  ${BACKEND_IMAGE}"
+      echo "Frontend: ${FRONTEND_IMAGE}"
     - echo "${CI_JOB_TOKEN}" | docker login "${CI_REGISTRY}" -u "${CI_REGISTRY_USER}" --password-stdin
   after_script:
     - docker logout "${CI_REGISTRY}" || true
@@ -30,9 +73,7 @@ variables:
 build-and-push-backend:
   extends: .docker-build
   stage: build
-  <<: *build-image-rules
   script:
-    - echo "Building ${BACKEND_IMAGE}"
     - docker build -t "${BACKEND_IMAGE}" -f "${BACKEND_DOCKERFILE}" "${BACKEND_CONTEXT}"
     - docker push "${BACKEND_IMAGE}"
     - docker rmi "${BACKEND_IMAGE}" || true
@@ -40,9 +81,7 @@ build-and-push-backend:
 build-and-push-frontend:
   extends: .docker-build
   stage: build
-  <<: *build-image-rules
   script:
-    - echo "Building ${FRONTEND_IMAGE}"
     - docker build -t "${FRONTEND_IMAGE}" -f "${FRONTEND_DOCKERFILE}" "${FRONTEND_CONTEXT}"
     - docker push "${FRONTEND_IMAGE}"
     - docker rmi "${FRONTEND_IMAGE}" || true
