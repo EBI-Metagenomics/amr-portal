@@ -2,16 +2,15 @@
 # Auth: CI_REGISTRY, CI_REGISTRY_USER, CI_JOB_TOKEN
 #
 # Run pipeline (CI/CD → Pipelines → Run pipeline):
-#   1. Optional: run "list-git-tags" to see tags in the job log
-#   2. Set "image_tag" (or leave empty to use the branch/tag you run from)
-#   3. Run build-and-push-backend / build-and-push-frontend
+#   1. Set "image_tag" (or leave empty to use the branch/tag you run from)
+#   2. Run build-and-push-backend / build-and-push-frontend
 
 spec:
   inputs:
     image_tag:
       description: >
         Docker image tag to publish (e.g. v0.0.9f). Leave empty to use the
-        current pipeline ref (branch name or git tag). Run list-git-tags for ideas.
+        current pipeline ref (branch name or git tag).
       type: string
       default: ""
 
@@ -31,19 +30,6 @@ variables:
 .build-image-rules: &build-image-rules
   rules:
     - when: manual
-
-# Lists git tags in the job log (GitLab cannot load git tags into the Run pipeline dropdown)
-list-git-tags:
-  stage: prepare
-  <<: *build-image-rules
-  variables:
-    GIT_DEPTH: 0
-  script:
-    - echo "Git tags (newest first)"
-    - 'git tag -l --sort=-version:refname | head -40'
-    - echo "Current branch or ref - ${CI_COMMIT_REF_NAME}"
-    - 'if [ -n "${CI_COMMIT_TAG:-}" ]; then echo "Current git tag - ${CI_COMMIT_TAG}"; else echo "No git tag on this pipeline"; fi'
-    - echo "Set image_tag when you Run pipeline, or leave empty to use the ref above."
 
 .docker-build:
   <<: *build-image-rules
