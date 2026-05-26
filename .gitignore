@@ -22,3 +22,5 @@ _site
 .vscode/settings.json
 .DS_Store
 /frontend/app-dist/
+/frontend/public/fasta/
+/frontend/public/gff/
