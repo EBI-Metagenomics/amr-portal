@@ -13,11 +13,11 @@ LABEL org.opencontainers.image.authors="ensembl-webteam@ebi.ac.uk"
 
 FROM python:3.12.2-slim
 RUN groupadd amr && useradd amr -g amr
-USER amr
-WORKDIR /usr/app/venv
-EXPOSE 8000
+WORKDIR /usr/app
 COPY --chown=amr:amr --from=builder /usr/app/venv /usr/app/venv
-COPY --chown=amr:amr . ./backend
-
+COPY --chown=amr:amr . /usr/app/backend
 ENV PATH="/usr/app/venv/bin:$PATH"
-CMD ["uvicorn", "--host", "0.0.0.0", "--port", "8000" ,"backend.main:app"]
+ENV PYTHONPATH=/usr/app
+USER amr
+EXPOSE 8000
+CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]

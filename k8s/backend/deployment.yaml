@@ -18,8 +18,8 @@ spec:
         - name: regcred
       containers:
         - name: amr
-          args: ["--host", "0.0.0.0", "--port", "8000", "backend.main:app" ]
-          command: ["uvicorn"]
+          # Use image CMD (uvicorn backend.main:app). Do not use main:app — imports fail.
+          workingDir: /usr/app
           envFrom:
           - configMapRef:
               name: amr-api-configmap-dev
