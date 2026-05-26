@@ -6,11 +6,10 @@ stages:
 
 variables:
   DOCKER_TLS_CERTDIR: ""
-  REGISTRY: dockerhub.ebi.ac.uk
   IMAGE_NAMESPACE: microbiome-informatics/containers
   IMAGE_TAG: ${CI_COMMIT_REF_NAME}
-  BACKEND_IMAGE: ${REGISTRY}/${IMAGE_NAMESPACE}/amr-portal-backend:${IMAGE_TAG}
-  FRONTEND_IMAGE: ${REGISTRY}/${IMAGE_NAMESPACE}/amr-portal-frontend:${IMAGE_TAG}
+  BACKEND_IMAGE: $CI_REGISTRY/${IMAGE_NAMESPACE}/amr-portal-backend:${IMAGE_TAG}
+  FRONTEND_IMAGE: $CI_REGISTRY/${IMAGE_NAMESPACE}/amr-portal-frontend:${IMAGE_TAG}
 
 .build-image-rules: &build-image-rules
   rules:
@@ -18,7 +17,7 @@ variables:
 
 .ebi-registry-login:
   before_script:
-    - docker login -u "${GITLAB_CONTAINERS_USERNAME}" -p "${GITLAB_CONTAINERS_PASSWORD}" "${REGISTRY}"
+    - docker login $CI_REGISTRY -u $CI_REGISTRY_USER -p $CI_JOB_TOKEN
 
 # CI/CD variables required: GITLAB_CONTAINERS_USERNAME, GITLAB_CONTAINERS_PASSWORD
 
@@ -31,7 +30,7 @@ build-and-push-backend:
     - docker build -t "${BACKEND_IMAGE}" -f backend/Dockerfile backend/
     - docker push "${BACKEND_IMAGE}"
     - docker rmi "${BACKEND_IMAGE}" || true
-    - docker logout "${REGISTRY}"
+    - docker logout "$CI_REGISTRY"
 
 build-and-push-frontend:
   extends: .ebi-registry-login
@@ -42,4 +41,4 @@ build-and-push-frontend:
     - docker build -t "${FRONTEND_IMAGE}" -f frontend/Dockerfile .
     - docker push "${FRONTEND_IMAGE}"
     - docker rmi "${FRONTEND_IMAGE}" || true
-    - docker logout "${REGISTRY}"
+    - docker logout "$CI_REGISTRY"
