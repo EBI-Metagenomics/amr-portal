@@ -1,14 +1,20 @@
-# Build and publish container images to the project GitLab container registry.
-# Auth: CI_REGISTRY, CI_REGISTRY_USER, CI_JOB_TOKEN (built-in, no custom variables).
-# Requires a runner with access to the Docker daemon.
+# Build and publish container images to EBI GitLab registry
+# Mirrors .github/workflows/build-and-push-gitlab.yml
+# Auth: CI_REGISTRY_USER, CI_JOB_TOKEN (login to REGISTRY)
 
 stages:
   - build
 
 variables:
+  REGISTRY: dockerhub.ebi.ac.uk
+  IMAGE_NAMESPACE: microbiome-informatics/containers
   IMAGE_TAG: ${CI_COMMIT_REF_NAME}
-  BACKEND_IMAGE: ${CI_REGISTRY_IMAGE}/amr-portal-backend:${IMAGE_TAG}
-  FRONTEND_IMAGE: ${CI_REGISTRY_IMAGE}/amr-portal-frontend:${IMAGE_TAG}
+  BACKEND_IMAGE: ${REGISTRY}/${IMAGE_NAMESPACE}/amr-portal-backend:${IMAGE_TAG}
+  FRONTEND_IMAGE: ${REGISTRY}/${IMAGE_NAMESPACE}/amr-portal-frontend:${IMAGE_TAG}
+  BACKEND_DOCKERFILE: backend/Dockerfile
+  BACKEND_CONTEXT: backend
+  FRONTEND_DOCKERFILE: frontend/Dockerfile
+  FRONTEND_CONTEXT: .
 
 .build-image-rules: &build-image-rules
   rules:
@@ -16,16 +22,16 @@ variables:
 
 .docker-build:
   before_script:
-    - echo "${CI_JOB_TOKEN}" | docker login "${CI_REGISTRY}" -u "${CI_REGISTRY_USER}" --password-stdin
+    - echo "${CI_JOB_TOKEN}" | docker login "${REGISTRY}" -u "${CI_REGISTRY_USER}" --password-stdin
   after_script:
-    - docker logout "${CI_REGISTRY}" || true
+    - docker logout "${REGISTRY}" || true
 
 build-and-push-backend:
   extends: .docker-build
   stage: build
   <<: *build-image-rules
   script:
-    - docker build -t "${BACKEND_IMAGE}" -f backend/Dockerfile backend/
+    - docker build -t "${BACKEND_IMAGE}" -f "${BACKEND_DOCKERFILE}" "${BACKEND_CONTEXT}"
     - docker push "${BACKEND_IMAGE}"
     - docker rmi "${BACKEND_IMAGE}" || true
 
@@ -34,6 +40,6 @@ build-and-push-frontend:
   stage: build
   <<: *build-image-rules
   script:
-    - docker build -t "${FRONTEND_IMAGE}" -f frontend/Dockerfile .
+    - docker build -t "${FRONTEND_IMAGE}" -f "${FRONTEND_DOCKERFILE}" "${FRONTEND_CONTEXT}"
     - docker push "${FRONTEND_IMAGE}"
     - docker rmi "${FRONTEND_IMAGE}" || true
