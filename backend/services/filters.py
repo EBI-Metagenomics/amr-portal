@@ -399,33 +399,45 @@ def fetch_amr_facets(payload: Any, db: duckdb.DuckDBPyConnection):
         search = (paging.search.strip() if paging and paging.search else "")
         facet_params: List[Any] = list(where_params)
 
+        facet_value_expr = quote_column_name(trimmed_category)
         base_count_query = f"""
-            SELECT {quote_column_name(trimmed_category)} AS value, COUNT(*) AS count
+            SELECT {facet_value_expr} AS value, COUNT(*) AS count
+            FROM {selected_dataset}
+        """
+        total_options_query = f"""
+            SELECT COUNT(DISTINCT {facet_value_expr})
             FROM {selected_dataset}
         """
         if where_sql:
             base_count_query += f" WHERE {where_sql}"
+            total_options_query += f" WHERE {where_sql}"
             value_prefix = " AND "
         else:
             value_prefix = " WHERE "
 
-        base_count_query += f"{value_prefix}{quote_column_name(trimmed_category)} IS NOT NULL"
+        base_count_query += f"{value_prefix}{facet_value_expr} IS NOT NULL"
+        total_options_query += f"{value_prefix}{facet_value_expr} IS NOT NULL"
         if search:
             base_count_query += (
-                f" AND LOWER(CAST({quote_column_name(trimmed_category)} AS VARCHAR)) "
+                f" AND LOWER(CAST({facet_value_expr} AS VARCHAR)) "
+                "LIKE ?"
+            )
+            total_options_query += (
+                f" AND LOWER(CAST({facet_value_expr} AS VARCHAR)) "
                 "LIKE ?"
             )
             facet_params.append(f"%{search.lower()}%")
 
         grouped_query = (
             f"{base_count_query} "
-            f"GROUP BY {quote_column_name(trimmed_category)} "
+            f"GROUP BY {facet_value_expr} "
             "ORDER BY LOWER(CAST(value AS VARCHAR)) ASC"
         )
-        total_options_query = f"SELECT COUNT(*) FROM ({grouped_query}) facet_counts"
         paged_query = f"{grouped_query} LIMIT ? OFFSET ?"
         paged_params = [*facet_params, offset + limit, 0]
 
+        # nosemgrep: bandit.B608
+        # selected_dataset/facet column come from validated metadata (view/table schema), user values are bound params.
         total_options = int(db.execute(total_options_query, facet_params).fetchone()[0])
         rows = db.execute(paged_query, paged_params).fetchall()
 
