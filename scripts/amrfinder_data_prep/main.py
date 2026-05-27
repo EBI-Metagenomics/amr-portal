@@ -160,7 +160,8 @@ def build_release(release_path: str, config_path: str):
         column_details[v] = config["gca"][v]
     
     for gca_obj in gca_files:
-        results = requests.get(species_details_url.format(gca_obj["gca"]))
+        results = requests.get(species_details_url.format(gca_obj["gca"]), timeout=60)
+        results.raise_for_status()
         gca_obj["columns"] = {}
         if results.ok:
             for col,col_path in column_details.items():
