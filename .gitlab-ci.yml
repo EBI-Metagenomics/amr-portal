@@ -1,297 +1,85 @@
-# Stages for Deployment Pipeline
+# Build and publish images to this project's GitLab container registry.
+# Auth: CI_REGISTRY, CI_REGISTRY_USER, CI_JOB_TOKEN
+#
+# Run pipeline (CI/CD → Pipelines → Run pipeline):
+#   1. Set "image_tag" (or leave empty to use the branch/tag you run from)
+#   2. Run build-and-push-backend / build-and-push-frontend
+
+spec:
+  inputs:
+    image_tag:
+      description: >
+        Docker image tag to publish (e.g. v0.0.9f). Leave empty to use the
+        current pipeline ref (branch name or git tag).
+      type: string
+      default: ""
+
+---
+
 stages:
+  - prepare
   - build
-  - deploy_rc
-  - qa
-  - deploy
+  - test
+  - secret-detection
 
-# Global Variables
 variables:
-  DOCKER_TLS_CERTDIR: ""
-  DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}
-  GITLAB_ADVANCED_SAST_ENABLED: true
+  BACKEND_DOCKERFILE: backend/Dockerfile
+  BACKEND_CONTEXT: backend
+  FRONTEND_DOCKERFILE: frontend/Dockerfile
+  FRONTEND_CONTEXT: .
+  IMAGE_TAG_INPUT: $[[ inputs.image_tag ]]
 
-# Code changed rules for backend
-# Rule to detect changes in backend directory
-# This will be used to build pipeline for backend code
-.be-rules: &be-code-change-rules
+.build-image-rules: &build-image-rules
   rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - backend/**/*
-      when: always
+    - when: manual
 
-# Code and config changed rules for backend
-# Rule to detect changes in backend directory and k8s
-# This will be used for the deploy pipeline for backend code
-.be-config-rules: &be-config-change-rules
-  rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - k8s/backend/configmap.yaml
-      when: always
-
-# Code changed rules for frontend
-# Rule to detect changes in frontend directory
-# This will be used to build/deploy pipeline for frontend code
-.fe-rules: &fe-code-change-rules
-  rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - portal-static/**/*
-        - frontend/**/*
-        - frontend/merge-frontend-dist.sh
-      when: always
-
-# Code changed rules for backend
-# Rule to detect changes in static assets nginx
-# This will be used to build/deploy pipeline for nginx conf
-.static-rules: &static-code-change-rules
-  rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - portal-static/nginx-conf/**/*
-        - frontend/nginx-conf/**/*
-      when: always
-
-# template for deploy context
-# Sets k8s agent ( k8s cluster) and namespace to use for deployment
-.deploy-template: &prepare-context
-  image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:1.0.4
+.docker-build:
+  <<: *build-image-rules
   before_script:
-    - kubectl config use-context ${AGENT}
-    - kubectl config set-context --current --namespace=${NS}
-
-# template for deploy context for backend
-# update docker image in appropriate environment
-.deploy-be-template:
-  <<: *prepare-context
-  script:
-    - cd k8s/backend/
-    - kustomize edit set image DOCKER_IMAGE=${DOCKER_IMAGE}
-    - kubectl apply -k .
-
-.deploy-nginx-template:
-  <<: *prepare-context
-  script:
-    - cd k8s/frontend/nginx/
-    - kustomize edit set image DOCKER_IMAGE=${DOCKER_IMAGE}
-    - kubectl apply -k .
-
-# template for deploy the configmap used by the backend backend
-# update docker image in appropriate environment
-.deploy-config-be-template:
-  <<: *prepare-context
-  script:
-    - cd k8s/backend/
-    - kubectl apply -f configmap.yaml
-
-# template for deploy context for frontend
-# publish static assets to appropriate environment
-.publish-assets-template:
-  <<: *prepare-context
-  script:
-    - cd k8s/frontend/publish_assets/
-    - sed -i "s#<PROJECT_ID>#${CI_PROJECT_ID}#g" publish_assets.yaml
-    - sed -i "s#<JOB_ID>#${BUILD_JOB_ID}#g" publish_assets.yaml
-    - kustomize edit set namesuffix -- -${CI_PROJECT_ID}-${BUILD_JOB_ID}
-    - kubectl apply -k .
-
-# Build docker image for backend
-Build:BE:Docker:
-  stage: build
-  <<: *be-code-change-rules
-  image: docker
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - docker build -t ${DOCKER_IMAGE} --no-cache -f backend/Dockerfile backend/
-    - docker push ${DOCKER_IMAGE}
-    - docker rmi ${DOCKER_IMAGE}
-    - docker logout $CI_REGISTRY
-
-# Build docker image whenever there is a change in nginx conf
-Build:FE:Docker:
-  stage: build
-  <<: *static-code-change-rules
-  image: docker
-  variables:
-    DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-fe
-  before_script:
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-  script:
-    - docker build -t ${DOCKER_IMAGE} --no-cache -f portal-static/Dockerfile portal-static/
-    - docker push ${DOCKER_IMAGE}
-    - docker rmi ${DOCKER_IMAGE}
-    - docker logout $CI_REGISTRY
-
-# Build FE assets whenever there ia change in frontend directory
-# Save the job ID to be used in publish asset job
-Build:FE:Assets:
-  stage: build
-  <<: *fe-code-change-rules
-  image: node:24
-  script:
-    - cd portal-static
-    - npm ci
-    - npm run build
-    - cd ../frontend
-    - npm ci
-    - npm run build
-    - cd ..
-    - chmod +x frontend/merge-frontend-dist.sh
-    - ./frontend/merge-frontend-dist.sh
+    - |
+      _tag="$(printf '%s' "${IMAGE_TAG_INPUT}" | tr -d '[:space:]')"
+      if [ -z "${_tag}" ]; then
+        if [ -n "${CI_COMMIT_TAG:-}" ]; then
+          _tag="${CI_COMMIT_TAG}"
+        else
+          _tag="${CI_COMMIT_REF_NAME}"
+        fi
+      fi
+      export IMAGE_TAG="$(printf '%s' "${_tag}" | tr -d '[:space:]')"
+      export BACKEND_IMAGE="${CI_REGISTRY_IMAGE}/amr-portal-backend:${IMAGE_TAG}"
+      export FRONTEND_IMAGE="${CI_REGISTRY_IMAGE}/amr-portal-frontend:${IMAGE_TAG}"
+      echo "Using image tag: ${IMAGE_TAG}"
+      echo "Backend:  ${BACKEND_IMAGE}"
+      echo "Frontend: ${FRONTEND_IMAGE}"
+    - echo "${CI_JOB_TOKEN}" | docker login "${CI_REGISTRY}" -u "${CI_REGISTRY_USER}" --password-stdin
   after_script:
-    - echo "BUILD_JOB_ID=${CI_JOB_ID}" >> build_static.env
-  artifacts:
-    name: build_artifacts
-    paths:
-      - portal-static/dist/
-    reports:
-      dotenv: build_static.env
+    - docker logout "${CI_REGISTRY}" || true
 
-# Deploy backend to QA environment
-Deploy:BE:RC:
-  extends: .deploy-be-template
-  stage: deploy_rc
-  <<: *be-code-change-rules
-  environment:
-    name: development
-  variables:
-    AGENT: ${REVIEW_AGENT}
-    NS: amr
-
-# Deploy backend configmap to QA environment
-Deploy:BE-Config:RC:
-  extends: .deploy-config-be-template
-  stage: deploy_rc
-  <<: *be-config-change-rules
-  environment:
-    name: development
-  variables:
-    AGENT: ${REVIEW_AGENT}
-    NS: amr
-
-# Publish static assets to QA environment
-Publish:Assets:RC:
-  extends: .publish-assets-template
-  stage: deploy_rc
-  <<: *fe-code-change-rules
-  environment:
-    name: development
-  variables:
-    AGENT: ${REVIEW_AGENT}
-    NS: amr
-
-# Runs Smoke testing for Backend
-QA:BE:
-  stage: qa
-  <<: *be-code-change-rules
-  image:
-    name: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:1.0.4
-    entrypoint: [ '' ]
-  variables:
-    HOSTNAME: http://amr.review.ensembl.org/amr
+build-and-push-backend:
+  extends: .docker-build
+  stage: build
   script:
-    - k6 run scripts/testing/smoke-testing.js
-    - qa_passed=1
-    - successful_checks=$(jq '.["metrics"]["checks"]["values"]["passes"]' amr-smoke-test-summary.json)
-    - if [ $successful_checks == 4 ]; then qa_passed=0; else qa_passed=1; fi
-    - return $qa_passed
-  artifacts:
-    paths:
-      - amr-smoke-test-summary.json
-      - amr-smoke-test-summary.html
-    when: always
-    expire_in: 1 week
-  when: on_success
+    - docker build -t "${BACKEND_IMAGE}" -f "${BACKEND_DOCKERFILE}" "${BACKEND_CONTEXT}"
+    - docker push "${BACKEND_IMAGE}"
+    - docker rmi "${BACKEND_IMAGE}" || true
 
-# Deploy backend to live environment
-# This is manual step it explicitly needs to be triggered by pressing a button in gitlab interface
-# The job is scheduled only for main branch and when deploy freeze is not in place
-Deploy:BE:Live:
-  extends: .deploy-be-template
-  <<: *be-code-change-rules
-  stage: deploy
-  environment:
-    name: production
-  variables:
-    AGENT: ${PROD_AGENT}
-    NS: amr
-  rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - backend/**/*
-      when: manual
+build-and-push-frontend:
+  extends: .docker-build
+  stage: build
+  script:
+    - docker build -t "${FRONTEND_IMAGE}" -f "${FRONTEND_DOCKERFILE}" "${FRONTEND_CONTEXT}"
+    - docker push "${FRONTEND_IMAGE}"
+    - docker rmi "${FRONTEND_IMAGE}" || true
 
-# Deploy backend config map to live environment
-# This is manual step it explicitly needs to be triggered by pressing a button in gitlab interface
-# The job is scheduled only for main branch and when deploy freeze is not in place
-Deploy:BE-config:Live:
-  extends: .deploy-config-be-template
-  <<: *be-config-change-rules
-  stage: deploy
-  environment:
-    name: production
+sast:
   variables:
-    AGENT: ${PROD_AGENT}
-    NS: amr
-  rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - k8s/backend/configmap.yaml
-      when: manual
-
-# Publish static assets to live environment
-# This is manual step it explicitly needs to be triggered by pressing a button in gitlab interface
-# The job is scheduled only for main branch and when deploy freeze is not in place
-Publish:Assets:Live:
-  extends: .publish-assets-template
-  stage: deploy
-  <<: *fe-code-change-rules
-  environment:
-    name: production
-  variables:
-    AGENT: ${PROD_AGENT}
-    NS: amr
-  rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - portal-static/**/*
-        - frontend/**/*
-      when: manual
-
-# Deploy Nginx to Live to serve static assets
-# This is manual step it explicitly needs to be triggered by pressing a button in gitlab interface
-# The job is scheduled only for main branch and when deploy freeze is not in place
-Deploy:Nginx:Live:
-  stage: deploy
-  extends: .deploy-nginx-template
-  <<: *static-code-change-rules
-  image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:1.0.4
-  environment:
-    name: production
-  variables:
-    AGENT: ${PROD_AGENT}
-    NS: amr
-    DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-fe
-  rules:
-    - if: '$CI_DEPLOY_FREEZE == null && $CI_COMMIT_BRANCH == "main"'
-      changes:
-        - portal-static/nginx-conf/**/*
-        - frontend/nginx-conf/**/*
-      when: manual
-
-# Deploy Nginx to RC to serve static assets
-# The job is scheduled only for main branch
-Deploy:Nginx:RC:
-  stage: deploy_rc
-  extends: .deploy-nginx-template
-  <<: *static-code-change-rules
-  image: dockerhub.ebi.ac.uk/ensembl-web/deploy-tools:1.0.4
-  environment:
-    name: development
-  variables:
-    AGENT: ${REVIEW_AGENT}
-    NS: amr
-    DOCKER_IMAGE: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}-fe
+    SAST_EXCLUDED_PATHS: data-generators, postman
+  stage: test
+include:
+- template: Security/SAST.gitlab-ci.yml
+- template: Security/SAST-IaC.latest.gitlab-ci.yml
+- template: Security/Dependency-Scanning.gitlab-ci.yml
+- template: Jobs/Container-Scanning.gitlab-ci.yml
+- template: Security/Secret-Detection.gitlab-ci.yml
+secret_detection:
+  stage: secret-detection
