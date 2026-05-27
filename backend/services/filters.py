@@ -433,13 +433,15 @@ def fetch_amr_facets(payload: Any, db: duckdb.DuckDBPyConnection):
             f"GROUP BY {facet_value_expr} "
             "ORDER BY LOWER(CAST(value AS VARCHAR)) ASC"
         )
-        paged_query = f"{grouped_query} LIMIT ? OFFSET ?"
-        paged_params = [*facet_params, offset + limit, 0]
-
-        # nosemgrep: bandit.B608
-        # selected_dataset/facet column come from validated metadata (view/table schema), user values are bound params.
-        total_options = int(db.execute(total_options_query, facet_params).fetchone()[0])
-        rows = db.execute(paged_query, paged_params).fetchall()
+        paged_query = (
+            "SELECT value, count, COUNT(*) OVER() AS total_options "
+            f"FROM ({grouped_query}) facet_counts "
+            "LIMIT ? OFFSET ?"
+        )
+        paged_params = [*facet_params, limit, offset]
+        rows_with_total = db.execute(paged_query, paged_params).fetchall()
+        total_options = int(rows_with_total[0][2]) if rows_with_total else 0
+        rows = [(value, count) for value, count, _ in rows_with_total]
 
         selected_values = {
             selected.value
