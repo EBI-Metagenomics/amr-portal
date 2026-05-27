@@ -30,6 +30,14 @@ Or
 export DUCKDB_PATH=path/to/duckdb/file.duckdb
 ```
 
+From the **repo root** (same import layout as the Docker image — do not use `backend.main:app`):
+
+```shell
+uvicorn main:app --reload --app-dir backend
+```
+
+Or from the `backend/` directory:
+
 ```shell
 cd backend
 uvicorn main:app --reload
@@ -37,9 +45,10 @@ uvicorn main:app --reload
 
 Swagger UI: http://localhost:8000/docs
 
-For production use:
+For production use (from repo root):
+
 ```shell
-uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4 --app-dir backend
 ```
 
 For testing:
@@ -49,9 +58,10 @@ Create a `.env.test` file in the project root with the following content:
 DUCKDB_PATH=path/to/test_data.duckdb
 ```
 
-Then run:
+Then run (from repo root):
+
 ```shell
-TESTING=true pytest backend/
+cd backend && TESTING=true pytest
 ```
 
 #### API Calls Examples
