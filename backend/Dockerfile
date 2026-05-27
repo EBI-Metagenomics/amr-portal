@@ -2,7 +2,6 @@
 FROM python:3.12.2-slim AS builder
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential=12.9 \
-    gcc=4:12.2.0-14 \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:0.11.13 /uv /uvx /bin/
 WORKDIR /usr/app
