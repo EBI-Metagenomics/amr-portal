@@ -11,6 +11,26 @@ import postcssImport from 'postcss-import';
 import postcssUrl from 'postcss-url';
 
 const isProductionBuild = process.env.ELEVENTY_ENV === 'production';
+const BUILD_ALLOWED_ROOTS = ['src/assets/css', 'node_modules'];
+
+const isPathWithin = (candidatePath, basePath) => {
+  const relative = path.relative(basePath, candidatePath);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
+};
+
+const assertBuildPathAllowed = async (filePath) => {
+  const resolved = await fs.realpath(filePath);
+  const allowedRoots = await Promise.all(
+    BUILD_ALLOWED_ROOTS.map(async (root) => fs.realpath(root).catch(() => null))
+  );
+  const allowed = allowedRoots
+    .filter(Boolean)
+    .some((root) => isPathWithin(resolved, root));
+
+  if (!allowed) {
+    throw new Error(`Refusing to read CSS outside allowed roots: ${filePath}`);
+  }
+};
 
 /**
  * Builds all assets for the site and returns an assets manifest.
@@ -46,6 +66,7 @@ export async function buildAssets({
         name: 'postcss',
         setup(build) {
           build.onLoad({ filter: /\.css$/ }, async (args) => {
+            await assertBuildPathAllowed(args.path);
             const source = await fs.readFile(args.path, 'utf8');
             const result = await postcss([
               postcssImport(),

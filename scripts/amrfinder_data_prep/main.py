@@ -1,10 +1,33 @@
 import os
+import re
 import sys
 import configparser
-from ftplib import FTP
+from html import unescape
+from urllib.parse import urljoin
+
 import csv
 
 import requests
+
+
+def list_remote_files(base_url: str) -> list[str]:
+    """List files from an EBI HTTPS directory index (replaces cleartext FTP)."""
+    response = requests.get(base_url, timeout=60)
+    response.raise_for_status()
+    return [
+        unescape(name.rstrip('/'))
+        for name in re.findall(r'href="([^"]+)"', response.text)
+        if name not in ('../', '/') and '/' not in name.rstrip('/')
+    ]
+
+
+def download_remote_file(base_url: str, filename: str, dest_path: str) -> None:
+    url = urljoin(base_url if base_url.endswith('/') else f'{base_url}/', filename)
+    with requests.get(url, stream=True, timeout=120) as response:
+        response.raise_for_status()
+        with open(dest_path, 'wb') as dest:
+            for chunk in response.iter_content(chunk_size=8192):
+                dest.write(chunk)
 
 
 def get_delimiter(path):
@@ -103,17 +126,15 @@ def build_release(release_path: str, config_path: str):
     ftp_domain = config["ftp"]["domain"]
     ftp_path = config["ftp"]["path"]
     target = config["ftp"]["target_files"]
+    base_url = f"https://{ftp_domain}/{ftp_path.strip('/')}/"
     
     # create release dir
     os.mkdir(release_path)
     
-    # get amr finder files
-    print(f"Connecting to: [{ftp_domain}]")
+    # get amr finder files over HTTPS (EBI mirrors ftp.ebi.ac.uk at https://ftp.ebi.ac.uk/)
+    print(f"Fetching files from: [{base_url}]")
     
-    ftp = FTP(ftp_domain)
-    ftp.login()
-    ftp.cwd(ftp_path)
-    files = ftp.nlst()
+    files = list_remote_files(base_url)
     
     target_files = [f for f in files if f.startswith(target)]
     gca_files = []
@@ -124,11 +145,9 @@ def build_release(release_path: str, config_path: str):
             "gca":gca,
             "path":tf_path
         }
-        with open(tf_path, 'wb') as tf_stream:
-            ftp.retrbinary(f"RETR {tf}", tf_stream.write)
+        download_remote_file(base_url, tf, tf_path)
         gca_files.append(gca_obj)
     
-    ftp.quit()
     print(f"{len(gca_files)} downloaded")
     
     # get species details
@@ -141,7 +160,8 @@ def build_release(release_path: str, config_path: str):
         column_details[v] = config["gca"][v]
     
     for gca_obj in gca_files:
-        results = requests.get(species_details_url.format(gca_obj["gca"]))
+        results = requests.get(species_details_url.format(gca_obj["gca"]), timeout=60)
+        results.raise_for_status()
         gca_obj["columns"] = {}
         if results.ok:
             for col,col_path in column_details.items():

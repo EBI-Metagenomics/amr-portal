@@ -5,7 +5,7 @@ import math
 from collections import defaultdict
 from dataclasses import dataclass
 from itertools import chain
-from typing import Any, Dict, Iterable, Iterator, List, Optional
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple
 
 import duckdb
 import numpy as np
@@ -32,6 +32,8 @@ class FilterQueryContext:
     dataset: str
     base_query: str
     count_query: str
+    base_params: List[Any]
+    count_params: List[Any]
     display_column_details: dict
     order_by_col: Optional[str]
 
@@ -83,9 +85,9 @@ def get_dataset_from_view(view_id: int, db: duckdb.DuckDBPyConnection):
     Raises:
         HTTPException: If the lookup fails.
     """
-    dataset_from_view_query = f"SELECT DISTINCT (dataset_name) FROM view_categories WHERE view_id = {view_id};"
+    dataset_from_view_query = "SELECT DISTINCT (dataset_name) FROM view_categories WHERE view_id = ?;"
     try:
-        dataset = db.execute(dataset_from_view_query).fetchone()[0]
+        dataset = db.execute(dataset_from_view_query, [view_id]).fetchone()[0]
         return dataset
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Failed to get dataset from view ID: {view_id}")
@@ -107,16 +109,16 @@ def get_display_column_details(view_id: int, db: duckdb.DuckDBPyConnection):
     if view_id in _display_columns_cache:
         return _display_columns_cache[view_id].copy()
 
-    columns_to_display_query = f"""
+    columns_to_display_query = """
         SELECT cd.fullname, cd.name, cd.label, cd.type, cd.sortable, cd.url, cd.delimiter
         FROM view as v
             JOIN view_column vc on v.view_id = vc.view_id
             JOIN column_definition cd on vc.column_id = cd.column_id
-        WHERE v.view_id = {view_id}
+        WHERE v.view_id = ?
         ORDER BY vc.rank;
     """
     try:
-        columns = db.execute(columns_to_display_query).fetchdf()
+        columns = db.execute(columns_to_display_query, [view_id]).fetchdf()
         _display_columns_cache[view_id] = columns
         return columns.copy()
     except Exception as e:
@@ -245,7 +247,7 @@ def _build_filter_query_context(payload: Payload, db: duckdb.DuckDBPyConnection)
         if order_by_col not in valid_columns:
             raise HTTPException(status_code=400, detail=f"Invalid order_by column: {order_by_col!r}")
 
-    where_sql = _build_where_clause(grouped_filters_with_operator)
+    where_sql, where_params = _build_where_clause(grouped_filters_with_operator)
     base_query = f"SELECT {columns_to_display_str} FROM {selected_dataset}"
     count_query = f"SELECT COUNT(*) AS count FROM {selected_dataset}"
     if where_sql:
@@ -256,13 +258,11 @@ def _build_filter_query_context(payload: Payload, db: duckdb.DuckDBPyConnection)
         dataset=selected_dataset,
         base_query=base_query,
         count_query=count_query,
+        base_params=list(where_params),
+        count_params=list(where_params),
         display_column_details=display_column_details,
         order_by_col=order_by_col,
     )
-
-
-def _escape_sql_string(value: str) -> str:
-    return value.replace("'", "''")
 
 
 def _group_selected_filters_with_operator(
@@ -281,19 +281,21 @@ def _group_selected_filters_with_operator(
     return grouped_filters
 
 
-def _build_where_clause(grouped_filters: Dict[str, Dict[str, Any]]) -> str:
+def _build_where_clause(grouped_filters: Dict[str, Dict[str, Any]]) -> Tuple[str, List[Any]]:
     where_clauses = []
+    params: List[Any] = []
     for category, details in grouped_filters.items():
         values = details["values"]
         operator = details.get("operator", "OR")
-        quoted_values = [f"'{_escape_sql_string(v)}'" for v in values]
         if operator == "AND":
-            and_clause = " AND ".join([f'{quote_column_name(category)} = {qv}' for qv in quoted_values])
+            and_clause = " AND ".join([f'{quote_column_name(category)} = ?' for _ in values])
+            params.extend(values)
             where_clauses.append(f"({and_clause})")
         else:
-            tuple_clause = f"({', '.join(quoted_values)})"
+            tuple_clause = f"({', '.join(['?'] * len(values))})"
+            params.extend(values)
             where_clauses.append(f'{quote_column_name(category)} IN {tuple_clause}')
-    return " AND ".join(where_clauses)
+    return " AND ".join(where_clauses), params
 
 
 def _fetch_view_facet_definitions(view_id: int, db: duckdb.DuckDBPyConnection) -> List[Dict[str, Any]]:
@@ -390,40 +392,56 @@ def fetch_amr_facets(payload: Any, db: duckdb.DuckDBPyConnection):
             payload.facet_operators if hasattr(payload, "facet_operators") else {},
             excluded_category=excluded_category,
         )
-        where_sql = _build_where_clause(grouped_filters)
+        where_sql, where_params = _build_where_clause(grouped_filters)
         paging = payload.facet_paging.get(facet_id) if payload.facet_paging else None
         limit = max(1, min(200, (paging.limit if paging else 10)))
         offset = max(0, paging.offset if paging else 0)
         search = (paging.search.strip() if paging and paging.search else "")
+        facet_params: List[Any] = list(where_params)
 
+        facet_value_expr = quote_column_name(trimmed_category)
         base_count_query = f"""
-            SELECT {quote_column_name(trimmed_category)} AS value, COUNT(*) AS count
+            SELECT {facet_value_expr} AS value, COUNT(*) AS count
+            FROM {selected_dataset}
+        """
+        total_options_query = f"""
+            SELECT COUNT(DISTINCT {facet_value_expr})
             FROM {selected_dataset}
         """
         if where_sql:
             base_count_query += f" WHERE {where_sql}"
+            total_options_query += f" WHERE {where_sql}"
             value_prefix = " AND "
         else:
             value_prefix = " WHERE "
 
-        base_count_query += f"{value_prefix}{quote_column_name(trimmed_category)} IS NOT NULL"
+        base_count_query += f"{value_prefix}{facet_value_expr} IS NOT NULL"
+        total_options_query += f"{value_prefix}{facet_value_expr} IS NOT NULL"
         if search:
-            escaped_search = _escape_sql_string(search)
             base_count_query += (
-                f" AND LOWER(CAST({quote_column_name(trimmed_category)} AS VARCHAR)) "
-                f"LIKE '%{escaped_search.lower()}%'"
+                f" AND LOWER(CAST({facet_value_expr} AS VARCHAR)) "
+                "LIKE ?"
             )
+            total_options_query += (
+                f" AND LOWER(CAST({facet_value_expr} AS VARCHAR)) "
+                "LIKE ?"
+            )
+            facet_params.append(f"%{search.lower()}%")
 
         grouped_query = (
             f"{base_count_query} "
-            f"GROUP BY {quote_column_name(trimmed_category)} "
+            f"GROUP BY {facet_value_expr} "
             "ORDER BY LOWER(CAST(value AS VARCHAR)) ASC"
         )
-        total_options_query = f"SELECT COUNT(*) FROM ({grouped_query}) facet_counts"
-        paged_query = f"{grouped_query} LIMIT {offset + limit} OFFSET 0"
-
-        total_options = int(db.execute(total_options_query).fetchone()[0])
-        rows = db.execute(paged_query).fetchall()
+        paged_query = (
+            "SELECT value, count, COUNT(*) OVER() AS total_options "
+            f"FROM ({grouped_query}) facet_counts "
+            "LIMIT ? OFFSET ?"
+        )
+        paged_params = [*facet_params, limit, offset]
+        rows_with_total = db.execute(paged_query, paged_params).fetchall()
+        total_options = int(rows_with_total[0][2]) if rows_with_total else 0
+        rows = [(value, count) for value, count, _ in rows_with_total]
 
         selected_values = {
             selected.value
@@ -462,6 +480,7 @@ def fetch_amr_facets(payload: Any, db: duckdb.DuckDBPyConnection):
 def _stream_prefixed_rows(
     context: FilterQueryContext,
     payload: Payload,
+    query_params: List[Any],
     batch_size: int = 10_000,
 ) -> Iterator[Dict[str, Any]]:
     """Yield dataset-prefixed rows directly from DuckDB in bounded batches.
@@ -480,7 +499,7 @@ def _stream_prefixed_rows(
     try:
         conn.execute("PRAGMA threads = 4")
         conn.execute("PRAGMA memory_limit = '2GB'")
-        cursor = conn.execute(query)
+        cursor = conn.execute(query, query_params)
         raw_columns = [desc[0] for desc in cursor.description]
         prefixed_columns = [f"{context.dataset}-{col}" for col in raw_columns]
 
@@ -566,14 +585,15 @@ def filter_amr_records(payload: Payload, db: duckdb.DuckDBPyConnection):
         logger.info(f"selected_filters: {payload.selected_filters}")
         logger.info(f"count_query: {context.count_query}")
 
-        total_hits = db.execute(context.count_query).fetchone()[0]
+        total_hits = db.execute(context.count_query, context.count_params).fetchone()[0]
 
         offset = (page - 1) * per_page
         paginated_query = _append_order_clause(context.base_query, payload, context.order_by_col)
-        paginated_query += f" LIMIT {per_page} OFFSET {offset}"
+        paginated_query += " LIMIT ? OFFSET ?"
+        paginated_params = [*context.base_params, per_page, offset]
         logger.info(f"base_query: {paginated_query}")
 
-        res_df = db.execute(paginated_query).fetchdf()
+        res_df = db.execute(paginated_query, paginated_params).fetchdf()
         res_df = res_df.replace({np.nan: None, np.inf: None, -np.inf: None})
         res_df = res_df.add_prefix(f"{context.dataset}-")
         columns_meta = _build_columns_metadata(context.display_column_details)
@@ -708,12 +728,12 @@ def fetch_filtered_records(payload: Payload, scope, file_format, db: duckdb.Duck
 
     # scope == "all" - true streaming without loading the full dataset
     context = _build_filter_query_context(payload, db)
-    total_hits = db.execute(context.count_query).fetchone()[0]
+    total_hits = db.execute(context.count_query, context.count_params).fetchone()[0]
     if total_hits == 0:
         raise HTTPException(status_code=404, detail="No data found for the given filters")
 
     # Stream rows straight from DuckDB so responses for 100k+ rows start immediately.
-    row_iter = _stream_prefixed_rows(context, payload)
+    row_iter = _stream_prefixed_rows(context, payload, context.base_params)
     if file_format == "json":
         return StreamingResponse(
             stream_json_rows(row_iter),
