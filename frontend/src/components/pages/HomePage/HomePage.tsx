@@ -1,14 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { amrService } from '@services/amr/amrService';
 import FacetSidebar from '@components/features/amr/FacetSidebar/FacetSidebar';
 import GeneViewerPanel from '@components/features/amr/GeneViewerPanel/GeneViewerPanel';
 import DataPanel from '@components/features/amr/DataPanel/DataPanel';
 import { useAmrPortalState } from '@/hooks/useAmrPortalState';
+import { buildGenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
+import { isGenomeViewerEnabled } from '@/config/appEnv';
+import type { AMRRecord } from '@interfaces/amrRecord';
 import styles from './HomePage.module.css';
 
 const HomePage = () => {
+  const genomeViewerEnabled = useMemo(() => isGenomeViewerEnabled(), []);
   const [isGeneViewerCollapsed, setIsGeneViewerCollapsed] = useState(true);
+  const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const state = useAmrPortalState();
   const {
     viewId,
@@ -94,30 +99,66 @@ const HomePage = () => {
   });
 
   useEffect(() => {
-    if (numericViewId !== null && numericStateViewId === null) {
+    if (numericViewId !== null && numericStateViewId === null && resolvedViewId !== null) {
       setCurrentView(resolvedViewId);
     }
   }, [numericViewId, numericStateViewId, resolvedViewId, setCurrentView]);
+
+  useEffect(() => {
+    setSelectedRowIndex(null);
+  }, [selectedFilters, page, perPage, sort, numericViewId]);
+
+  useEffect(() => {
+    if (selectedRowIndex === null) {
+      setIsGeneViewerCollapsed(true);
+    }
+  }, [selectedRowIndex]);
+
+  const { genomeRowContext, hasSelectedTableRow } = useMemo(() => {
+    if (selectedRowIndex === null || !recordsQuery.data || numericViewId === null) {
+      return { genomeRowContext: null, hasSelectedTableRow: false };
+    }
+    const record = recordsQuery.data.data[selectedRowIndex];
+    if (!record) {
+      return { genomeRowContext: null, hasSelectedTableRow: false };
+    }
+    return {
+      genomeRowContext: buildGenomeViewerRowContext(record, recordsQuery.data.meta.columns, numericViewId),
+      hasSelectedTableRow: true,
+    };
+  }, [selectedRowIndex, recordsQuery.data, numericViewId]);
+
+  const handleRowSelect = useCallback((rowIndex: number, _record: AMRRecord) => {
+    setSelectedRowIndex(rowIndex);
+    if (genomeViewerEnabled) {
+      setIsGeneViewerCollapsed(false);
+    }
+  }, [genomeViewerEnabled]);
+
+  const loadJbrowseData =
+    genomeViewerEnabled && !isGeneViewerCollapsed && hasSelectedTableRow && genomeRowContext !== null;
+
+  const contentLayoutClass = useMemo(() => {
+    if (!genomeViewerEnabled) return styles.contentLayoutGeneViewerDisabled;
+    return isGeneViewerCollapsed
+      ? styles.contentLayoutGeneViewerCollapsed
+      : styles.contentLayoutGeneViewerExpanded;
+  }, [genomeViewerEnabled, isGeneViewerCollapsed]);
 
   return (
     <div className={styles.root}>
       {numericViewId !== null ? (
         <>
-          <GeneViewerPanel
-            isCollapsed={isGeneViewerCollapsed}
-            onToggleCollapsed={() => setIsGeneViewerCollapsed(prev => !prev)}
-          />
-          {!isGeneViewerCollapsed ? <section className={styles.geneViewerExpandedFill} /> : null}
-          <div
-            className={[
-              styles.contentLayout,
-              isGeneViewerCollapsed
-                ? styles.contentLayoutGeneViewerCollapsed
-                : styles.contentLayoutGeneViewerExpanded,
-            ]
-              .filter(Boolean)
-              .join(' ')}
-          >
+          {genomeViewerEnabled ? (
+            <GeneViewerPanel
+              isCollapsed={isGeneViewerCollapsed}
+              onToggleCollapsed={() => setIsGeneViewerCollapsed(prev => !prev)}
+              rowContext={genomeRowContext}
+              hasSelectedTableRow={hasSelectedTableRow}
+              loadData={loadJbrowseData}
+            />
+          ) : null}
+          <div className={[styles.contentLayout, contentLayoutClass].filter(Boolean).join(' ')}>
             <aside className={styles.leftFacetPanel}>
               <FacetSidebar
                 facetsData={facetsQuery.data}
@@ -152,6 +193,8 @@ const HomePage = () => {
                 onPerPageChange={setPerPage}
                 onSortChange={toggleSort}
                 onClearFilters={clearAllFilters}
+                selectedRowIndex={selectedRowIndex}
+                onRowSelect={handleRowSelect}
               />
             </div>
           </div>

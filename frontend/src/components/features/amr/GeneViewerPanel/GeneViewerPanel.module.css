@@ -2,37 +2,126 @@
   position: relative;
   width: calc(100% - var(--amr-rail-gutter));
   margin-right: var(--amr-rail-gutter);
-  min-height: var(--amr-top-panel-height);
   height: var(--amr-top-panel-height);
+  min-height: var(--amr-top-panel-height);
+  padding: 8px;
   overflow: visible;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #fff;
 }
 
-.placeholderText {
+.rootExpanded {
+  height: var(--amr-gene-viewer-expanded-total);
+  min-height: var(--amr-gene-viewer-expanded-total);
+}
+
+.rail {
+  --buttons-column-color: #fff;
+  position: absolute;
+  right: var(--amr-rail-anchor);
+  top: -1px;
+  width: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 4;
+  background: var(--buttons-column-color);
+  padding: 6px 4px 6px 2px;
+  border-radius: 6px;
+}
+
+.viewerBody {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
+.viewerLayout {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  overflow: hidden;
+}
+
+.browserPane {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.featurePane {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hint {
   margin: 0;
+  padding: 12px;
   font-size: 13px;
   color: #64748b;
 }
 
+.selectionSummary {
+  margin: 0;
+  padding: 12px 12px 0;
+  font-size: 12px;
+  color: #0f172a;
+  flex-shrink: 0;
+}
+
+.overrideNotice {
+  margin: 0;
+  padding: 8px 12px 12px;
+  font-size: 12px;
+  color: #92400e;
+  flex-shrink: 0;
+}
+
+.error {
+  margin: 0;
+  padding: 12px;
+  font-size: 13px;
+  color: #b91c1c;
+}
+
+.code {
+  font-size: 12px;
+  background: #f1f5f9;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
 .toggle {
-  position: absolute;
-  top: -1px;
-  right: var(--amr-rail-anchor);
-  transform: none;
-  z-index: 4;
-  border-radius: 0 6px 6px 0;
-  background: #fff;
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 25px;
+  background: transparent;
   padding: 0;
-  color: #0ea5e9;
+  color: #1093df;
   line-height: 1;
   border: 0;
   box-shadow: none;
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  flex-shrink: 0;
+  font-size: 27px;
+}
+
+@media (max-width: 1100px) {
+  .viewerLayout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) 220px;
+  }
 }
