@@ -53,11 +53,14 @@ export class GFFParser {
         }
 
         if (type === 'gene' && attributes.locus_tag) {
+          const gffStart = parseInt(start, 10);
+          const gffEnd = parseInt(end, 10);
           features.push({
             uniqueId: attributes.locus_tag,
             refName,
-            start: parseInt(start, 10),
-            end: parseInt(end, 10),
+            // GFF is 1-based inclusive; JBrowse uses 0-based coordinates with exclusive end.
+            start: gffStart - 1,
+            end: gffEnd,
             strand: strand === '+' ? 1 : -1,
             type,
             attributes,
