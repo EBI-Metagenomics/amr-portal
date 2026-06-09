@@ -21,9 +21,11 @@ global-search/
   amr_global_search/
     build.py                    # Python API
   sql/
-    01_create_table.sql         # Rebuild global_search table
-    02_create_fts_index.sql     # Create / replace BM25 FTS index
-    03_manual_test_queries.sql  # Optional smoke tests
+    00_optional_session_settings.sql  # PRAGMAs if spill / OOM errors
+    01_create_table.sql               # Rebuild global_search table
+    02_create_fts_index.sql           # Create / replace BM25 FTS index
+    03_manual_test_queries.sql        # Smoke tests (efficient patterns)
+    04_efficient_search_queries.sql   # Documented search/count SQL patterns
   tests/
     test_build.py
 ```
@@ -103,20 +105,45 @@ uv sync --group dev
 uv run pytest tests/ -v
 ```
 
-## Example API query pattern (for backend implementation)
+## Query patterns (important)
+
+**Do not** filter the full `global_search` table with `match_bm25` in `WHERE`:
 
 ```sql
-WITH query AS (SELECT lower(?) AS q),
-hits AS (
-    SELECT source_table, source_rowid,
-           fts_main_global_search.match_bm25(g.rowid, q.q) AS score
-    FROM global_search g, query q
-    WHERE fts_main_global_search.match_bm25(g.rowid, q.q) IS NOT NULL
-      AND g.source_table = ?   -- active view dataset, e.g. 'phenotype'
+-- AVOID on large tables — full scan + heavy spill, often hits max_temp_directory_size
+FROM global_search g
+WHERE fts_main_global_search.match_bm25(g.rowid, 'tetA') IS NOT NULL
+```
+
+Reasons:
+
+1. DuckDB evaluates this against **every** `global_search` row on large releases.
+2. `match_bm25` is implemented as `rowid IN (...)` with an internal **`LIMIT 1000`**, so it cannot produce accurate RESULT TYPE counts.
+
+**Instead**, start from the FTS inverted index (`dict` → `terms` → `docs`), then join to `global_search`. See `sql/04_efficient_search_queries.sql`.
+
+### Default: prefix search (partial user input)
+
+Users usually type prefixes (`ERZ254`, `tet`, `amik`), not full indexed tokens (`erz25458162`). Use prefix lookup on `dict.term`:
+
+```sql
+WITH search_query AS (
+    SELECT lower(trim(?)) AS prefix
+),
+qtermids AS (
+    SELECT dict.termid
+    FROM fts_main_global_search.dict AS dict, search_query AS q
+    WHERE length(q.prefix) >= 3
+      AND dict.term LIKE q.prefix || '%'
+),
+matching_docids AS (
+    SELECT DISTINCT terms.docid
+    FROM fts_main_global_search.terms AS terms
+    WHERE terms.termid IN (SELECT termid FROM qtermids)
 )
-SELECT p.*, h.score
-FROM hits h
-JOIN phenotype p ON p.rowid = h.source_rowid
-ORDER BY h.score DESC
-LIMIT 100 OFFSET 0;
+SELECT g.source_table, COUNT(*) AS search_count
+FROM matching_docids AS md
+INNER JOIN fts_main_global_search.docs AS docs ON md.docid = docs.docid
+INNER JOIN global_search AS g ON g.rowid = docs.name
+GROUP BY g.source_table;
 ```
