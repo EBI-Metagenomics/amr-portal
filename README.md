@@ -54,6 +54,20 @@ Then run:
 cd backend && uv sync --extra dev && TESTING=true uv run pytest tests/
 ```
 
+### Global search (DuckDB FTS)
+
+The `global-search/` package builds the `global_search` table and FTS index on an
+AMR DuckDB release. Run it after ETL or whenever source tables are updated:
+
+```shell
+cd global-search
+uv sync
+uv run python rebuild_global_search.py --db-path /path/to/amr_RELEASE.duckdb
+```
+
+See [global-search/README.md](global-search/README.md) for SQL scripts, manual
+duckdb CLI usage, and test queries.
+
 #### API Calls Examples
 
 ##### `/filters-config`
