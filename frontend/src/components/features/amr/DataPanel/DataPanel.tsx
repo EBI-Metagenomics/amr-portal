@@ -20,7 +20,8 @@ type Props = {
   isPlaceholderData?: boolean;
   isLoading: boolean;
   isError: boolean;
-  hasSelectedFilters: boolean;
+  canShowResults: boolean;
+  activeSearchQuery?: string;
   page: number;
   perPage: number;
   sort: SortState;
@@ -44,7 +45,8 @@ const DataPanel = ({
   isPlaceholderData = false,
   isLoading,
   isError,
-  hasSelectedFilters,
+  canShowResults,
+  activeSearchQuery,
   page,
   perPage,
   sort,
@@ -66,14 +68,16 @@ const DataPanel = ({
     onClearFilters();
   };
 
-  if (!hasSelectedFilters) {
+  if (!canShowResults) {
     return (
       <section className={panelSection()}>
         <div className={styles.initialContent}>
           <span className={[styles.initialIcon, styles.initialIconStrong].join(' ')}>
             <TableIcon />
           </span>
-          <span className={styles.initialTextStrong}>Select data from the Faceted Filters</span>
+          <span className={styles.initialTextStrong}>
+            Search above or select data from the Faceted Filters
+          </span>
 
           <span className={styles.initialIcon}>
             <ColumnsIcon />
@@ -286,6 +290,7 @@ const DataPanel = ({
         <ActionButtons
           viewId={currentViewId}
           selectedFilters={selectedFilters}
+          searchQuery={activeSearchQuery}
           columns={columns}
           hiddenColumnIds={hiddenColumnIds}
           onClearFilters={handleClearFilters}

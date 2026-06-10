@@ -1,12 +1,19 @@
 import { useMemo } from 'react';
 import type { AMRFacetsResponse, FacetOperator, SelectedFilter } from '@interfaces/amrApi';
+import { GLOBAL_SEARCH_MIN_LENGTH } from '@/config/globalSearch';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
+import { buildFacetMetaMap, formatFacetFilterTagLabel } from './activeFilterLabels';
 import styles from './FacetSidebar.module.css';
 
 type Props = {
   facetsData?: AMRFacetsResponse;
   selectedFilters: SelectedFilter[];
   currentViewId: string | number;
+  searchQuery: string;
+  activeSearchQuery?: string;
+  isGlobalSearchActive: boolean;
+  onSearchQueryChange: (value: string) => void;
+  onClearActiveFilters: () => void;
   onViewChange: (viewId: string | number) => void;
   onFilterToggle: (category: string, value: string, isSelected: boolean) => void;
   onClearAllFilters: () => void;
@@ -23,6 +30,11 @@ const FacetSidebar = ({
   facetsData,
   selectedFilters,
   currentViewId,
+  searchQuery,
+  activeSearchQuery,
+  isGlobalSearchActive,
+  onSearchQueryChange,
+  onClearActiveFilters,
   onViewChange,
   onFilterToggle,
   onClearAllFilters,
@@ -41,37 +53,130 @@ const FacetSidebar = ({
     () => new Set(selectedFilters.map(filter => `${filter.category}::${filter.value}`)),
     [selectedFilters]
   );
+  const trimmedSearchLength = searchQuery.trim().length;
+  const showSearchMinLengthHint =
+    trimmedSearchLength > 0 && trimmedSearchLength < GLOBAL_SEARCH_MIN_LENGTH;
+  const facetMeta = useMemo(() => buildFacetMetaMap(facets), [facets]);
+  const activeFilterCount =
+    (isGlobalSearchActive ? 1 : 0) + selectedFilters.length;
+  const showActiveFilters = activeFilterCount > 0;
 
   const sectionClass = [panelStyles.root, styles.root].filter(Boolean).join(' ');
 
   return (
     <section className={sectionClass}>
       <div className={styles.content}>
+        <div className={styles.globalSearchSection}>
+          <label className={styles.globalSearchLabel} htmlFor="global-search-input">
+            Global search
+          </label>
+          <input
+            id="global-search-input"
+            className={styles.globalSearchInput}
+            type="search"
+            value={searchQuery}
+            placeholder="Search sample accessions, genome accessions, or genes..."
+            onChange={event => onSearchQueryChange(event.target.value)}
+          />
+          {showSearchMinLengthHint ? (
+            <p className={styles.globalSearchHint}>
+              Enter at least {GLOBAL_SEARCH_MIN_LENGTH} characters to search.
+            </p>
+          ) : null}
+        </div>
+
+        <fieldset className={styles.resultTypeFieldset}>
+          <legend className={styles.resultTypeLegend}>
+            <span>Result type</span>
+            {isGlobalSearchActive ? (
+              <span className={styles.resultTypeNote}>Counts are based on your current search.</span>
+            ) : null}
+          </legend>
+          <div className={styles.dataTypeGrid}>
+            {dataTypes.map(type => {
+              const active = Boolean(type.active) || String(type.id) === String(currentViewId);
+              const countBadge =
+                isGlobalSearchActive && type.search_count != null
+                  ? type.search_count.toLocaleString()
+                  : null;
+
+              return (
+                <label
+                  key={String(type.id)}
+                  className={[styles.dataTypeCard, active ? styles.dataTypeCardActive : '']
+                    .filter(Boolean)
+                    .join(' ')}
+                >
+                  <input
+                    type="radio"
+                    className={styles.dataTypeRadio}
+                    name="result-type"
+                    checked={active}
+                    onChange={() => onViewChange(type.id)}
+                  />
+                  <span>{type.name}</span>
+                  {countBadge ? <span className={styles.filterCountCircle}>{countBadge}</span> : null}
+                </label>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        {showActiveFilters ? (
+          <section className={styles.activeFiltersSection} aria-label="Active filters">
+            <div className={styles.activeFiltersHeader}>
+              <h4 className={styles.activeFiltersTitle}>
+                Active filters ({activeFilterCount})
+              </h4>
+              <button type="button" className={styles.clearButton} onClick={onClearActiveFilters}>
+                Clear all
+              </button>
+            </div>
+            <div className={styles.activeFiltersList}>
+              {isGlobalSearchActive && activeSearchQuery ? (
+                <span
+                  className={[styles.activeFilterTag, styles.activeFilterTagSearch].join(' ')}
+                >
+                  <span className={styles.activeFilterTagLabel}>{activeSearchQuery}</span>
+                  <button
+                    type="button"
+                    className={styles.activeFilterRemove}
+                    aria-label={`Remove search ${activeSearchQuery}`}
+                    onClick={() => onSearchQueryChange('')}
+                  >
+                    ✕
+                  </button>
+                </span>
+              ) : null}
+              {selectedFilters.map(filter => {
+                const tagLabel = formatFacetFilterTagLabel(
+                  filter.category,
+                  filter.value,
+                  facetMeta
+                );
+                return (
+                  <span key={`${filter.category}::${filter.value}`} className={styles.activeFilterTag}>
+                    <span className={styles.activeFilterTagLabel}>{tagLabel}</span>
+                    <button
+                      type="button"
+                      className={styles.activeFilterRemove}
+                      aria-label={`Remove filter ${tagLabel}`}
+                      onClick={() => onFilterToggle(filter.category, filter.value, false)}
+                    >
+                      ✕
+                    </button>
+                  </span>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
+
         <div className={styles.headerRow}>
-          <h3 className={styles.heading}>Filter Results</h3>
+          <h3 className={styles.heading}>Filters</h3>
           <button type="button" className={styles.clearButton} onClick={onClearAllFilters}>
             Clear all
           </button>
-        </div>
-        <div className={styles.dataTypeGrid}>
-          {dataTypes.map(type => {
-            const active = Boolean(type.active) || String(type.id) === String(currentViewId);
-            return (
-              <button
-                key={String(type.id)}
-                type="button"
-                className={[styles.dataTypeCard, active ? styles.dataTypeCardActive : '']
-                  .filter(Boolean)
-                  .join(' ')}
-                onClick={() => onViewChange(type.id)}
-              >
-                <span>{type.name}</span>
-                {type.selected_count > 0 ? (
-                  <span className={styles.filterCountCircle}>{type.selected_count}</span>
-                ) : null}
-              </button>
-            );
-          })}
         </div>
 
         <div className={styles.facetList}>

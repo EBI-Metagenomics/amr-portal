@@ -8,6 +8,7 @@ type ActionView = 'columns' | 'clear' | 'download' | null;
 type Props = {
   viewId: string | number;
   selectedFilters: Array<{ category: string; value: string }>;
+  searchQuery?: string;
   columns: Array<{ id: string; label: string }>;
   hiddenColumnIds: string[];
   disabled?: boolean;
@@ -18,6 +19,7 @@ type Props = {
 const ActionButtons = ({
   viewId,
   selectedFilters,
+  searchQuery,
   columns,
   hiddenColumnIds,
   disabled,
@@ -35,8 +37,9 @@ const ActionButtons = ({
         apiBaseUrl: API_BASE_URL,
         viewId,
         selectedFilters,
+        searchQuery,
       }),
-    [viewId, selectedFilters]
+    [viewId, selectedFilters, searchQuery]
   );
 
   useEffect(() => {

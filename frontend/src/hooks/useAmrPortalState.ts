@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FacetOperator, FacetPageState, SelectedFilter } from '@interfaces/amrApi';
+import { isGlobalSearchActive } from '@/config/globalSearch';
 
 const DEFAULT_PER_PAGE = 100;
 const DEFAULT_VIEW_ID = 1;
@@ -30,6 +31,15 @@ export const useAmrPortalState = () => {
   const [facetOperatorsByView, setFacetOperatorsByView] = useState<Record<string, Record<string, FacetOperator>>>(
     {}
   );
+  const [searchQuery, setSearchQueryState] = useState('');
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearchQuery(searchQuery.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  const activeSearchQuery = isGlobalSearchActive(debouncedSearchQuery) ? debouncedSearchQuery : undefined;
 
   const initialViewId = useMemo(() => {
     const fromUrl = new URL(window.location.href).searchParams.get('view');
@@ -93,6 +103,11 @@ export const useAmrPortalState = () => {
     setPage(1);
   };
 
+  const setSearchQuery = useCallback((value: string) => {
+    setSearchQueryState(value);
+    setPage(1);
+  }, []);
+
   const clearAllFilters = () => {
     setSelectedFiltersByView({});
     setFacetPagingByView({});
@@ -100,6 +115,16 @@ export const useAmrPortalState = () => {
     setPage(1);
     setSort(null);
   };
+
+  const clearActiveFilters = useCallback(() => {
+    setSearchQueryState('');
+    setDebouncedSearchQuery('');
+    setSelectedFiltersByView({});
+    setFacetPagingByView({});
+    setFacetOperatorsByView({});
+    setPage(1);
+    setSort(null);
+  }, []);
 
   const facetPaging = useMemo(() => {
     if (!resolvedViewId) return {};
@@ -192,13 +217,18 @@ export const useAmrPortalState = () => {
     page,
     perPage,
     sort,
+    searchQuery,
+    activeSearchQuery,
+    isGlobalSearchActive: Boolean(activeSearchQuery),
     setCurrentView,
     setActiveGroup,
     toggleFilter,
     setPage,
     setPerPage,
     toggleSort,
+    setSearchQuery,
     clearAllFilters,
+    clearActiveFilters,
     facetPaging,
     facetOperators,
     setFacetSearch,

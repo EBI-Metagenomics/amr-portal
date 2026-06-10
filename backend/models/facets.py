@@ -12,10 +12,11 @@ class FacetPageRequest(BaseModel):
 
 
 class FacetsPayload(BaseModel):
-    selected_filters: List[SelectedFilter]
+    selected_filters: List[SelectedFilter] = Field(default_factory=list)
     view_id: int
     facet_paging: Dict[str, FacetPageRequest] = Field(default_factory=dict)
     facet_operators: Dict[str, Literal["AND", "OR"]] = Field(default_factory=dict)
+    search_query: Optional[str] = None
 
 
 class FacetOption(BaseModel):
@@ -29,6 +30,7 @@ class FacetDataTypeSummary(BaseModel):
     id: int
     name: str
     selected_count: int
+    search_count: Optional[int] = None
     active: bool
 
 

@@ -26,6 +26,9 @@ class AMRService implements BackendInterface {
     if (params.orderBy) {
       payload.order_by = params.orderBy;
     }
+    if (params.searchQuery) {
+      payload.search_query = params.searchQuery;
+    }
 
     const response = await apiClient.post<AMRRecordsResponse>('/amr-records', payload);
     return response.data;
@@ -39,6 +42,9 @@ class AMRService implements BackendInterface {
     };
     if (params.viewId !== undefined) {
       payload.view_id = params.viewId;
+    }
+    if (params.searchQuery) {
+      payload.search_query = params.searchQuery;
     }
     const response = await apiClient.post<AMRFacetsResponse>('/amr-facets', payload);
     return response.data;

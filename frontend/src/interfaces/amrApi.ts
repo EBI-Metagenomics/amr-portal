@@ -14,6 +14,7 @@ export type AMRRecordsFetchParams = {
   page: number;
   perPage: number;
   facetOperators?: Record<string, FacetOperator>;
+  searchQuery?: string;
   orderBy?: {
     category: string;
     order: 'ASC' | 'DESC';
@@ -31,6 +32,7 @@ export type AMRFacetsFetchParams = {
   viewId?: string | number;
   facetPaging?: Record<string, FacetPageState>;
   facetOperators?: Record<string, FacetOperator>;
+  searchQuery?: string;
 };
 
 export type FacetOption = {
@@ -44,6 +46,7 @@ export type FacetDataTypeSummary = {
   id: number;
   name: string;
   selected_count: number;
+  search_count?: number | null;
   active: boolean;
 };
 

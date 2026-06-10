@@ -3,12 +3,24 @@ def test_filters_config(client):
     assert response.status_code == 200
     assert isinstance(response.json(), dict)
 
-def test_amr_records_basic(client):
+def test_amr_records_requires_filters_or_search(client):
     payload = {
         "selected_filters": [],
         "page": 1,
-        "view_id":1,
-        "per_page": 10
+        "view_id": 1,
+        "per_page": 10,
+    }
+    response = client.post("/amr-records", json=payload)
+    assert response.status_code == 400
+
+
+def test_amr_records_with_search(client):
+    payload = {
+        "selected_filters": [],
+        "search_query": "amik",
+        "page": 1,
+        "view_id": 1,
+        "per_page": 10,
     }
     response = client.post("/amr-records", json=payload)
     assert response.status_code == 200

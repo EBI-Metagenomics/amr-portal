@@ -17,6 +17,13 @@ import logging
 from models.payload import Payload
 from core.filters_config_parser import build_filters_config
 from core.config import get_settings
+from services.global_search import (
+    compose_search_query,
+    fetch_search_counts_by_dataset,
+    merge_search_predicate,
+    require_filters_or_search,
+    resolve_search_prefix,
+)
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
@@ -248,18 +255,38 @@ def _build_filter_query_context(payload: Payload, db: duckdb.DuckDBPyConnection)
             raise HTTPException(status_code=400, detail=f"Invalid order_by column: {order_by_col!r}")
 
     where_sql, where_params = _build_where_clause(grouped_filters_with_operator)
+    search_prefix = resolve_search_prefix(
+        getattr(payload, "search_query", None),
+        db,
+    )
+    require_filters_or_search(payload.selected_filters, search_prefix)
+    where_sql = merge_search_predicate(where_sql, search_prefix)
+
     base_query = f"SELECT {columns_to_display_str} FROM {selected_dataset}"
     count_query = f"SELECT COUNT(*) AS count FROM {selected_dataset}"
     if where_sql:
         base_query += f" WHERE {where_sql}"
         count_query += f" WHERE {where_sql}"
 
+    base_query, base_params = compose_search_query(
+        base_query,
+        list(where_params),
+        selected_dataset,
+        search_prefix,
+    )
+    count_query, count_params = compose_search_query(
+        count_query,
+        list(where_params),
+        selected_dataset,
+        search_prefix,
+    )
+
     return FilterQueryContext(
         dataset=selected_dataset,
         base_query=base_query,
         count_query=count_query,
-        base_params=list(where_params),
-        count_params=list(where_params),
+        base_params=base_params,
+        count_params=count_params,
         display_column_details=display_column_details,
         order_by_col=order_by_col,
     )
@@ -345,6 +372,7 @@ def _fetch_data_type_summary(
     selected_filters: List[Any],
     current_view_id: int,
     db: duckdb.DuckDBPyConnection,
+    search_prefix: Optional[str] = None,
 ) -> List[Dict[str, Any]]:
     query = "SELECT view_id, name FROM view ORDER BY view_id"
     rows = db.execute(query).fetchall()
@@ -352,17 +380,23 @@ def _fetch_data_type_summary(
     for selected in selected_filters:
         dataset_name = selected.category.split("-")[0]
         selected_by_dataset[dataset_name] += 1
+    search_counts = (
+        fetch_search_counts_by_dataset(db, search_prefix)
+        if search_prefix
+        else {}
+    )
     summaries = []
     for view_id, name in rows:
         dataset_name = get_dataset_from_view(int(view_id), db)
-        summaries.append(
-            {
-                "id": int(view_id),
-                "name": str(name),
-                "selected_count": int(selected_by_dataset.get(str(dataset_name), 0)),
-                "active": int(view_id) == int(current_view_id),
-            }
-        )
+        summary: Dict[str, Any] = {
+            "id": int(view_id),
+            "name": str(name),
+            "selected_count": int(selected_by_dataset.get(str(dataset_name), 0)),
+            "active": int(view_id) == int(current_view_id),
+        }
+        if search_prefix:
+            summary["search_count"] = int(search_counts.get(str(dataset_name), 0))
+        summaries.append(summary)
     return summaries
 
 
@@ -372,7 +406,17 @@ def fetch_amr_facets(payload: Any, db: duckdb.DuckDBPyConnection):
     valid_columns = get_table_columns(selected_dataset, db)
     facet_definitions = _fetch_view_facet_definitions(selected_view_id, db)
     facet_option_labels = _fetch_facet_option_labels([facet["id"] for facet in facet_definitions], db)
-    data_type_summary = _fetch_data_type_summary(payload.selected_filters, selected_view_id, db)
+    search_prefix = resolve_search_prefix(
+        getattr(payload, "search_query", None),
+        db,
+    )
+    # Facets must load with no filters so the sidebar can show options before browse/search.
+    data_type_summary = _fetch_data_type_summary(
+        payload.selected_filters,
+        selected_view_id,
+        db,
+        search_prefix,
+    )
 
     facets = []
     for facet in facet_definitions:
@@ -393,6 +437,7 @@ def fetch_amr_facets(payload: Any, db: duckdb.DuckDBPyConnection):
             excluded_category=excluded_category,
         )
         where_sql, where_params = _build_where_clause(grouped_filters)
+        where_sql = merge_search_predicate(where_sql, search_prefix)
         paging = payload.facet_paging.get(facet_id) if payload.facet_paging else None
         limit = max(1, min(200, (paging.limit if paging else 10)))
         offset = max(0, paging.offset if paging else 0)
@@ -439,6 +484,12 @@ def fetch_amr_facets(payload: Any, db: duckdb.DuckDBPyConnection):
             "LIMIT ? OFFSET ?"
         )
         paged_params = [*facet_params, limit, offset]
+        paged_query, paged_params = compose_search_query(
+            paged_query,
+            paged_params,
+            selected_dataset,
+            search_prefix,
+        )
         rows_with_total = db.execute(paged_query, paged_params).fetchall()
         total_options = int(rows_with_total[0][2]) if rows_with_total else 0
         rows = [(value, count) for value, count, _ in rows_with_total]

@@ -17,7 +17,8 @@ class Settings(BaseSettings):
         # load from .env if present, or .env.test when running pytest
         env_file=".env.test" if os.getenv("TESTING") else ".env",
         env_file_encoding="utf-8",
-        case_sensitive=False
+        case_sensitive=False,
+        extra="ignore",
     )
 
     @field_validator("duckdb_path", mode="after")  # type: ignore[misc]

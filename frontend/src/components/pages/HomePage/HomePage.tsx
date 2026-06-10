@@ -26,6 +26,7 @@ const HomePage = () => {
     setCurrentView,
     toggleFilter,
     clearAllFilters,
+    clearActiveFilters,
     setFacetSearch,
     loadMoreFacet,
     toggleFacetExpanded,
@@ -35,7 +36,12 @@ const HomePage = () => {
     setPage,
     setPerPage,
     toggleSort,
+    searchQuery,
+    activeSearchQuery,
+    isGlobalSearchActive,
+    setSearchQuery,
   } = state;
+  const canShowResults = isGlobalSearchActive || selectedFilters.length > 0;
   const numericStateViewId =
     typeof viewId === 'number'
       ? viewId
@@ -50,6 +56,7 @@ const HomePage = () => {
       selectedFilters,
       facetPaging,
       facetOperators,
+      activeSearchQuery,
     ],
     queryFn: () =>
       amrService.getAMRFacets({
@@ -57,6 +64,7 @@ const HomePage = () => {
         viewId: numericStateViewId ?? undefined,
         facetPaging,
         facetOperators,
+        searchQuery: activeSearchQuery,
       }),
     placeholderData: keepPreviousData,
   });
@@ -82,6 +90,7 @@ const HomePage = () => {
       page,
       perPage,
       sort,
+      activeSearchQuery,
     ],
     queryFn: () =>
       amrService.getAMRRecords({
@@ -90,11 +99,12 @@ const HomePage = () => {
         page,
         perPage,
         facetOperators,
+        searchQuery: activeSearchQuery,
         orderBy: sort
           ? { category: sort.category, order: sort.order.toUpperCase() as 'ASC' | 'DESC' }
           : undefined,
       }),
-    enabled: numericViewId !== null && selectedFilters.length > 0,
+    enabled: numericViewId !== null && canShowResults,
     placeholderData: keepPreviousData,
   });
 
@@ -106,7 +116,7 @@ const HomePage = () => {
 
   useEffect(() => {
     setSelectedRowIndex(null);
-  }, [selectedFilters, page, perPage, sort, numericViewId]);
+  }, [selectedFilters, page, perPage, sort, numericViewId, activeSearchQuery]);
 
   useEffect(() => {
     if (selectedRowIndex === null) {
@@ -164,6 +174,11 @@ const HomePage = () => {
                 facetsData={facetsQuery.data}
                 selectedFilters={selectedFilters}
                 currentViewId={numericViewId}
+                searchQuery={searchQuery}
+                activeSearchQuery={activeSearchQuery}
+                isGlobalSearchActive={isGlobalSearchActive}
+                onSearchQueryChange={setSearchQuery}
+                onClearActiveFilters={clearActiveFilters}
                 onViewChange={setCurrentView}
                 onFilterToggle={toggleFilter}
                 onClearAllFilters={clearAllFilters}
@@ -185,7 +200,8 @@ const HomePage = () => {
                 isPlaceholderData={recordsQuery.isPlaceholderData}
                 isLoading={recordsQuery.isLoading}
                 isError={recordsQuery.isError}
-                hasSelectedFilters={selectedFilters.length > 0}
+                canShowResults={canShowResults}
+                activeSearchQuery={activeSearchQuery}
                 page={page}
                 perPage={perPage}
                 sort={sort}
