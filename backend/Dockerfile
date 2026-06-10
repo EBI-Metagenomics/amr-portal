@@ -22,6 +22,7 @@ COPY --chown=amr:amr api ./api
 COPY --chown=amr:amr core ./core
 COPY --chown=amr:amr models ./models
 COPY --chown=amr:amr services ./services
+COPY --chown=amr:amr static ./static
 
 ENV PATH="/usr/app/.venv/bin:$PATH"
 USER amr

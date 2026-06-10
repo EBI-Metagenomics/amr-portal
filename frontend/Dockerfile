@@ -28,14 +28,17 @@ FROM nginx:1.27-alpine
 LABEL maintainer="ensembl-webteam@ebi.ac.uk"
 
 RUN rm -f /etc/nginx/conf.d/default.conf \
-  && mkdir -p /var/cache/nginx /var/log/nginx /var/run \
-  && chown -R nginx:nginx /var/cache/nginx /var/log/nginx /var/run /etc/nginx/conf.d /usr/share/nginx/html
+  && mkdir -p /var/cache/nginx/client_temp /var/cache/nginx/proxy_temp \
+    /var/cache/nginx/fastcgi_temp /var/cache/nginx/uwsgi_temp /var/cache/nginx/scgi_temp \
+    /var/log/nginx /var/run \
+  && sed -i 's|pid /run/nginx.pid;|pid /var/cache/nginx/nginx.pid;|' /etc/nginx/nginx.conf \
+  && chown -R nginx:nginx /var/cache/nginx /var/log/nginx /var/run /etc/nginx/conf.d
 
 COPY --chown=nginx:nginx frontend/nginx-conf/local.conf /etc/nginx/conf.d/local.conf
 COPY --chown=nginx:nginx frontend/nginx-conf/mime.types /etc/nginx/conf.d/mime.types
 COPY --chown=nginx:nginx --from=merge /html /usr/share/nginx/html
 RUN sed -i 's|<head>|<head><script src="./runtime-config.js"></script>|' /usr/share/nginx/html/data/index.html \
-  && chown nginx:nginx /usr/share/nginx/html/data/index.html
+  && chown -R nginx:nginx /usr/share/nginx/html
 
 USER nginx
 EXPOSE 8000

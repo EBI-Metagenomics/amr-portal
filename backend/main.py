@@ -6,7 +6,6 @@ _ROOT = Path(__file__).resolve().parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 _STATIC_ROOT = _ROOT / "static"
-_STATIC_ROOT.mkdir(parents=True, exist_ok=True)
 
 from fastapi import FastAPI
 from fastapi.openapi.docs import get_swagger_ui_html
