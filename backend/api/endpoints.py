@@ -1,7 +1,6 @@
 import base64
 
-import duckdb
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
 
 from models.amr_records import AMRRecordsResponse
@@ -11,7 +10,7 @@ from models.payload import Payload
 from models.release import Release
 from services.filters import fetch_filters, filter_amr_records, fetch_filtered_records, fetch_amr_facets
 from services.release import fetch_release
-from core.database import get_db_connection
+from core.database import run_in_db
 from starlette.responses import StreamingResponse
 from starlette.concurrency import run_in_threadpool
 
@@ -28,8 +27,8 @@ class HealthResponse(BaseModel):
     description="Returns available filter categories, views, grouped categories, and release metadata.",
     response_description="Filter configuration consumed by the AMR portal UI.",
 )
-def get_filters_config(db: duckdb.DuckDBPyConnection = Depends(get_db_connection)) -> FiltersConfig:
-    filters: dict = fetch_filters(db)
+def get_filters_config() -> FiltersConfig:
+    filters: dict = run_in_db(fetch_filters)
     return FiltersConfig(**filters)
 
 
@@ -44,11 +43,8 @@ def get_filters_config(db: duckdb.DuckDBPyConnection = Depends(get_db_connection
         status.HTTP_500_INTERNAL_SERVER_ERROR: {"description": "Database query execution failed."},
     },
 )
-def get_amr_records(
-    payload: Payload,
-    db: duckdb.DuckDBPyConnection = Depends(get_db_connection)
-):
-    return filter_amr_records(payload, db)
+def get_amr_records(payload: Payload):
+    return run_in_db(filter_amr_records, payload)
 
 
 @router.post(
@@ -63,11 +59,8 @@ def get_amr_records(
     },
     include_in_schema=False,
 )
-def get_amr_facets(
-    payload: FacetsPayload,
-    db: duckdb.DuckDBPyConnection = Depends(get_db_connection)
-):
-    return fetch_amr_facets(payload, db)
+def get_amr_facets(payload: FacetsPayload):
+    return run_in_db(fetch_amr_facets, payload)
 
 
 @router.post(
@@ -88,9 +81,8 @@ def download_filtered_records(
     payload: Payload,
     scope: str = Query("all", pattern="^(page|all)$"),
     file_format: str = Query("csv", pattern="^(csv|json)$"),
-    db: duckdb.DuckDBPyConnection = Depends(get_db_connection)
 ):
-    return fetch_filtered_records(payload, scope, file_format, db)
+    return run_in_db(fetch_filtered_records, payload, scope, file_format)
 
 
 def _b64url_decode_to_str(s: str) -> str:
@@ -121,28 +113,25 @@ async def download_filtered_records_get(
     payload: str = Query(..., description="Base64 URL-safe encoded JSON matching the Payload schema"),
     scope: str = Query("all", description="Either 'page' or 'all'", pattern="^(page|all)$"),
     file_format: str = Query("csv", description="Either 'csv' or 'json'", pattern="^(csv|json)$"),
-    db: duckdb.DuckDBPyConnection = Depends(get_db_connection),
 ):
     """
     GET version of /amr-records/download.
     - Keeps Base64-encoded JSON `payload`.
     - Forwards the StreamingResponse (CSV) or dict (JSON) returned by fetch_filtered_records.
     """
-    # Decode and validate the payload into your Pydantic model
     decoded = _b64url_decode_to_str(payload)
     try:
         payload_obj = Payload.model_validate_json(decoded)
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Invalid 'payload' JSON: {e}")
 
-    # Moves the blocking I/O operations to a separate thread pool (DuckDB queries, file operations)
-    result = await run_in_threadpool(fetch_filtered_records, payload_obj, scope, file_format, db)
+    result = await run_in_threadpool(
+        run_in_db, fetch_filtered_records, payload_obj, scope, file_format
+    )
 
-    # If the service already streams CSV, just return it.
     if isinstance(result, StreamingResponse):
         return result
 
-    # Otherwise (e.g., JSON path returns a dict), return as-is.
     return result
 
 
@@ -162,6 +151,8 @@ def health() -> HealthResponse:
     summary="Get release metadata",
     description="Returns the current AMR release label used to annotate UI and data exports.",
 )
-def get_release(db: duckdb.DuckDBPyConnection = Depends(get_db_connection)) -> Release:
-    release: dict = fetch_release(db)
+def get_release() -> Release:
+    release = run_in_db(fetch_release)
+    if release is None:
+        raise HTTPException(status_code=404, detail="Release metadata not found")
     return Release(**release)

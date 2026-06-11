@@ -9,15 +9,14 @@ from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple
 
 import duckdb
 import numpy as np
-from functools import lru_cache
 from fastapi import HTTPException
 from fastapi.responses import StreamingResponse
 import logging
 
 from models.payload import Payload
-from core.filters_config_parser import build_filters_config
 from core.config import get_settings
 from core.duckdb_conn import connect_duckdb
+from core.filters_config_parser import build_filters_config
 from services.global_search import (
     compose_search_query,
     fetch_search_counts_by_dataset,
@@ -32,6 +31,8 @@ _settings = get_settings()
 
 # Cache display columns per view_id so repeated downloads do not incur extra metadata queries.
 _display_columns_cache: Dict[int, Any] = {}
+_table_columns_cache: Dict[str, frozenset[str]] = {}
+_view_dataset_map: Optional[Dict[int, str]] = None
 
 
 @dataclass
@@ -46,25 +47,33 @@ class FilterQueryContext:
     order_by_col: Optional[str]
 
 
-@lru_cache(maxsize=32)
-def get_table_columns(table_name: str, db: duckdb.DuckDBPyConnection):
-    """Return the set of column names for the provided table.
-
-    Args:
-        table_name (str): Target DuckDB table name.
-        db (duckdb.DuckDBPyConnection): Database connection to query through.
-
-    Returns:
-        set[str]: Column names available on the table.
-
-    Raises:
-        HTTPException: If DuckDB fails to return table metadata.
-    """
+def get_table_columns(table_name: str, db: duckdb.DuckDBPyConnection) -> set[str]:
+    """Return the set of column names for the provided table (cached per process)."""
+    cached = _table_columns_cache.get(table_name)
+    if cached is not None:
+        return set(cached)
     try:
         columns_result = db.query(f"PRAGMA table_info({table_name})").fetchdf()
-        return set(columns_result['name'].tolist())
-    except Exception as e:
+        columns = frozenset(columns_result["name"].tolist())
+        _table_columns_cache[table_name] = columns
+        return set(columns)
+    except Exception:
         raise HTTPException(status_code=400, detail=f"Failed to get columns for table: {table_name}")
+
+
+def get_view_dataset_map(db: duckdb.DuckDBPyConnection) -> Dict[int, str]:
+    """Map view_id → dataset table name (loaded once per process)."""
+    global _view_dataset_map
+    if _view_dataset_map is not None:
+        return _view_dataset_map
+    try:
+        rows = db.execute(
+            "SELECT DISTINCT view_id, dataset_name FROM view_categories"
+        ).fetchall()
+        _view_dataset_map = {int(view_id): str(dataset_name) for view_id, dataset_name in rows}
+        return _view_dataset_map
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to load view dataset map: {e}")
 
 def check_selected_filters(grouped_filters, valid_columns):
     """Verify that all requested filter columns exist within the dataset schema.
@@ -80,25 +89,12 @@ def check_selected_filters(grouped_filters, valid_columns):
         return True
     return False
 
-def get_dataset_from_view(view_id: int, db: duckdb.DuckDBPyConnection):
-    """Resolve the dataset backing a view_id.
-
-    Args:
-        view_id (int): View identifier coming from the UI configuration.
-        db (duckdb.DuckDBPyConnection): Database connection.
-
-    Returns:
-        str: Dataset/table name associated with the view.
-
-    Raises:
-        HTTPException: If the lookup fails.
-    """
-    dataset_from_view_query = "SELECT DISTINCT (dataset_name) FROM view_categories WHERE view_id = ?;"
-    try:
-        dataset = db.execute(dataset_from_view_query, [view_id]).fetchone()[0]
-        return dataset
-    except Exception as e:
+def get_dataset_from_view(view_id: int, db: duckdb.DuckDBPyConnection) -> str:
+    """Resolve the dataset backing a view_id."""
+    dataset = get_view_dataset_map(db).get(int(view_id))
+    if dataset is None:
         raise HTTPException(status_code=400, detail=f"Failed to get dataset from view ID: {view_id}")
+    return dataset
 
 def get_display_column_details(view_id: int, db: duckdb.DuckDBPyConnection):
     """Return per-column metadata for a view, caching results for reuse.
@@ -377,6 +373,7 @@ def _fetch_data_type_summary(
 ) -> List[Dict[str, Any]]:
     query = "SELECT view_id, name FROM view ORDER BY view_id"
     rows = db.execute(query).fetchall()
+    view_dataset_map = get_view_dataset_map(db)
     selected_by_dataset: Dict[str, int] = defaultdict(int)
     for selected in selected_filters:
         dataset_name = selected.category.split("-")[0]
@@ -388,7 +385,9 @@ def _fetch_data_type_summary(
     )
     summaries = []
     for view_id, name in rows:
-        dataset_name = get_dataset_from_view(int(view_id), db)
+        dataset_name = view_dataset_map.get(int(view_id))
+        if dataset_name is None:
+            continue
         summary: Dict[str, Any] = {
             "id": int(view_id),
             "name": str(name),
@@ -533,6 +532,7 @@ def _stream_prefixed_rows(
     context: FilterQueryContext,
     payload: Payload,
     query_params: List[Any],
+    _db: duckdb.DuckDBPyConnection,
     batch_size: int = 10_000,
 ) -> Iterator[Dict[str, Any]]:
     """Yield dataset-prefixed rows directly from DuckDB in bounded batches.
@@ -546,10 +546,10 @@ def _stream_prefixed_rows(
         Dict[str, Any]: Sanitized row mapping, prefixed with dataset name to match UI expectations.
     """
     query = _append_order_clause(context.base_query, payload, context.order_by_col)
-    # Use a dedicated connection so the FastAPI dependency can close cleanly while streaming continues.
-    conn = connect_duckdb(_settings.duckdb_path, read_only=True)
+    # Dedicated connection: the request lock is released before StreamingResponse finishes.
+    stream_conn = connect_duckdb(_settings.duckdb_path, read_only=True)
     try:
-        cursor = conn.execute(query, query_params)
+        cursor = stream_conn.execute(query, query_params)
         raw_columns = [desc[0] for desc in cursor.description]
         prefixed_columns = [f"{context.dataset}-{col}" for col in raw_columns]
 
@@ -563,7 +563,7 @@ def _stream_prefixed_rows(
                     for col_name, value in zip(prefixed_columns, row)
                 }
     finally:
-        conn.close()
+        stream_conn.close()
 
 
 def _build_columns_metadata(display_column_details: dict) -> list[Dict[str, Any]]:
@@ -783,7 +783,7 @@ def fetch_filtered_records(payload: Payload, scope, file_format, db: duckdb.Duck
         raise HTTPException(status_code=404, detail="No data found for the given filters")
 
     # Stream rows straight from DuckDB so responses for 100k+ rows start immediately.
-    row_iter = _stream_prefixed_rows(context, payload, context.base_params)
+    row_iter = _stream_prefixed_rows(context, payload, context.base_params, db)
     if file_format == "json":
         return StreamingResponse(
             stream_json_rows(row_iter),

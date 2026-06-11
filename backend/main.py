@@ -17,33 +17,28 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from api.endpoints import router as api_router
 from api.docs_chrome import FOOTER_HTML, HEADER_HTML
-from core.config import get_settings
-from core.duckdb_conn import connect_duckdb, verify_fts_extension
-from services.global_search import is_global_search_available
+from core.database import close_db_connection, init_db_connection, verify_db_at_startup
 
 logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
-    settings = get_settings()
-    conn = connect_duckdb(settings.duckdb_path, read_only=True)
-    try:
-        fts_ok = verify_fts_extension(conn)
-        if fts_ok and is_global_search_available(conn):
-            logger.info("global_search table and FTS index are available")
-        elif fts_ok:
-            logger.warning(
-                "FTS extension loaded but global_search / fts_main_global_search "
-                "not found — run global-search rebuild on the database"
-            )
-        else:
-            logger.warning(
-                "FTS extension unavailable — global search endpoints will be degraded"
-            )
-    finally:
-        conn.close()
+    init_db_connection()
+    fts_ok, search_ok = verify_db_at_startup()
+    if fts_ok and search_ok:
+        logger.info("global_search table and FTS index are available")
+    elif fts_ok:
+        logger.warning(
+            "FTS extension loaded but global_search / fts_main_global_search "
+            "not found — run global-search rebuild on the database"
+        )
+    else:
+        logger.warning(
+            "FTS extension unavailable — global search endpoints will be degraded"
+        )
     yield
+    close_db_connection()
 
 
 app = FastAPI(

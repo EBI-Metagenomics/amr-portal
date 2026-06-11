@@ -1,18 +1,28 @@
 import duckdb
+import pytest
 
+import core.duckdb_conn as duckdb_conn
 from core.duckdb_conn import configure_duckdb_connection, is_fts_loaded, load_fts_extension
+
+
+@pytest.fixture(autouse=True)
+def reset_process_fts_flag():
+    duckdb_conn._fts_initialized = False
+    yield
+    duckdb_conn._fts_initialized = False
 
 
 def test_load_fts_extension_in_memory():
     conn = duckdb.connect(":memory:")
     try:
-        load_fts_extension(conn)
+        load_fts_extension(conn, allow_install=True)
         assert is_fts_loaded(conn)
     finally:
         conn.close()
 
 
-def test_configure_duckdb_connection_applies_pragmas():
+def test_configure_duckdb_connection_applies_pragmas(monkeypatch):
+    monkeypatch.setenv("TESTING", "1")
     conn = duckdb.connect(":memory:")
     try:
         configure_duckdb_connection(conn)
