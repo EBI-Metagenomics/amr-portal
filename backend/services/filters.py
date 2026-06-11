@@ -17,6 +17,7 @@ import logging
 from models.payload import Payload
 from core.filters_config_parser import build_filters_config
 from core.config import get_settings
+from core.duckdb_conn import connect_duckdb
 from services.global_search import (
     compose_search_query,
     fetch_search_counts_by_dataset,
@@ -546,10 +547,8 @@ def _stream_prefixed_rows(
     """
     query = _append_order_clause(context.base_query, payload, context.order_by_col)
     # Use a dedicated connection so the FastAPI dependency can close cleanly while streaming continues.
-    conn = duckdb.connect(_settings.duckdb_path, read_only=True)
+    conn = connect_duckdb(_settings.duckdb_path, read_only=True)
     try:
-        conn.execute("PRAGMA threads = 4")
-        conn.execute("PRAGMA memory_limit = '2GB'")
         cursor = conn.execute(query, query_params)
         raw_columns = [desc[0] for desc in cursor.description]
         prefixed_columns = [f"{context.dataset}-{col}" for col in raw_columns]

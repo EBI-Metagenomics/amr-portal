@@ -56,13 +56,16 @@ cd backend && uv sync --extra dev && TESTING=true uv run pytest tests/
 
 ### Global search (DuckDB FTS)
 
-The `global-search/` package builds the `global_search` table and FTS index on an
-AMR DuckDB release. Run it after ETL or whenever source tables are updated:
+The backend Docker image pre-installs the DuckDB FTS extension and loads it on every
+connection. The `global_search` table and FTS index are built **locally** with the
+`global-search/` package, then the finished `.duckdb` file is copied to the cluster
+PVC (see [global-search/README.md](global-search/README.md) for the full workflow).
 
 ```shell
 cd global-search
 uv sync
 uv run python rebuild_global_search.py --db-path /path/to/amr_RELEASE.duckdb
+# copy amr_RELEASE.duckdb to the API PVC, then restart backend pods
 ```
 
 See [global-search/README.md](global-search/README.md) for SQL scripts, manual

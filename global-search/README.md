@@ -40,9 +40,68 @@ Re-run **both** `01_create_table.sql` and `02_create_fts_index.sql` whenever:
 
 `01` changes `global_search.rowid` values, so the FTS index must always be rebuilt immediately after.
 
+## Deploy to the cluster (local rebuild, copy to PVC)
+
+The API image only **loads** the FTS extension at runtime; the `global_search` table
+and FTS index must already exist **inside** the DuckDB file. Build them locally, then
+copy the finished file to the PVC the API mounts.
+
+### 1. Obtain the release DuckDB file
+
+Download or copy the current `amr_RELEASE.duckdb` from FTP, ETL output, or the
+cluster (if you need to re-index an existing file).
+
+### 2. Rebuild locally
+
+```bash
+cd global-search
+uv sync
+uv run python rebuild_global_search.py --db-path /path/to/amr_RELEASE.duckdb
+```
+
+DuckDB will `INSTALL`/`LOAD` the FTS extension into your local user cache on first
+run. No container image is required for this step.
+
+### 3. Smoke test (optional)
+
+```bash
+duckdb /path/to/amr_RELEASE.duckdb
+```
+
+```sql
+LOAD fts;
+.read global-search/sql/03_manual_test_queries.sql
+```
+
+Or run the package tests: `uv sync --group dev && uv run pytest tests/ -v`
+
+### 4. Copy to the API PVC
+
+Scale the backend deployment to zero (or ensure no pod has the file open), then copy
+the file to the mount path your API uses (`DUCKDB_PATH`, often `/usr/data/portal.duckdb`).
+
+**Via a temporary debug pod** (adjust namespace, PVC name, and paths):
+
+```bash
+kubectl run duckdb-upload --rm -it --restart=Never \
+  --image=busybox \
+  --overrides='{"spec":{"containers":[{"name":"duckdb-upload","image":"busybox","command":["sh"],"stdin":true,"tty":true,"volumeMounts":[{"name":"data","mountPath":"/data"}]}],"volumes":[{"name":"data","persistentVolumeClaim":{"claimName":"YOUR_PVC"}}]}}'
+
+# In another terminal, while the pod is running:
+kubectl cp /path/to/amr_RELEASE.duckdb YOUR_NAMESPACE/duckdb-upload:/data/portal.duckdb
+```
+
+**Or** `kubectl cp` directly to a backend pod if your cluster allows it and the pod
+is stopped or the file is not locked.
+
+### 5. Restart the API and verify
+
+Restart backend pods so they pick up the new file. On startup the API logs whether
+FTS is loaded and `global_search` / `fts_main_global_search` are present.
+
 ## Automation
 
-### Rebuild on an existing database (recommended)
+### Rebuild on an existing database
 
 ```bash
 cd global-search

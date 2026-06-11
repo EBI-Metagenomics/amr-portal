@@ -12,6 +12,8 @@ from pathlib import Path
 
 import duckdb
 
+from amr_global_search.duckdb_ext import ensure_fts_extension
+
 SQL_DIR = Path(__file__).resolve().parent.parent / "sql"
 
 REQUIRED_SOURCE_TABLES = ("phenotype", "genotype", "pheno_geno_merged")
@@ -27,11 +29,6 @@ def _load_sql(script_name: str) -> str:
     if not path.is_file():
         raise FileNotFoundError(f"Global search SQL script not found: {path}")
     return path.read_text(encoding="utf-8")
-
-
-def _ensure_fts_extension(conn: duckdb.DuckDBPyConnection) -> None:
-    conn.execute("INSTALL fts;")
-    conn.execute("LOAD fts;")
 
 
 def _ensure_source_tables(conn: duckdb.DuckDBPyConnection) -> None:
@@ -89,7 +86,7 @@ def build_global_search(conn: duckdb.DuckDBPyConnection) -> None:
     print("Building global_search table and FTS index...")
 
     _ensure_source_tables(conn)
-    _ensure_fts_extension(conn)
+    ensure_fts_extension(conn)
 
     for script_name in SQL_SCRIPTS:
         print(f"  Running {script_name}")
