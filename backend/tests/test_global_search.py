@@ -6,8 +6,8 @@ import duckdb
 import pytest
 from fastapi import HTTPException
 
+from core.constants import MIN_SEARCH_PREFIX_LENGTH
 from services.global_search import (
-    MIN_SEARCH_PREFIX_LENGTH,
     compose_search_query,
     fetch_search_counts_by_dataset,
     is_global_search_available,

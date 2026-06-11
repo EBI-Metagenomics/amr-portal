@@ -25,7 +25,6 @@ from services.global_search import (
     resolve_search_prefix,
 )
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 _settings = get_settings()
 

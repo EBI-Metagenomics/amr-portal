@@ -2,6 +2,7 @@ import duckdb
 import pytest
 
 import core.duckdb_conn as duckdb_conn
+from core.config import get_settings
 from core.duckdb_conn import configure_duckdb_connection, is_fts_loaded, load_fts_extension
 
 
@@ -23,6 +24,7 @@ def test_load_fts_extension_in_memory():
 
 def test_configure_duckdb_connection_applies_pragmas(monkeypatch):
     monkeypatch.setenv("TESTING", "1")
+    get_settings.cache_clear()
     conn = duckdb.connect(":memory:")
     try:
         configure_duckdb_connection(conn)

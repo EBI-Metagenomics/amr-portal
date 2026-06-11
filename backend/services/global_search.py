@@ -8,9 +8,9 @@ from typing import Any, Dict, List, Optional, Tuple
 import duckdb
 from fastapi import HTTPException
 
-logger = logging.getLogger(__name__)
+from core.constants import MIN_SEARCH_PREFIX_LENGTH
 
-MIN_SEARCH_PREFIX_LENGTH = 3
+logger = logging.getLogger(__name__)
 
 # Params per query using SEARCH_HITS_CTE: (1) prefix, (2) source_table
 SEARCH_HITS_CTE = """

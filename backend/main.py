@@ -17,8 +17,22 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from api.endpoints import router as api_router
 from api.docs_chrome import FOOTER_HTML, HEADER_HTML
+from core.config import get_settings
+from core.constants import API_PREFIX, API_STATIC_MOUNT, GZIP_COMPRESSLEVEL, GZIP_MINIMUM_SIZE
 from core.database import close_db_connection, init_db_connection, verify_db_at_startup
 
+_settings = get_settings()
+
+
+def _configure_logging() -> None:
+    level = getattr(logging, _settings.log_level.upper(), logging.INFO)
+    logging.basicConfig(
+        level=level,
+        format="%(asctime)s - %(levelname)s - %(name)s - %(message)s",
+    )
+
+
+_configure_logging()
 logger = logging.getLogger(__name__)
 
 
@@ -50,16 +64,20 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=_settings.cors_allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-app.add_middleware(GZipMiddleware, minimum_size=1000, compresslevel=5)
+app.add_middleware(
+    GZipMiddleware,
+    minimum_size=GZIP_MINIMUM_SIZE,
+    compresslevel=GZIP_COMPRESSLEVEL,
+)
 
-app.mount("/api-static", StaticFiles(directory=_STATIC_ROOT), name="api-static")
-app.include_router(api_router, prefix="/api")
+app.mount(API_STATIC_MOUNT, StaticFiles(directory=_STATIC_ROOT), name="api-static")
+app.include_router(api_router, prefix=API_PREFIX)
 
 
 @app.get("/docs", include_in_schema=False)
