@@ -3,6 +3,7 @@ def test_filters_config(client):
     assert response.status_code == 200
     assert isinstance(response.json(), dict)
 
+
 def test_amr_records_requires_filters_or_search(client):
     payload = {
         "selected_filters": [],

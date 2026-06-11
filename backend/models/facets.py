@@ -1,4 +1,4 @@
-from typing import Dict, List, Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -8,15 +8,15 @@ from models.payload import SelectedFilter
 class FacetPageRequest(BaseModel):
     offset: int = 0
     limit: int = 10
-    search: Optional[str] = None
+    search: str | None = None
 
 
 class FacetsPayload(BaseModel):
-    selected_filters: List[SelectedFilter] = Field(default_factory=list)
+    selected_filters: list[SelectedFilter] = Field(default_factory=list)
     view_id: int
-    facet_paging: Dict[str, FacetPageRequest] = Field(default_factory=dict)
-    facet_operators: Dict[str, Literal["AND", "OR"]] = Field(default_factory=dict)
-    search_query: Optional[str] = None
+    facet_paging: dict[str, FacetPageRequest] = Field(default_factory=dict)
+    facet_operators: dict[str, Literal["AND", "OR"]] = Field(default_factory=dict)
+    search_query: str | None = None
 
 
 class FacetOption(BaseModel):
@@ -30,7 +30,7 @@ class FacetDataTypeSummary(BaseModel):
     id: int
     name: str
     selected_count: int
-    search_count: Optional[int] = None
+    search_count: int | None = None
     active: bool
 
 
@@ -39,11 +39,11 @@ class FacetResponseItem(BaseModel):
     label: str
     selected_count: int
     total_options: int
-    options: List[FacetOption]
+    options: list[FacetOption]
     has_more: bool
-    next_offset: Optional[int] = None
+    next_offset: int | None = None
 
 
 class FacetsResponse(BaseModel):
-    data_type: List[FacetDataTypeSummary]
-    facets: List[FacetResponseItem]
+    data_type: list[FacetDataTypeSummary]
+    facets: list[FacetResponseItem]

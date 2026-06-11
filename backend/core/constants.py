@@ -27,10 +27,22 @@ DEFAULT_DUCKDB_THREADS = 4
 DEFAULT_DUCKDB_MEMORY_LIMIT = "1GB"
 DUCKDB_FTS_EXTENSION = "fts"
 
-# HTTP middleware
+# HTTP middleware / CORS
 DEFAULT_CORS_ORIGINS: list[str] = ["*"]
+DEFAULT_CORS_ALLOW_CREDENTIALS = True
+DEFAULT_CORS_ALLOW_METHODS: list[str] = ["GET", "POST", "OPTIONS", "HEAD"]
+DEFAULT_CORS_ALLOW_HEADERS: list[str] = [
+    "Accept",
+    "Authorization",
+    "Content-Type",
+    "Origin",
+    "X-Requested-With",
+]
 GZIP_MINIMUM_SIZE = 1000
 GZIP_COMPRESSLEVEL = 5
 
 # Logging
 DEFAULT_LOG_LEVEL = "INFO"
+
+# Column metadata keys copied into per-cell API payloads
+KNOWN_COLUMN_ATTRIBUTES = ("type", "sortable", "url", "delimiter")

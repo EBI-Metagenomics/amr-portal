@@ -10,15 +10,22 @@ if str(_ROOT) not in sys.path:
 _STATIC_ROOT = _ROOT / "static"
 
 from fastapi import FastAPI
-from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
-from api.endpoints import router as api_router
+
 from api.docs_chrome import FOOTER_HTML, HEADER_HTML
+from api.endpoints import router as api_router
 from core.config import get_settings
-from core.constants import API_PREFIX, API_STATIC_MOUNT, GZIP_COMPRESSLEVEL, GZIP_MINIMUM_SIZE
+from core.constants import (
+    API_PREFIX,
+    API_STATIC_MOUNT,
+    DEFAULT_CORS_ALLOW_CREDENTIALS,
+    GZIP_COMPRESSLEVEL,
+    GZIP_MINIMUM_SIZE,
+)
 from core.database import close_db_connection, init_db_connection, verify_db_at_startup
 
 _settings = get_settings()
@@ -35,6 +42,20 @@ def _configure_logging() -> None:
 _configure_logging()
 logger = logging.getLogger(__name__)
 
+_cors = _settings.cors_config()
+if "*" in _settings.cors_allowed_origins and DEFAULT_CORS_ALLOW_CREDENTIALS:
+    logger.warning(
+        "CORS_ALLOWED_ORIGINS contains '*'; credentials are disabled because "
+        "browsers reject that combination"
+    )
+logger.info(
+    "CORS configured: origins=%s credentials=%s methods=%s headers=%s",
+    _cors.allow_origins,
+    _cors.allow_credentials,
+    _cors.allow_methods,
+    _cors.allow_headers,
+)
+
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
@@ -48,9 +69,7 @@ async def lifespan(_app: FastAPI):
             "not found — run global-search rebuild on the database"
         )
     else:
-        logger.warning(
-            "FTS extension unavailable — global search endpoints will be degraded"
-        )
+        logger.warning("FTS extension unavailable — global search endpoints will be degraded")
     yield
     close_db_connection()
 
@@ -64,10 +83,10 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=_settings.cors_allowed_origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=_cors.allow_origins,
+    allow_credentials=_cors.allow_credentials,
+    allow_methods=_cors.allow_methods,
+    allow_headers=_cors.allow_headers,
 )
 
 app.add_middleware(
@@ -96,7 +115,7 @@ def custom_swagger_ui() -> HTMLResponse:
         '  <link rel="stylesheet" href="//ebi.emblstatic.net/web_guidelines/EBI-Icon-fonts/v1.3/fonts.css"/>\n'
         "</head>",
     )
-    html = html.replace('<div id="swagger-ui">', f"{HEADER_HTML}\n<div id=\"swagger-ui\">")
+    html = html.replace('<div id="swagger-ui">', f'{HEADER_HTML}\n<div id="swagger-ui">')
     html = html.replace(
         "</body>",
         f"{FOOTER_HTML}\n"

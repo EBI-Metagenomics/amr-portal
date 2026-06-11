@@ -1,9 +1,17 @@
 from __future__ import annotations
 
-from typing import Any, Iterable
-from collections import defaultdict, OrderedDict
+from collections import OrderedDict, defaultdict
+from collections.abc import Iterable
+from typing import Any
 
 import duckdb
+
+from core.sql.filters_config import (
+    COLUMNS_PER_VIEW_SQL,
+    FILTERS_CATEGORY_SQL,
+    FILTERS_VIEW_SQL,
+)
+from core.sql.release import RELEASE_LABEL_SQL
 from core.utils import query_to_records
 
 
@@ -48,7 +56,7 @@ def _ensure_group(
     Args:
         view: The view dict with 'categoryGroups' and 'otherCategoryGroups'.
         group_name: Name of the category group.
-        is_primary: Whether the group belongs to 'categoryGroups' (True) or 'otherCategoryGroups' (False).
+        is_primary: True for categoryGroups, False for otherCategoryGroups.
         group_index: Internal index mapping (group_name, is_primary) -> index in the target list.
 
     Returns:
@@ -88,19 +96,10 @@ def _build_columns_per_view(db):
 
     Example:
         >>> result = _build_columns_per_view(db)
-        >>> result['AMR antibiotics']
-        [{'view_name': 'AMR antibiotics', 'id': 'phenotype-Antibiotic_name, 'label': 'Antibiotic Name', 'sortable': True, 'rank': 1, 'enable_by_default': True},
-         {'view_name': 'AMR antibiotics', 'id': 'phenotype-Antibiotic_abbreviation', 'label': ''Antibiotic Abbreviation', 'sortable': True, 'rank': 2, 'enable_by_default': True}]
+        >>> result["AMR antibiotics"][0]["id"]
+        'phenotype-Antibiotic_name'
     """
-    columns_per_view_query = """
-        SELECT v.name as view_name, cd.fullname AS id, cd.label, cd.sortable, vc.rank, vc.enable_by_default
-        FROM view as v
-            JOIN view_column vc on v.view_id = vc.view_id
-            JOIN column_definition cd on vc.column_id = cd.column_id
-        ORDER BY vc.rank
-     """
-
-    columns_per_view = query_to_records(db, columns_per_view_query)
+    columns_per_view = query_to_records(db, COLUMNS_PER_VIEW_SQL)
     columns_grouped_per_view = defaultdict(list)
 
     for col in columns_per_view:
@@ -148,7 +147,7 @@ def _build_filter_views(db, rows: Iterable[dict[str, Any]]) -> list[dict[str, An
 
     # Add columns per view
     columns_per_view = _build_columns_per_view(db)
-    for view_id, view in views.items():
+    for _view_id, view in views.items():
         view_name = view["name"]
         if view_name in columns_per_view:
             # Get columns and remove 'view_name' from each column dict
@@ -183,42 +182,12 @@ def build_filters_config(db: duckdb.DuckDBPyConnection) -> dict[str, Any]:
             - "filterViews": [ {...}, ... ]
             - "release": {...}
     """
-    # Categories
-    filters_category_query = """
-        SELECT f.label, f.value, d.name as dataset, cd.fullname as column_id
-        FROM filter f
-        JOIN column_definition cd ON f.column_id = cd.column_id
-        JOIN dataset_column dc ON cd.column_id = dc.column_id
-        JOIN dataset d ON dc.dataset_id = d.dataset_id
-    """
-    category_rows = query_to_records(db, filters_category_query)
+    category_rows = query_to_records(db, FILTERS_CATEGORY_SQL)
     filter_categories = _build_filter_categories(category_rows)
 
-    # Views
-    filters_view_query = """
-        SELECT view_id,
-            view_name,
-            view_url_name as url_name,
-            category_group_id,
-            category_group_name,
-            category_group_is_primary,
-            category_name,
-            column_fullname as column_id,
-            column_name,
-        FROM view_categories
-        ORDER BY view_id, category_group_id;
-    """
-
-    # Release
-    release_query = "SELECT release_label as label FROM release"
-
-    view_rows = query_to_records(db, filters_view_query)
+    view_rows = query_to_records(db, FILTERS_VIEW_SQL)
     filter_views = _build_filter_views(db, view_rows)
-    release_rows = query_to_records(db, release_query)
+    release_rows = query_to_records(db, RELEASE_LABEL_SQL)
     release = release_rows[0] if release_rows else None
 
-    return {
-        "filterCategories": filter_categories,
-        "filterViews": filter_views,
-        "release": release
-    }
+    return {"filterCategories": filter_categories, "filterViews": filter_views, "release": release}

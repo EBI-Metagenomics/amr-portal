@@ -1,24 +1,31 @@
-import base64
+import binascii
 
 from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel
+from starlette.concurrency import run_in_threadpool
+from starlette.responses import StreamingResponse
 
+from core.database import run_in_db
+from core.encoding import b64url_decode_to_str
 from models.amr_records import AMRRecordsResponse
-from models.filters_config import FiltersConfig
 from models.facets import FacetsPayload, FacetsResponse
+from models.filters_config import FiltersConfig
 from models.payload import Payload
 from models.release import Release
-from services.filters import fetch_filters, filter_amr_records, fetch_filtered_records, fetch_amr_facets
+from services.filters import (
+    fetch_amr_facets,
+    fetch_filtered_records,
+    fetch_filters,
+    filter_amr_records,
+)
 from services.release import fetch_release
-from core.database import run_in_db
-from starlette.responses import StreamingResponse
-from starlette.concurrency import run_in_threadpool
 
 router = APIRouter(tags=["AMR"])
 
 
 class HealthResponse(BaseModel):
     status: str
+
 
 @router.get(
     "/filters-config",
@@ -85,16 +92,6 @@ def download_filtered_records(
     return run_in_db(fetch_filtered_records, payload, scope, file_format)
 
 
-def _b64url_decode_to_str(s: str) -> str:
-    # URL-safe Base64 often omits padding characters (=)
-    # This adds the missing padding for URL-safe Base64
-    s = s.strip()
-    s += "=" * (-len(s) % 4)
-    try:
-        return base64.urlsafe_b64decode(s).decode("utf-8")
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid Base64 in 'payload': {e}")
-
 @router.get(
     "/amr-records/download",
     response_class=StreamingResponse,
@@ -105,12 +102,16 @@ def _b64url_decode_to_str(s: str) -> str:
             "description": "Streamed file download.",
             "content": {"text/csv": {}, "application/json": {}},
         },
-        status.HTTP_400_BAD_REQUEST: {"description": "Invalid Base64 payload, JSON payload, or query parameters."},
+        status.HTTP_400_BAD_REQUEST: {
+            "description": "Invalid Base64 payload, JSON payload, or query parameters."
+        },
         status.HTTP_404_NOT_FOUND: {"description": "No records found for supplied filters."},
     },
 )
 async def download_filtered_records_get(
-    payload: str = Query(..., description="Base64 URL-safe encoded JSON matching the Payload schema"),
+    payload: str = Query(
+        ..., description="Base64 URL-safe encoded JSON matching the Payload schema"
+    ),
     scope: str = Query("all", description="Either 'page' or 'all'", pattern="^(page|all)$"),
     file_format: str = Query("csv", description="Either 'csv' or 'json'", pattern="^(csv|json)$"),
 ):
@@ -119,11 +120,14 @@ async def download_filtered_records_get(
     - Keeps Base64-encoded JSON `payload`.
     - Forwards the StreamingResponse (CSV) or dict (JSON) returned by fetch_filtered_records.
     """
-    decoded = _b64url_decode_to_str(payload)
+    try:
+        decoded = b64url_decode_to_str(payload)
+    except (binascii.Error, UnicodeDecodeError, ValueError) as e:
+        raise HTTPException(status_code=400, detail=f"Invalid Base64 in 'payload': {e}") from e
     try:
         payload_obj = Payload.model_validate_json(decoded)
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Invalid 'payload' JSON: {e}")
+        raise HTTPException(status_code=400, detail=f"Invalid 'payload' JSON: {e}") from e
 
     result = await run_in_threadpool(
         run_in_db, fetch_filtered_records, payload_obj, scope, file_format

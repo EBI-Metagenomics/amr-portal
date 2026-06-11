@@ -1,13 +1,17 @@
+from __future__ import annotations
+
+from collections.abc import Sequence
 from typing import Any
 
-def query_to_records(db, sql: str) -> list[dict[str, Any]]:
-    """Run a SQL query and return a list of dict records.
+import duckdb
 
-    Args:
-        db: Database connection object exposing `.query(sql).fetchdf()`.
-        sql: SQL query to execute.
 
-    Returns:
-        List[Dict[str, Any]]: Each row represented as a dictionary.
-    """
+def query_to_records(
+    db: duckdb.DuckDBPyConnection,
+    sql: str,
+    params: Sequence[Any] | None = None,
+) -> list[dict[str, Any]]:
+    """Run a SQL query and return a list of dict records."""
+    if params:
+        return db.execute(sql, list(params)).fetchdf().to_dict(orient="records")
     return db.query(sql).fetchdf().to_dict(orient="records")

@@ -5,12 +5,12 @@ from __future__ import annotations
 import logging
 import threading
 from pathlib import Path
-from typing import Optional
 
 import duckdb
 
 from core.config import get_settings
 from core.constants import DUCKDB_FTS_EXTENSION
+from core.sql.duckdb import FTS_EXTENSION_LOADED_SQL
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +18,7 @@ _fts_initialized = False
 _fts_init_lock = threading.Lock()
 
 
-def extension_directory() -> Optional[Path]:
+def extension_directory() -> Path | None:
     """Return extension_directory when configured (set in the API container image)."""
     return get_settings().duckdb_extension_directory
 
@@ -31,11 +31,7 @@ def _apply_extension_directory(conn: duckdb.DuckDBPyConnection) -> None:
 
 def is_fts_loaded(conn: duckdb.DuckDBPyConnection) -> bool:
     rows = conn.execute(
-        """
-        SELECT loaded
-        FROM duckdb_extensions()
-        WHERE extension_name = ?
-        """,
+        FTS_EXTENSION_LOADED_SQL,
         [DUCKDB_FTS_EXTENSION],
     ).fetchall()
     return bool(rows and rows[0][0])
@@ -61,9 +57,7 @@ def load_fts_extension(
         if is_fts_loaded(conn):
             return True
         if not allow_install:
-            logger.warning(
-                "Failed to LOAD fts extension at runtime (skipping INSTALL): %s", exc
-            )
+            logger.warning("Failed to LOAD fts extension at runtime (skipping INSTALL): %s", exc)
             return False
         try:
             conn.execute(f"INSTALL {DUCKDB_FTS_EXTENSION}")
@@ -81,9 +75,7 @@ def configure_duckdb_connection(conn: duckdb.DuckDBPyConnection) -> None:
     _apply_extension_directory(conn)
     with _fts_init_lock:
         if not _fts_initialized:
-            _fts_initialized = load_fts_extension(
-                conn, allow_install=settings.testing
-            )
+            _fts_initialized = load_fts_extension(conn, allow_install=settings.testing)
         # Later connections skip LOAD fts — concurrent LOAD calls crash or corrupt the process.
     conn.execute(f"PRAGMA threads = {settings.duckdb_threads}")
     conn.execute(f"PRAGMA memory_limit = '{settings.duckdb_memory_limit}'")
@@ -97,9 +89,7 @@ def verify_fts_extension(conn: duckdb.DuckDBPyConnection) -> bool:
     if loaded:
         logger.info("DuckDB FTS extension loaded (extension_directory=%s)", ext_label)
     else:
-        logger.warning(
-            "DuckDB FTS extension is not loaded (extension_directory=%s)", ext_label
-        )
+        logger.warning("DuckDB FTS extension is not loaded (extension_directory=%s)", ext_label)
     return loaded
 
 

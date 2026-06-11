@@ -18,7 +18,34 @@ dependencies = [
 dev = [
     "httpx==0.28.1",
     "pytest>=9.0.3",
+    "ruff>=0.12.0",
 ]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["."]
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "UP",  # pyupgrade
+    "B",   # flake8-bugbear
+]
+ignore = [
+    "B008",  # Depends() in FastAPI route defaults is intentional
+]
+
+[tool.ruff.lint.per-file-ignores]
+"main.py" = ["E402", "E501"]  # sys.path bootstrap; long Swagger HTML strings
+"api/docs_chrome.py" = ["E501"]  # embedded HTML templates
+"api/endpoints.py" = ["E501"]  # OpenAPI description strings
+
+[tool.ruff.lint.isort]
+known-first-party = ["api", "core", "models", "services"]
 
 [tool.uv]
 package = false

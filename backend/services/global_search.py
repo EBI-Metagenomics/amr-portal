@@ -3,66 +3,24 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any
 
 import duckdb
 from fastapi import HTTPException
 
 from core.constants import MIN_SEARCH_PREFIX_LENGTH
+from core.sql.global_search import (
+    GLOBAL_SEARCH_SCHEMAS_SQL,
+    GLOBAL_SEARCH_TABLES_SQL,
+    SEARCH_COUNTS_SQL,
+    SEARCH_HITS_CTE,
+    SEARCH_ROWID_PREDICATE,
+)
 
 logger = logging.getLogger(__name__)
 
-# Params per query using SEARCH_HITS_CTE: (1) prefix, (2) source_table
-SEARCH_HITS_CTE = """
-search_query AS (
-    SELECT ? AS prefix
-),
-qtermids AS (
-    SELECT dict.termid
-    FROM fts_main_global_search.dict AS dict, search_query AS q
-    WHERE length(q.prefix) >= 3
-      AND dict.term LIKE q.prefix || '%'
-),
-matching_docids AS (
-    SELECT DISTINCT terms.docid
-    FROM fts_main_global_search.terms AS terms
-    WHERE terms.termid IN (SELECT termid FROM qtermids)
-),
-search_hits AS (
-    SELECT g.source_rowid AS hit_rowid
-    FROM matching_docids AS md
-    INNER JOIN fts_main_global_search.docs AS docs ON md.docid = docs.docid
-    INNER JOIN global_search AS g ON g.rowid = docs.name
-    WHERE g.source_table = ?
-)
-""".strip()
 
-SEARCH_COUNTS_SQL = """
-WITH search_query AS (
-    SELECT ? AS prefix
-),
-qtermids AS (
-    SELECT dict.termid
-    FROM fts_main_global_search.dict AS dict, search_query AS q
-    WHERE length(q.prefix) >= 3
-      AND dict.term LIKE q.prefix || '%'
-),
-matching_docids AS (
-    SELECT DISTINCT terms.docid
-    FROM fts_main_global_search.terms AS terms
-    WHERE terms.termid IN (SELECT termid FROM qtermids)
-)
-SELECT g.source_table, COUNT(*) AS search_count
-FROM matching_docids AS md
-INNER JOIN fts_main_global_search.docs AS docs ON md.docid = docs.docid
-INNER JOIN global_search AS g ON g.rowid = docs.name
-GROUP BY g.source_table
-""".strip()
-
-SEARCH_ROWID_PREDICATE = "rowid IN (SELECT hit_rowid FROM search_hits)"
-
-
-def normalize_search_query(raw: Optional[str]) -> Optional[str]:
+def normalize_search_query(raw: str | None) -> str | None:
     """Return a normalized prefix for search, or None if inactive."""
     if raw is None:
         return None
@@ -75,34 +33,19 @@ def normalize_search_query(raw: Optional[str]) -> Optional[str]:
 def is_global_search_available(db: duckdb.DuckDBPyConnection) -> bool:
     """True when global_search and its FTS schema exist."""
     try:
-        tables = {
-            row[0]
-            for row in db.execute(
-                """
-                SELECT table_name
-                FROM information_schema.tables
-                WHERE table_schema = 'main'
-                  AND table_type = 'BASE TABLE'
-                """
-            ).fetchall()
-        }
+        tables = {row[0] for row in db.execute(GLOBAL_SEARCH_TABLES_SQL).fetchall()}
         if "global_search" not in tables:
             return False
-        schemas = {
-            row[0]
-            for row in db.execute(
-                "SELECT schema_name FROM information_schema.schemata"
-            ).fetchall()
-        }
+        schemas = {row[0] for row in db.execute(GLOBAL_SEARCH_SCHEMAS_SQL).fetchall()}
         return "fts_main_global_search" in schemas
     except Exception:
         return False
 
 
 def resolve_search_prefix(
-    raw: Optional[str],
+    raw: str | None,
     db: duckdb.DuckDBPyConnection,
-) -> Optional[str]:
+) -> str | None:
     """Normalize search input and verify FTS infrastructure is present."""
     prefix = normalize_search_query(raw)
     if not prefix:
@@ -115,7 +58,7 @@ def resolve_search_prefix(
     return prefix
 
 
-def search_hit_params(prefix: str, dataset: str) -> List[Any]:
+def search_hit_params(prefix: str, dataset: str) -> list[Any]:
     return [prefix, dataset]
 
 
@@ -123,7 +66,7 @@ def prepend_search_hits_cte(sql: str) -> str:
     return f"WITH {SEARCH_HITS_CTE} {sql}"
 
 
-def merge_search_predicate(where_sql: str, search_prefix: Optional[str]) -> str:
+def merge_search_predicate(where_sql: str, search_prefix: str | None) -> str:
     if not search_prefix:
         return where_sql
     if where_sql:
@@ -133,10 +76,10 @@ def merge_search_predicate(where_sql: str, search_prefix: Optional[str]) -> str:
 
 def compose_search_query(
     sql: str,
-    params: List[Any],
+    params: list[Any],
     dataset: str,
-    search_prefix: Optional[str],
-) -> Tuple[str, List[Any]]:
+    search_prefix: str | None,
+) -> tuple[str, list[Any]]:
     """Prefix SQL with the search_hits CTE and prepend bind parameters."""
     if not search_prefix:
         return sql, params
@@ -146,15 +89,15 @@ def compose_search_query(
 def fetch_search_counts_by_dataset(
     db: duckdb.DuckDBPyConnection,
     search_prefix: str,
-) -> Dict[str, int]:
+) -> dict[str, int]:
     """Return {source_table: search_count} across all datasets."""
     rows = db.execute(SEARCH_COUNTS_SQL, [search_prefix]).fetchall()
     return {str(source_table): int(count) for source_table, count in rows}
 
 
 def require_filters_or_search(
-    selected_filters: List[Any],
-    search_prefix: Optional[str],
+    selected_filters: list[Any],
+    search_prefix: str | None,
 ) -> None:
     """Browse mode needs facets; global search mode needs only search_query + view_id."""
     if search_prefix:

@@ -2,7 +2,6 @@ import sys
 from pathlib import Path
 
 import duckdb
-
 import pytest
 from fastapi import HTTPException
 

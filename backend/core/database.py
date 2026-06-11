@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
-from typing import Callable, Optional, TypeVar
 
 import duckdb
 
@@ -14,10 +14,8 @@ from core.duckdb_conn import connect_duckdb
 logger = logging.getLogger(__name__)
 _settings = get_settings()
 
-T = TypeVar("T")
-
 _executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="duckdb")
-_conn: Optional[duckdb.DuckDBPyConnection] = None
+_conn: duckdb.DuckDBPyConnection | None = None
 
 
 def _connection() -> duckdb.DuckDBPyConnection:
@@ -54,7 +52,7 @@ def _open_connection() -> duckdb.DuckDBPyConnection:
     return _conn
 
 
-def run_in_db(func: Callable[..., T], /, *args, **kwargs) -> T:
+def run_in_db[T](func: Callable[..., T], /, *args, **kwargs) -> T:
     """
     Run a callable that takes a DuckDB connection as its last argument.
 
@@ -76,6 +74,3 @@ def close_db_connection() -> None:
 
     _executor.submit(_close).result()
     logger.info("DuckDB connection closed")
-
-
-close_thread_connection = close_db_connection
