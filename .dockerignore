@@ -1,0 +1,11 @@
+# Local .env files must not override Docker build placeholders.
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+frontend/app-dist
+frontend/node_modules
+
+portal-static/node_modules
+portal-static/content-dist
+
+.git

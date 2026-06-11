@@ -1,9 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { amrService } from '@services/amr/amrService';
 import FacetSidebar from '@components/features/amr/FacetSidebar/FacetSidebar';
-import GeneViewerPanel from '@components/features/amr/GeneViewerPanel/GeneViewerPanel';
 import DataPanel from '@components/features/amr/DataPanel/DataPanel';
+
+const GeneViewerPanel = lazy(
+  () => import('@components/features/amr/GeneViewerPanel/GeneViewerPanel')
+);
 import { useAmrPortalState } from '@/hooks/useAmrPortalState';
 import { buildGenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
 import { isGenomeViewerEnabled } from '@/config/appEnv';
@@ -160,13 +163,15 @@ const HomePage = () => {
       {numericViewId !== null ? (
         <>
           {genomeViewerEnabled ? (
-            <GeneViewerPanel
-              isCollapsed={isGeneViewerCollapsed}
-              onToggleCollapsed={() => setIsGeneViewerCollapsed(prev => !prev)}
-              rowContext={genomeRowContext}
-              hasSelectedTableRow={hasSelectedTableRow}
-              loadData={loadJbrowseData}
-            />
+            <Suspense fallback={null}>
+              <GeneViewerPanel
+                isCollapsed={isGeneViewerCollapsed}
+                onToggleCollapsed={() => setIsGeneViewerCollapsed(prev => !prev)}
+                rowContext={genomeRowContext}
+                hasSelectedTableRow={hasSelectedTableRow}
+                loadData={loadJbrowseData}
+              />
+            </Suspense>
           ) : null}
           <div className={[styles.contentLayout, contentLayoutClass].filter(Boolean).join(' ')}>
             <aside className={styles.leftFacetPanel}>
