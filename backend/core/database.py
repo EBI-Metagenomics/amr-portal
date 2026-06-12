@@ -34,11 +34,12 @@ def verify_db_at_startup() -> tuple[bool, bool]:
 
     def _verify() -> tuple[bool, bool]:
         from core.duckdb_conn import verify_fts_extension
-        from services.global_search import is_global_search_available
+        from services.global_search import is_global_search_available, set_global_search_available
 
         conn = _connection()
         fts_ok = verify_fts_extension(conn)
         search_ok = is_global_search_available(conn) if fts_ok else False
+        set_global_search_available(search_ok)
         return fts_ok, search_ok
 
     return _executor.submit(_verify).result()

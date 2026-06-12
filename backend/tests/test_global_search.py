@@ -7,13 +7,18 @@ from fastapi import HTTPException
 
 from core.constants import MIN_SEARCH_PREFIX_LENGTH
 from services.global_search import (
+    clear_search_hits,
     compose_search_query,
     fetch_search_counts_by_dataset,
+    fetch_search_counts_from_materialized,
     is_global_search_available,
+    materialize_search_hits,
+    merge_materialized_search_predicate,
     merge_search_predicate,
     normalize_search_query,
     require_filters_or_search,
     resolve_search_prefix,
+    set_global_search_available,
 )
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -55,6 +60,38 @@ def test_require_filters_or_search():
     with pytest.raises(HTTPException) as exc:
         require_filters_or_search([], None)
     assert exc.value.status_code == 400
+
+
+def test_merge_materialized_search_predicate():
+    sql, params = merge_materialized_search_predicate("genus = ?", "phenotype")
+    assert "_amr_search_hits" in sql
+    assert params == ["phenotype"]
+
+
+@pytest.mark.skipif(
+    not (_REPO_ROOT / "duckdb" / "portal.duckdb").exists(),
+    reason="portal.duckdb not available",
+)
+def test_materialized_search_hits_against_portal_db():
+    set_global_search_available(None)
+    conn = duckdb.connect(str(_REPO_ROOT / "duckdb" / "portal.duckdb"), read_only=True)
+    if not is_global_search_available(conn):
+        conn.close()
+        pytest.skip("global_search FTS not available in portal.duckdb")
+
+    materialize_search_hits(conn, "amik")
+    counts = fetch_search_counts_from_materialized(conn)
+    assert sum(counts.values()) > 0
+
+    where_sql, params = merge_materialized_search_predicate("", "phenotype")
+    count = conn.execute(
+        f"SELECT COUNT(*) FROM phenotype WHERE {where_sql}",
+        params,
+    ).fetchone()[0]
+    assert count > 0
+
+    clear_search_hits(conn)
+    conn.close()
 
 
 def test_compose_search_query_noop_without_prefix():

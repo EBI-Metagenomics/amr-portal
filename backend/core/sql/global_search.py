@@ -51,6 +51,41 @@ GROUP BY g.source_table
 
 SEARCH_ROWID_PREDICATE = "rowid IN (SELECT hit_rowid FROM search_hits)"
 
+# Materialize FTS hits once per request; facet queries reuse this temp table.
+SEARCH_HITS_MATERIALIZE_SQL = f"""
+CREATE OR REPLACE TEMP TABLE _amr_search_hits AS
+WITH search_query AS (
+    SELECT ? AS prefix
+),
+qtermids AS (
+    SELECT dict.termid
+    FROM fts_main_global_search.dict AS dict, search_query AS q
+    WHERE length(q.prefix) >= {MIN_SEARCH_PREFIX_LENGTH}
+      AND dict.term LIKE q.prefix || '%'
+),
+matching_docids AS (
+    SELECT DISTINCT terms.docid
+    FROM fts_main_global_search.terms AS terms
+    WHERE terms.termid IN (SELECT termid FROM qtermids)
+)
+SELECT g.source_rowid AS hit_rowid, g.source_table AS source_table
+FROM matching_docids AS md
+INNER JOIN fts_main_global_search.docs AS docs ON md.docid = docs.docid
+INNER JOIN global_search AS g ON g.rowid = docs.name
+""".strip()
+
+SEARCH_HITS_DROP_SQL = "DROP TABLE IF EXISTS _amr_search_hits"
+
+SEARCH_ROWID_PREDICATE_MATERIALIZED = (
+    "rowid IN (SELECT hit_rowid FROM _amr_search_hits WHERE source_table = ?)"
+)
+
+SEARCH_COUNTS_FROM_MATERIALIZED_SQL = """
+SELECT source_table, COUNT(*) AS search_count
+FROM _amr_search_hits
+GROUP BY source_table
+""".strip()
+
 GLOBAL_SEARCH_TABLES_SQL = """
     SELECT table_name
     FROM information_schema.tables
