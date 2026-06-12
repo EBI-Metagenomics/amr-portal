@@ -6,7 +6,6 @@ import logging
 from typing import Any
 
 import duckdb
-from fastapi import HTTPException
 
 from core.constants import MIN_SEARCH_PREFIX_LENGTH
 from core.sql.global_search import (
@@ -139,19 +138,3 @@ def fetch_search_counts_by_dataset(
     rows = db.execute(SEARCH_COUNTS_SQL, [search_prefix]).fetchall()
     return {str(source_table): int(count) for source_table, count in rows}
 
-
-def require_filters_or_search(
-    selected_filters: list[Any],
-    search_prefix: str | None,
-) -> None:
-    """Browse mode needs facets; global search mode needs only search_query + view_id."""
-    if search_prefix:
-        return
-    if not selected_filters:
-        raise HTTPException(
-            status_code=400,
-            detail=(
-                "Select at least one facet filter to browse data, or provide "
-                f"search_query (minimum {MIN_SEARCH_PREFIX_LENGTH} characters) for global search."
-            ),
-        )

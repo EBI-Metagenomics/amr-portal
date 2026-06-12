@@ -152,7 +152,7 @@ export const useAmrPortalState = () => {
     });
   };
 
-  const loadMoreFacet = (facetId: string, nextOffset: number) => {
+  const loadMoreFacet = (facetId: string, totalOptions: number) => {
     if (!resolvedViewId) return;
     const key = String(resolvedViewId);
     setFacetPagingByView(prev => {
@@ -162,7 +162,11 @@ export const useAmrPortalState = () => {
         ...prev,
         [key]: {
           ...current,
-          [facetId]: { ...currentFacet, offset: nextOffset },
+          [facetId]: {
+            ...currentFacet,
+            offset: 0,
+            limit: Math.max(1, totalOptions),
+          },
         },
       };
     });

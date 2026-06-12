@@ -4,7 +4,7 @@ def test_filters_config(client):
     assert isinstance(response.json(), dict)
 
 
-def test_amr_records_requires_filters_or_search(client):
+def test_amr_records_browse_all_without_filters_or_search(client):
     payload = {
         "selected_filters": [],
         "page": 1,
@@ -12,7 +12,12 @@ def test_amr_records_requires_filters_or_search(client):
         "per_page": 10,
     }
     response = client.post("/amr-records", json=payload)
-    assert response.status_code == 400
+    assert response.status_code == 200
+    data = response.json()
+    assert "meta" in data
+    assert "data" in data
+    assert data["meta"]["total_hits"] > 0
+    assert len(data["data"]) == 10
 
 
 def test_amr_records_with_search(client):

@@ -3,8 +3,6 @@ from pathlib import Path
 
 import duckdb
 import pytest
-from fastapi import HTTPException
-
 from core.constants import MIN_SEARCH_PREFIX_LENGTH
 from services.global_search import (
     clear_search_hits,
@@ -16,7 +14,6 @@ from services.global_search import (
     merge_materialized_search_predicate,
     merge_search_predicate,
     normalize_search_query,
-    require_filters_or_search,
     resolve_search_prefix,
     set_global_search_available,
 )
@@ -52,14 +49,6 @@ def test_compose_search_query_adds_cte_and_params():
     assert sql.startswith("WITH ")
     assert "search_hits" in sql
     assert params == ["erz254", "phenotype", "Streptococcus"]
-
-
-def test_require_filters_or_search():
-    require_filters_or_search([], "erz")
-    require_filters_or_search([{"category": "x", "value": "y"}], None)
-    with pytest.raises(HTTPException) as exc:
-        require_filters_or_search([], None)
-    assert exc.value.status_code == 400
 
 
 def test_merge_materialized_search_predicate():

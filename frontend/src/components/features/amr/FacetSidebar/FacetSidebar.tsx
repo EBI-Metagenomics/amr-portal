@@ -3,6 +3,8 @@ import type { AMRFacetsResponse, FacetOperator, SelectedFilter } from '@interfac
 import { GLOBAL_SEARCH_MIN_LENGTH } from '@/config/globalSearch';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import { buildFacetMetaMap, formatFacetFilterTagLabel } from './activeFilterLabels';
+import { buildFacetHeaderSummary, getActiveScopeTotal } from './facetHeaderSummary';
+import FilterIcon from './FilterIcon';
 import styles from './FacetSidebar.module.css';
 
 type Props = {
@@ -18,12 +20,13 @@ type Props = {
   onFilterToggle: (category: string, value: string, isSelected: boolean) => void;
   onClearAllFilters: () => void;
   onFacetSearch: (facetId: string, search: string) => void;
-  onFacetLoadMore: (facetId: string, nextOffset: number) => void;
+  onFacetLoadMore: (facetId: string, totalOptions: number) => void;
   onFacetToggleExpand: (facetId: string) => void;
   isFacetExpanded: (facetId: string) => boolean;
   hasFacetExpansionState: boolean;
   facetOperators: Record<string, FacetOperator>;
   onFacetOperatorChange: (facetId: string, operator: FacetOperator) => void;
+  scopeTotal?: number | null;
 };
 
 const FacetSidebar = ({
@@ -45,6 +48,7 @@ const FacetSidebar = ({
   hasFacetExpansionState,
   facetOperators,
   onFacetOperatorChange,
+  scopeTotal: scopeTotalProp,
 }: Props) => {
   const showAnyAllControls = false;
   const dataTypes = facetsData?.data_type ?? [];
@@ -57,6 +61,12 @@ const FacetSidebar = ({
   const showSearchMinLengthHint =
     trimmedSearchLength > 0 && trimmedSearchLength < GLOBAL_SEARCH_MIN_LENGTH;
   const facetMeta = useMemo(() => buildFacetMetaMap(facets), [facets]);
+  const scopeTotal = useMemo(() => {
+    if (scopeTotalProp != null) {
+      return scopeTotalProp;
+    }
+    return getActiveScopeTotal(dataTypes, currentViewId, isGlobalSearchActive);
+  }, [scopeTotalProp, dataTypes, currentViewId, isGlobalSearchActive]);
   const activeFilterCount =
     (isGlobalSearchActive ? 1 : 0) + selectedFilters.length;
   const showActiveFilters = activeFilterCount > 0;
@@ -67,7 +77,10 @@ const FacetSidebar = ({
     <section className={sectionClass}>
       <div className={styles.content}>
         <div className={styles.globalSearchSection}>
-          <label className={styles.globalSearchLabel} htmlFor="global-search-input">
+          <label
+            className={[styles.sectionTitle, styles.globalSearchLabel].join(' ')}
+            htmlFor="global-search-input"
+          >
             Global search
           </label>
           <input
@@ -86,7 +99,7 @@ const FacetSidebar = ({
         </div>
 
         <fieldset className={styles.resultTypeFieldset}>
-          <legend className={styles.resultTypeLegend}>
+          <legend className={[styles.sectionTitle, styles.resultTypeLegend].join(' ')}>
             <span>Result type</span>
             {isGlobalSearchActive ? (
               <span className={styles.resultTypeNote}>Counts are based on your current search.</span>
@@ -115,7 +128,12 @@ const FacetSidebar = ({
                     onChange={() => onViewChange(type.id)}
                   />
                   <span>{type.name}</span>
-                  {countBadge ? <span className={styles.filterCountCircle}>{countBadge}</span> : null}
+                  {countBadge ? (
+                    <span className={styles.resultCountBadge} title="Matching records">
+                      <span className={styles.resultCountValue}>{countBadge}</span>
+                      <span className={styles.resultCountLabel}>matches</span>
+                    </span>
+                  ) : null}
                 </label>
               );
             })}
@@ -173,10 +191,15 @@ const FacetSidebar = ({
         ) : null}
 
         <div className={styles.headerRow}>
-          <h3 className={styles.heading}>Filters</h3>
-          <button type="button" className={styles.clearButton} onClick={onClearAllFilters}>
+          <div className={styles.filtersHeadingGroup}>
+            <h3 className={styles.sectionTitle}>Filters</h3>
+            {/* <p className={styles.filtersHint}>
+              Match counts show records in scope. Filter icons show active selections.
+            </p> */}
+          </div>
+          {/* <button type="button" className={styles.clearButton} onClick={onClearAllFilters}>
             Clear all
-          </button>
+          </button> */}
         </div>
 
         <div className={styles.facetList}>
@@ -204,18 +227,31 @@ const FacetSidebar = ({
             ]
               .filter(Boolean)
               .join(' ');
+            const headerSummary = buildFacetHeaderSummary(facet, scopeTotal);
             return (
               <section key={facet.id} className={styles.facetSection}>
                 <button
                   type="button"
                   className={styles.facetHeader}
                   onClick={() => onFacetToggleExpand(facet.id)}
+                  aria-label={`${facet.label}. ${headerSummary.ariaLabel}`}
                 >
-                  <span className={styles.facetTitle}>
-                    {facet.label}
-                    <span className={styles.facetCount}>{facet.selected_count}</span>
+                  <span className={styles.facetTitle}>{facet.label}</span>
+                  <span className={styles.facetHeaderMeta}>
+                    {headerSummary.filterSelectionCount > 0 ? (
+                      <span
+                        className={styles.facetFilterBadge}
+                        title={`${headerSummary.filterSelectionCount} selected`}
+                      >
+                        <FilterIcon />
+                        <span>{headerSummary.filterSelectionCount}</span>
+                      </span>
+                    ) : null}
+                    {headerSummary.matchText ? (
+                      <span className={styles.facetMatchSummary}>{headerSummary.matchText}</span>
+                    ) : null}
+                    <span className={styles.facetChevron}>{expanded ? '▾' : '▸'}</span>
                   </span>
-                  <span className={styles.facetChevron}>{expanded ? '▾' : '▸'}</span>
                 </button>
                 {expanded ? (
                   <div className={styles.facetBody}>
@@ -244,6 +280,10 @@ const FacetSidebar = ({
                       placeholder={`Search ${facet.label.toLowerCase()}`}
                       onChange={event => onFacetSearch(facet.id, event.target.value)}
                     />
+                    <div className={styles.optionListHeader} aria-hidden="true">
+                      <span>Value</span>
+                      <span>Matches</span>
+                    </div>
                     <div className={optionListClass}>
                       {sortedOptions.map(option => {
                         const checked = selectedMap.has(`${facet.id}::${option.value}`);
@@ -257,7 +297,12 @@ const FacetSidebar = ({
                               }
                             />
                             <span className={styles.optionLabel}>{option.label}</span>
-                            <span className={styles.optionCount}>{option.count.toLocaleString()}</span>
+                            <span
+                              className={styles.optionCount}
+                              title="Matching records for this value"
+                            >
+                              {option.count.toLocaleString()}
+                            </span>
                           </label>
                         );
                       })}

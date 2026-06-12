@@ -597,15 +597,13 @@ def build_collection() -> dict:
                             req(
                                 "POST",
                                 "/amr-records",
-                                "amr-records-missing-filters",
+                                "amr-records-browse-all",
                                 body={"selected_filters": [], "view_id": 1, "page": 1, "per_page": 10},
-                                description="Browse mode without filters or search should return 400.",
-                                tests=[
-                                    'pm.test("Status code is 400", function () {',
-                                    "    pm.response.to.have.status(400);",
-                                    "});",
-                                    'pm.test("Error explains filter or search requirement", function () {',
-                                    '    pm.expect(pm.response.json().detail).to.include("search_query");',
+                                description="Browse all phenotype records without filters or search.",
+                                tests=records_tests()
+                                + [
+                                    'pm.test("Returns the full dataset count", function () {',
+                                    "    pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
                                     "});",
                                 ],
                             ),

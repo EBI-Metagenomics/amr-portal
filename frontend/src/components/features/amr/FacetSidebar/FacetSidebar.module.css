@@ -28,10 +28,15 @@
   gap: 6px;
 }
 
-.globalSearchLabel {
-  font-size: 13px;
+.sectionTitle {
+  margin: 0;
+  font-size: 15px;
   font-weight: 600;
   color: #374151;
+}
+
+.globalSearchLabel {
+  display: block;
 }
 
 .globalSearchInput {
@@ -60,9 +65,6 @@
   flex-direction: column;
   gap: 4px;
   margin-bottom: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #374151;
 }
 
 .resultTypeNote {
@@ -149,13 +151,24 @@
 
 .headerRow {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
+  gap: 12px;
 }
 
-.heading {
+.filtersHeadingGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.filtersHint {
   margin: 0;
-  font-size: 20px;
+  font-size: 12px;
+  line-height: 1.35;
+  color: #6b7280;
+  max-width: 28rem;
 }
 
 .clearButton {
@@ -238,33 +251,61 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   padding: 12px;
+  text-align: left;
+}
+
+.facetHeader:hover {
+  background: #f9fafb;
 }
 
 .facetTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  flex: 1;
+  min-width: 0;
+}
+
+.facetHeaderMeta {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
+  flex-shrink: 0;
 }
 
-.facetCount {
-  min-width: 18px;
-  height: 18px;
-  border-radius: 18px;
+.facetFilterBadge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background-color: #dbeafe;
-  color: #1e3a8a;
-  padding: 0 6px;
+  gap: 3px;
+  min-height: 22px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1e40af;
+  padding: 0 8px 0 6px;
   font-size: 11px;
   font-weight: 700;
+  line-height: 1;
+}
+
+.filterIcon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
+}
+
+.facetMatchSummary {
+  font-size: 12px;
+  font-weight: 500;
+  color: #4b5563;
+  white-space: nowrap;
 }
 
 .facetChevron {
   color: #6b7280;
+  font-size: 12px;
+  line-height: 1;
 }
 
 .facetBody {
@@ -331,6 +372,31 @@
   margin-bottom: 8px;
 }
 
+.optionListHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 0 6px;
+  border-bottom: 1px solid #f3f4f6;
+  margin-bottom: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #9ca3af;
+}
+
+.optionListHeader span:first-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.optionListHeader span:last-child {
+  flex-shrink: 0;
+  min-width: 4.5rem;
+  text-align: right;
+}
+
 .optionList {
   display: flex;
   flex-direction: column;
@@ -383,8 +449,12 @@
 }
 
 .optionCount {
-  color: #6b7280;
+  flex-shrink: 0;
+  min-width: 4.5rem;
+  text-align: right;
+  color: #374151;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
 }
 
 .loadMoreButton {
@@ -403,17 +473,33 @@
   font-size: 14px;
 }
 
-.filterCountCircle {
+.resultCountBadge {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+  margin-left: 8px;
+  flex-shrink: 0;
+}
+
+.resultCountValue {
   min-width: 18px;
-  height: 18px;
-  border-radius: 18px;
+  border-radius: 999px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background-color: #47d147;
+  background-color: #16a34a;
   color: #fff;
   font-weight: 700;
-  padding: 2px;
+  padding: 2px 8px;
   font-size: 12px;
-  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.resultCountLabel {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: #6b7280;
 }

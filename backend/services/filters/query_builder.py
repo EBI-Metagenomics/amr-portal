@@ -21,7 +21,6 @@ from services.filters.metadata import (
 from services.global_search import (
     compose_search_query,
     merge_search_predicate,
-    require_filters_or_search,
     resolve_search_prefix,
 )
 
@@ -143,7 +142,6 @@ def build_filter_query_context(
 
     where_sql, where_params = build_where_clause(grouped_filters_with_operator)
     search_prefix = resolve_search_prefix(payload.search_query, db)
-    require_filters_or_search(payload.selected_filters, search_prefix)
     where_sql = merge_search_predicate(where_sql, search_prefix)
 
     base_query = f"SELECT {columns_to_display_str} FROM {selected_dataset}"

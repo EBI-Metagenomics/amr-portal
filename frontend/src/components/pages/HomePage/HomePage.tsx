@@ -2,6 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { amrService } from '@services/amr/amrService';
 import FacetSidebar from '@components/features/amr/FacetSidebar/FacetSidebar';
+import { getActiveScopeTotal } from '@components/features/amr/FacetSidebar/facetHeaderSummary';
 import DataPanel from '@components/features/amr/DataPanel/DataPanel';
 
 const GeneViewerPanel = lazy(
@@ -44,7 +45,6 @@ const HomePage = () => {
     isGlobalSearchActive,
     setSearchQuery,
   } = state;
-  const canShowResults = isGlobalSearchActive || selectedFilters.length > 0;
   const numericStateViewId =
     typeof viewId === 'number'
       ? viewId
@@ -107,9 +107,21 @@ const HomePage = () => {
           ? { category: sort.category, order: sort.order.toUpperCase() as 'ASC' | 'DESC' }
           : undefined,
       }),
-    enabled: numericViewId !== null && canShowResults,
+    enabled: numericViewId !== null,
     placeholderData: keepPreviousData,
   });
+
+  const scopeTotal = useMemo(() => {
+    if (isGlobalSearchActive) {
+      return getActiveScopeTotal(facetsQuery.data?.data_type ?? [], numericViewId ?? 1, true);
+    }
+    return recordsQuery.data?.meta.total_hits ?? null;
+  }, [
+    isGlobalSearchActive,
+    facetsQuery.data?.data_type,
+    numericViewId,
+    recordsQuery.data?.meta.total_hits,
+  ]);
 
   useEffect(() => {
     if (numericViewId !== null && numericStateViewId === null && resolvedViewId !== null) {
@@ -194,6 +206,7 @@ const HomePage = () => {
                 hasFacetExpansionState={hasFacetExpansionState}
                 facetOperators={facetOperators}
                 onFacetOperatorChange={setFacetOperator}
+                scopeTotal={scopeTotal}
               />
             </aside>
             <div className={styles.resultsPanel}>
@@ -205,7 +218,6 @@ const HomePage = () => {
                 isPlaceholderData={recordsQuery.isPlaceholderData}
                 isLoading={recordsQuery.isLoading}
                 isError={recordsQuery.isError}
-                canShowResults={canShowResults}
                 activeSearchQuery={activeSearchQuery}
                 page={page}
                 perPage={perPage}
