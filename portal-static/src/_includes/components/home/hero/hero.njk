@@ -8,5 +8,43 @@
         Data resource
       </div>
     </div>
+
+    <section class="hero-search-panel" aria-labelledby="hero-search-heading">
+      <h2 id="hero-search-heading" class="hero-search-heading">
+        Search combined AMR phenotypes and genotypes
+      </h2>
+
+      <form class="hero-search-form vf-search vf-search--inline" action="/data/" method="get">
+        <input type="hidden" name="view" value="combined" />
+
+        <div class="hero-search-field">
+          <label class="vf-form__label hero-search-label" for="home-search-input">
+            Global search
+          </label>
+          <div class="hero-search-controls">
+            <input
+              id="home-search-input"
+              class="vf-form__input hero-search-input"
+              type="search"
+              name="q"
+              placeholder="Sample accession, assembly ID, gene symbol..."
+              minlength="3"
+              required
+              autocomplete="off"
+            />
+            <button class="vf-button vf-button--primary hero-search-button" type="submit">
+              Search
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <p class="hero-search-examples">
+        <span class="hero-search-examples-label">Example searches:</span>
+        <a class="vf-link" href="/data/?view=combined&amp;q=gentamicin">gentamicin</a>,
+        <a class="vf-link" href="/data/?view=combined&amp;q=SAMEA">SAMEA</a>,
+        <a class="vf-link" href="/data/?view=combined&amp;q=ERZ">ERZ</a>
+      </p>
+    </section>
   </div>
 </div>

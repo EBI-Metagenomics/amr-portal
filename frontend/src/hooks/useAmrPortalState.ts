@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FacetOperator, FacetPageState, SelectedFilter } from '@interfaces/amrApi';
-import { isGlobalSearchActive } from '@/config/globalSearch';
+import { isGlobalSearchActive, SEARCH_QUERY_URL_PARAM } from '@/config/globalSearch';
 
 const DEFAULT_PER_PAGE = 100;
 const DEFAULT_VIEW_ID = 1;
@@ -31,8 +31,20 @@ export const useAmrPortalState = () => {
   const [facetOperatorsByView, setFacetOperatorsByView] = useState<Record<string, Record<string, FacetOperator>>>(
     {}
   );
-  const [searchQuery, setSearchQueryState] = useState('');
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
+  const initialUrlState = useMemo(() => {
+    const params = new URL(window.location.href).searchParams;
+    const fromView = params.get('view');
+    let viewIdFromUrl = DEFAULT_VIEW_ID;
+    if (fromView) {
+      const parsed = Number(fromView);
+      viewIdFromUrl = Number.isInteger(parsed) ? parsed : (VIEW_SLUG_TO_ID[fromView] ?? DEFAULT_VIEW_ID);
+    }
+    const searchFromUrl = params.get(SEARCH_QUERY_URL_PARAM)?.trim() ?? '';
+    return { viewIdFromUrl, searchFromUrl };
+  }, []);
+
+  const [searchQuery, setSearchQueryState] = useState(initialUrlState.searchFromUrl);
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(initialUrlState.searchFromUrl);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDebouncedSearchQuery(searchQuery.trim()), 300);
@@ -41,21 +53,20 @@ export const useAmrPortalState = () => {
 
   const activeSearchQuery = isGlobalSearchActive(debouncedSearchQuery) ? debouncedSearchQuery : undefined;
 
-  const initialViewId = useMemo(() => {
-    const fromUrl = new URL(window.location.href).searchParams.get('view');
-    if (!fromUrl) return DEFAULT_VIEW_ID;
-    const parsed = Number(fromUrl);
-    if (Number.isInteger(parsed)) return parsed;
-    return VIEW_SLUG_TO_ID[fromUrl] ?? DEFAULT_VIEW_ID;
-  }, []);
-  const resolvedViewId = viewId ?? initialViewId;
+  const resolvedViewId = viewId ?? initialUrlState.viewIdFromUrl;
 
   useEffect(() => {
     if (!resolvedViewId) return;
     const url = new URL(window.location.href);
     url.searchParams.set('view', String(resolvedViewId));
+    const trimmedSearch = searchQuery.trim();
+    if (isGlobalSearchActive(trimmedSearch)) {
+      url.searchParams.set(SEARCH_QUERY_URL_PARAM, trimmedSearch);
+    } else {
+      url.searchParams.delete(SEARCH_QUERY_URL_PARAM);
+    }
     window.history.replaceState(null, '', url);
-  }, [resolvedViewId]);
+  }, [resolvedViewId, searchQuery]);
 
   const selectedFilters = useMemo(() => {
     if (!resolvedViewId) return [];
