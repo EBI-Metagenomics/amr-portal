@@ -28,9 +28,13 @@ A merged dataset of experimental evidence and in silico genotypes linked between
 
 <div class="card-links-container">
   <div class="card-links-container-inner">
-    {{ cardLink({ href: '/data/?view=experiments', cardText: cardLinkText1, linkText: 'AMR phenotypes', prerender: true }) }}
-    {{ cardLink({ href: '/data/?view=predictions', cardText: cardLinkText2, linkText: 'AMR genotypes' }) }}
-    {{ cardLink({ href: '/data/?view=combined', cardText: cardLinkText3, linkText: 'Combined phenotypes and genotypes' }) }}
+    {% include "components/home/search-card/search-card.njk" %}
+
+    <div class="card-links-row">
+      {{ cardLink({ href: '/data/?view=experiments', cardText: cardLinkText1, linkText: 'AMR phenotypes', prerender: true }) }}
+      {{ cardLink({ href: '/data/?view=predictions', cardText: cardLinkText2, linkText: 'AMR genotypes' }) }}
+      {{ cardLink({ href: '/data/?view=combined', cardText: cardLinkText3, linkText: 'Combined phenotypes and genotypes' }) }}
+    </div>
   </div>
 </div>
 

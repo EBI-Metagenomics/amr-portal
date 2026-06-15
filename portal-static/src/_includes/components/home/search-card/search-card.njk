@@ -1,0 +1,40 @@
+<section class="home-search-card" aria-labelledby="home-search-heading">
+  <div class="home-search-card-bg-pattern" aria-hidden="true"></div>
+
+  <div class="home-search-card-content">
+    <h2 id="home-search-heading" class="home-search-card-heading">
+      Search combined AMR phenotypes and genotypes
+    </h2>
+
+    <form class="home-search-form vf-search vf-search--inline" action="/data/" method="get">
+      <input type="hidden" name="view" value="combined" />
+
+      <div class="home-search-controls">
+        <label class="visually-hidden" for="home-search-input">
+          Search sample accessions, assembly IDs, or genes
+        </label>
+        <input
+          id="home-search-input"
+          class="vf-form__input home-search-input"
+          type="search"
+          name="q"
+          placeholder="Enter sample accession, assembly ID, gene symbol..."
+          minlength="3"
+          required
+          autocomplete="off"
+        />
+        <button class="vf-button vf-button--primary home-search-button" type="submit">
+          <span class="home-search-button-icon" aria-hidden="true">⌕</span>
+          Search
+        </button>
+      </div>
+    </form>
+
+    <p class="home-search-examples">
+      <span class="home-search-examples-label">Example searches:</span>
+      <a class="vf-link" href="/data/?view=combined&amp;q=gentamicin">gentamicin</a>,
+      <a class="vf-link" href="/data/?view=combined&amp;q=SAMEA">SAMEA</a>,
+      <a class="vf-link" href="/data/?view=combined&amp;q=ERZ">ERZ</a>
+    </p>
+  </div>
+</section>

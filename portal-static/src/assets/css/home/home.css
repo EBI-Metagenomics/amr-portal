@@ -11,11 +11,19 @@ body {
 
 .card-links-container-inner {
   display: flex;
-  flex-wrap: wrap;
+  flex-direction: column;
   flex-grow: 1;
+  gap: var(--page-grid-gap);
+  max-width: var(--vf-layout--comfortable);
+  width: 100%;
+}
+
+.card-links-row {
+  display: flex;
+  flex-wrap: wrap;
   column-gap: var(--page-grid-gap);
   row-gap: var(--page-grid-gap);
-  max-width: var(--vf-layout--comfortable);
+  width: 100%;
 }
 
 /* Styles in addition to the styles defined in card-link.css */
