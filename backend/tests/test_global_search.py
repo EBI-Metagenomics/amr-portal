@@ -10,6 +10,7 @@ from services.global_search import (
     fetch_search_counts_by_dataset,
     fetch_search_counts_from_materialized,
     is_global_search_available,
+    is_taxon_id_query,
     materialize_search_hits,
     merge_materialized_search_predicate,
     merge_search_predicate,
@@ -32,6 +33,13 @@ def test_normalize_search_query():
     assert normalize_search_query("  ERZ254  ") == "erz254"
 
 
+def test_is_taxon_id_query():
+    assert is_taxon_id_query("562")
+    assert is_taxon_id_query("28901")
+    assert not is_taxon_id_query("erz254")
+    assert not is_taxon_id_query("salmonella")
+
+
 def test_merge_search_predicate():
     assert merge_search_predicate("", None) == ""
     assert merge_search_predicate("genus = ?", None) == "genus = ?"
@@ -48,7 +56,7 @@ def test_compose_search_query_adds_cte_and_params():
     )
     assert sql.startswith("WITH ")
     assert "search_hits" in sql
-    assert params == ["erz254", "phenotype", "Streptococcus"]
+    assert params == ["erz254", "phenotype", "phenotype", "Streptococcus"]
 
 
 def test_merge_materialized_search_predicate():
@@ -102,9 +110,12 @@ def test_global_search_round_trip_in_memory():
         """
         CREATE TABLE phenotype AS SELECT
             'SAMEA1' AS BioSample_ID,
+            'SRR1' AS SRA_accession,
             'ERZ25458162' AS assembly_ID,
             'amikacin' AS antibiotic_name,
-            'resistant' AS resistance_phenotype
+            'Escherichia coli' AS organism,
+            'Escherichia' AS genus,
+            'coli' AS species
         """
     )
     conn.execute(
@@ -115,7 +126,10 @@ def test_global_search_round_trip_in_memory():
             'tetA' AS gene_symbol,
             'tetA' AS id,
             'tetA' AS amr_element_symbol,
-            'tetracycline' AS antibiotic_name
+            'tetracycline' AS antibiotic_name,
+            'Klebsiella pneumoniae' AS organism,
+            'Klebsiella' AS genus,
+            'pneumoniae' AS species
         """
     )
     conn.execute(
@@ -127,7 +141,11 @@ def test_global_search_round_trip_in_memory():
             NULL AS id,
             NULL AS gene_symbol,
             NULL AS amr_element_symbol,
-            'amikacin' AS antibiotic_name
+            'amikacin' AS antibiotic_name,
+            'Escherichia coli' AS organism,
+            'Escherichia' AS genus,
+            'coli' AS species,
+            '562' AS taxon_id
         """
     )
 
@@ -136,6 +154,25 @@ def test_global_search_round_trip_in_memory():
 
     counts = fetch_search_counts_by_dataset(conn, "erz254")
     assert counts.get("phenotype", 0) >= 1
+
+    genus_counts = fetch_search_counts_by_dataset(conn, "escher")
+    assert genus_counts.get("phenotype", 0) >= 1
+
+    taxon_counts = fetch_search_counts_by_dataset(conn, "562")
+    assert taxon_counts.get("pheno_geno_merged", 0) == 1
+    assert taxon_counts.get("phenotype", 0) == 0
+
+    materialize_search_hits(conn, "562")
+    merged_count = conn.execute(
+        """
+        SELECT COUNT(*) FROM pheno_geno_merged
+        WHERE rowid IN (
+            SELECT hit_rowid FROM _amr_search_hits WHERE source_table = 'pheno_geno_merged'
+        )
+        """
+    ).fetchone()[0]
+    assert merged_count == 1
+    clear_search_hits(conn)
 
     sql, params = compose_search_query(
         "SELECT COUNT(*) FROM phenotype",

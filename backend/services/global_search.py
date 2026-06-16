@@ -35,6 +35,11 @@ def normalize_search_query(raw: str | None) -> str | None:
     return prefix
 
 
+def is_taxon_id_query(prefix: str) -> bool:
+    """True when the search string should also be matched as an exact taxon_id."""
+    return prefix.isdigit()
+
+
 def is_global_search_available(db: duckdb.DuckDBPyConnection) -> bool:
     """True when global_search and its FTS schema exist (cached per process)."""
     global _global_search_available
@@ -60,7 +65,7 @@ def set_global_search_available(available: bool | None) -> None:
 
 
 def materialize_search_hits(db: duckdb.DuckDBPyConnection, search_prefix: str) -> None:
-    """Run the FTS lookup once and store matching rowids in a temp table."""
+    """Run FTS + optional taxon_id exact lookup and store hits in a temp table."""
     db.execute(SEARCH_HITS_MATERIALIZE_SQL, [search_prefix])
 
 
@@ -103,7 +108,7 @@ def resolve_search_prefix(
 
 
 def search_hit_params(prefix: str, dataset: str) -> list[Any]:
-    return [prefix, dataset]
+    return [prefix, dataset, dataset]
 
 
 def prepend_search_hits_cte(sql: str) -> str:

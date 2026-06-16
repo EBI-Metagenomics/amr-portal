@@ -16,12 +16,14 @@
 --   current source data. Always re-run 02_create_fts_index.sql afterwards
 --   because rowids in this table change on every rebuild.
 --
--- Searchable fields (indexed in step 02)
+-- Searchable fields (indexed in step 02 unless noted)
 --   Sample accession  : BioSample_ID
 --   Genome accession  : assembly_ID
 --   SRA accession     : SRA_accession (phenotype + merged only)
 --   Gene / AMR locus  : id, gene_symbol, amr_element_symbol (genotype + merged)
 --   Antibiotic name   : antibiotic_name
+--   Taxonomy (text)   : organism, genus, species
+--   NCBI taxon ID     : taxon_id (merged only; exact match at query time, not FTS)
 --
 -- source_table values map to portal views (see view.dataset):
 --   phenotype         -> view_id 1 (AMR phenotypes)
@@ -39,7 +41,11 @@ SELECT
     CAST(NULL AS VARCHAR) AS id,
     CAST(NULL AS VARCHAR) AS gene_symbol,
     CAST(NULL AS VARCHAR) AS amr_element_symbol,
-    CAST(antibiotic_name AS VARCHAR) AS antibiotic_name
+    CAST(antibiotic_name AS VARCHAR) AS antibiotic_name,
+    CAST(organism AS VARCHAR) AS organism,
+    CAST(genus AS VARCHAR) AS genus,
+    CAST(species AS VARCHAR) AS species,
+    CAST(NULL AS VARCHAR) AS taxon_id
 FROM phenotype
 
 UNION ALL
@@ -53,7 +59,11 @@ SELECT
     CAST(id AS VARCHAR) AS id,
     CAST(gene_symbol AS VARCHAR) AS gene_symbol,
     CAST(amr_element_symbol AS VARCHAR) AS amr_element_symbol,
-    CAST(antibiotic_name AS VARCHAR) AS antibiotic_name
+    CAST(antibiotic_name AS VARCHAR) AS antibiotic_name,
+    CAST(organism AS VARCHAR) AS organism,
+    CAST(genus AS VARCHAR) AS genus,
+    CAST(species AS VARCHAR) AS species,
+    CAST(NULL AS VARCHAR) AS taxon_id
 FROM genotype
 
 UNION ALL
@@ -67,5 +77,9 @@ SELECT
     CAST(id AS VARCHAR) AS id,
     CAST(gene_symbol AS VARCHAR) AS gene_symbol,
     CAST(amr_element_symbol AS VARCHAR) AS amr_element_symbol,
-    CAST(antibiotic_name AS VARCHAR) AS antibiotic_name
+    CAST(antibiotic_name AS VARCHAR) AS antibiotic_name,
+    CAST(organism AS VARCHAR) AS organism,
+    CAST(genus AS VARCHAR) AS genus,
+    CAST(species AS VARCHAR) AS species,
+    CAST(taxon_id AS VARCHAR) AS taxon_id
 FROM pheno_geno_merged;

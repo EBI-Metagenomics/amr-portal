@@ -12,7 +12,7 @@
 -- Tokenisation settings
 --   stemmer   = 'none'  : preserve gene symbols and accession tokens (e.g. tetA)
 --   stopwords = 'none'  : do not drop short tokens that may be accessions
---   ignore    = '[^a-zA-Z0-9_\\-\\.]+' : keep alphanumerics, underscore, hyphen, dot
+--   ignore    = '[^a-zA-Z0-9_\\-\\.\\(\\)]+' : keep alphanumerics, underscore, hyphen, dot, brackets
 --   lower     = 1       : case-insensitive search
 --   overwrite = 1       : replace existing index on re-run
 --
@@ -20,6 +20,7 @@
 --   Safe to re-run with overwrite = 1.
 --
 -- Note
+--   taxon_id is intentionally excluded — the API uses exact equality at query time.
 --   FTS indexes do not auto-update when source tables change. Re-run both
 --   01_create_table.sql and this file after any phenotype/genotype/merged reload.
 -- =============================================================================
@@ -34,9 +35,12 @@ PRAGMA create_fts_index(
     'gene_symbol',
     'amr_element_symbol',
     'antibiotic_name',
+    'organism',
+    'genus',
+    'species',
     stemmer = 'none',
     stopwords = 'none',
-    ignore = '[^a-zA-Z0-9_\\-\\.]+',
+    ignore = '[^a-zA-Z0-9_\\-\\.\\(\\)]+',
     lower = 1,
     overwrite = 1
 );
