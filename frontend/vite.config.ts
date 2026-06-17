@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => {
         name: 'amr-bgzip-headers',
         configureServer(server) {
           server.middlewares.use((req, res, next) => {
-            if (req.url?.includes('.fa.gz') || req.url?.includes('.gff.gz')) {
+            if (req.url?.includes('.fasta.gz') || req.url?.includes('.gff.gz')) {
               res.setHeader('Content-Type', 'application/octet-stream')
               res.setHeader('Content-Encoding', 'identity')
             }

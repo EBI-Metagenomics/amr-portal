@@ -26,3 +26,4 @@ frontend/app-dist
 .DS_Store
 /frontend/public/fasta/
 /frontend/public/gff/
+/frontend/public/genomes/

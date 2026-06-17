@@ -99,7 +99,12 @@ const FeaturePanel = ({ feature, isLoading, error, onClose }: Props) => {
   }, [allExpanded]);
 
   const hasAnnotations = Boolean(
-    feature?.gene || feature?.product || feature?.alias.length || feature?.note || feature?.dbxref.length
+    feature?.gene ||
+      feature?.product ||
+      feature?.alias.length ||
+      feature?.note ||
+      feature?.dbxref.length ||
+      feature?.annotations.length
   );
 
   return (
@@ -163,6 +168,9 @@ const FeaturePanel = ({ feature, isLoading, error, onClose }: Props) => {
               >
                 {feature.note ? <Field label="Note" value={feature.note} /> : null}
                 {feature.dbxref.length ? <Field label="Dbxref" value={feature.dbxref.join(', ')} /> : null}
+                {feature.annotations.map(annotation => (
+                  <Field key={annotation.key} label={annotation.label} value={annotation.value} />
+                ))}
               </CollapsibleSection>
             ) : null}
           </>

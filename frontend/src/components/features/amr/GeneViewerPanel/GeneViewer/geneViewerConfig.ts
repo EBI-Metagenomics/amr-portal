@@ -6,7 +6,7 @@ import { useMemo } from 'react';
 import getAssembly from './assembly';
 import type { GenomeMeta } from './assembly';
 import getTracks from './tracks';
-import getDefaultSessionConfig, { type DisplayedRegionInput } from './defaultSessionConfig';
+import getDefaultSessionConfig, { type DisplayedRegionInput, type SessionViewOptions } from './defaultSessionConfig';
 import type { Track } from './geneViewerState';
 
 export type { GenomeMeta, DisplayedRegionInput };
@@ -15,10 +15,7 @@ export const useAmrGeneViewerConfig = (
   genomeMeta: GenomeMeta | null,
   fastaUri: string | null,
   gffUri: string | null,
-  sessionOptions?: {
-    displayedRegions?: DisplayedRegionInput[];
-    bpPerPx?: number;
-  }
+  sessionOptions?: SessionViewOptions
 ) => {
   const assembly = useMemo(() => {
     if (!genomeMeta || !fastaUri) return null;

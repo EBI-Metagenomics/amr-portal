@@ -3,7 +3,7 @@ import Plugin from '@jbrowse/core/Plugin';
 import type PluginManager from '@jbrowse/core/PluginManager';
 import configSchema from './configSchema';
 import { getGeneLabel } from './geneLabel';
-import { VIEWPORT_SYNC_CONSTANTS } from '@utils/jbrowse/viewportSyncConstants';
+import { VIEWPORT_SYNC_CONSTANTS } from '@utils/jbrowse/constants';
 
 export default class EnhancedGeneFeaturePlugin extends Plugin {
   name = 'EnhancedGeneFeaturePlugin';

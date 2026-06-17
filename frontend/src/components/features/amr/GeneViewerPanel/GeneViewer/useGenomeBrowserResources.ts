@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { getGenomeFastaBaseUrl, getGenomeGffBaseUrl } from '@/config/appEnv';
 import type { GenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
 import { buildGenomeAssemblyDirectoryUrl, buildGenomeGffUri } from './assemblyPaths';
-import { bpPerPxForGenotypeFocus, type DisplayedRegionInput } from './defaultSessionConfig';
+import { getGenotypeViewport, type DisplayedRegionInput } from './defaultSessionConfig';
 import type { GenomeMeta } from './assembly';
 
 function publicAssetUrl(path: string): string {
@@ -14,15 +14,9 @@ function publicAssetUrl(path: string): string {
 
 // TODO(amr): REMOVE after local rendering check with the sample files in `frontend/public/`.
 const TEMP_TEST_FILE_OVERRIDE = {
-  enabled: true,
+  enabled: false,
   fastaUri: publicAssetUrl('/fasta/ABC/000/ABC_0008492/BU_ATCC8492VPI0062_NT5002.1.fa.gz'),
   gffUri: publicAssetUrl('/gff/ABC/000/ABC_0008492/BU_ATCC8492_annotations.gff.gz'),
-  genotypeDisplayedRegion: {
-    refName: 'contig_1',
-    start: 0,
-    end: 500000,
-    reversed: false,
-  },
 } as const;
 
 type FaiSequence = { name: string; length: number };
@@ -64,23 +58,8 @@ type GenomeSessionPlan =
       gffUri: string;
       displayedRegions?: DisplayedRegionInput[];
       bpPerPx?: number;
+      offsetPx?: number;
     };
-
-function clampDisplayedRegion(
-  fr: GenomeViewerRowContext['focusedRegion'],
-  seqLen: number
-): DisplayedRegionInput | null {
-  if (!fr) return null;
-  const start = Math.max(0, Math.min(fr.start, Math.max(0, seqLen - 1)));
-  const end = Math.max(start + 1, Math.min(fr.end, seqLen));
-  return {
-    refName: fr.refName,
-    start,
-    end,
-    reversed: fr.reversed,
-    assemblyName: '',
-  };
-}
 
 /**
  * FAI-backed contig list + session plan for the genome browser (keeps `GeneViewerPanel` thin for review).
@@ -119,7 +98,7 @@ export function useGenomeBrowserResources(
   const fastaUri = isUsingTempTestFiles
     ? TEMP_TEST_FILE_OVERRIDE.fastaUri
     : fastaAssemblyDirectoryUrl && assemblyId
-      ? `${fastaAssemblyDirectoryUrl.replace(/\/$/, '')}/${assemblyId}.fa.gz`
+      ? `${fastaAssemblyDirectoryUrl.replace(/\/$/, '')}/${assemblyId}.fasta.gz`
       : null;
   const faiUrl = fastaUri ? `${fastaUri}.fai` : null;
   const gffUri = isUsingTempTestFiles
@@ -154,17 +133,26 @@ export function useGenomeBrowserResources(
 
     let displayedRegions: DisplayedRegionInput[] | undefined;
     let bpPerPx: number | undefined;
+    let offsetPx: number | undefined;
 
     if (rowContext.viewMode === 'genotype') {
-      const selectedRegion = isUsingTempTestFiles
-        ? TEMP_TEST_FILE_OVERRIDE.genotypeDisplayedRegion
-        : rowContext.focusedRegion;
+      const selectedRegion = rowContext.focusedRegion;
       const seq = findFaiEntry(faiQuery.data, selectedRegion!.refName);
       if (!seq) return { kind: 'invalid', code: 'genotype_unknown_contig' };
-      const clamped = clampDisplayedRegion(selectedRegion, seq.length);
-      if (!clamped) return { kind: 'invalid', code: 'genotype_bad_interval' };
-      displayedRegions = [{ ...clamped, assemblyName: assemblyId, refName: seq.name }];
-      bpPerPx = bpPerPxForGenotypeFocus(clamped.start, clamped.end);
+      const clampedStart = Math.max(0, Math.min(selectedRegion!.start, Math.max(0, seq.length - 1)));
+      const clampedEnd = Math.max(clampedStart + 1, Math.min(selectedRegion!.end, seq.length));
+      displayedRegions = [
+        {
+          refName: seq.name,
+          start: 0,
+          end: seq.length,
+          // Keep coordinate axis in genomic forward direction (left -> right).
+          // Gene strand is represented by feature orientation, not by flipping the whole view.
+          reversed: false,
+          assemblyName: assemblyId,
+        },
+      ];
+      ({ bpPerPx, offsetPx } = getGenotypeViewport(clampedStart, clampedEnd));
     }
 
     return {
@@ -173,6 +161,7 @@ export function useGenomeBrowserResources(
       gffUri,
       displayedRegions,
       bpPerPx,
+      offsetPx,
     };
   }, [rowContext, assemblyId, fastaUri, gffUri, faiQuery.data, isUsingTempTestFiles]);
 

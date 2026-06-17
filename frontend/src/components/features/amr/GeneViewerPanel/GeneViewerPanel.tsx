@@ -43,6 +43,7 @@ const GeneViewerPanel = ({
         ? {
             displayedRegions: readySessionPlan.displayedRegions,
             bpPerPx: readySessionPlan.bpPerPx,
+            offsetPx: readySessionPlan.offsetPx,
           }
         : undefined,
     [readySessionPlan]

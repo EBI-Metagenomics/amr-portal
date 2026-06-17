@@ -1,6 +1,50 @@
 import { unzip } from '@gmod/bgzf-filehandle';
 import type { SimpleFeatureSerialized } from '@jbrowse/core/util/simpleFeature';
-import pako from 'pako';
+
+/** Split GFF3 attributes on semicolons that start the next key=value pair. */
+export function parseGffAttributes(attrString: string): Record<string, string> {
+  const attributes: Record<string, string> = {};
+  for (const pair of attrString.split(/;(?=[^=;]+=)/)) {
+    const separator = pair.indexOf('=');
+    if (separator <= 0) continue;
+    const key = pair.slice(0, separator).trim();
+    const value = pair.slice(separator + 1).trim();
+    if (key) attributes[key] = value;
+  }
+  return attributes;
+}
+
+const GENE_ANNOTATION_TYPES = new Set(['gene', 'CDS', 'mRNA', 'tRNA', 'rRNA', 'ncRNA', 'pseudogene']);
+
+const GENE_ANNOTATION_TYPE_RANK: Record<string, number> = {
+  gene: 0,
+  mRNA: 1,
+  CDS: 2,
+  tRNA: 3,
+  rRNA: 4,
+  ncRNA: 5,
+  pseudogene: 6,
+};
+
+function dedupeByLocusTag(features: SimpleFeatureSerialized[]): SimpleFeatureSerialized[] {
+  const byLocusTag = new Map<string, SimpleFeatureSerialized>();
+  for (const feature of features) {
+    const locusTag =
+      (feature.attributes as Record<string, string> | undefined)?.locus_tag?.trim();
+    if (!locusTag) continue;
+    const existing = byLocusTag.get(locusTag);
+    if (!existing) {
+      byLocusTag.set(locusTag, feature);
+      continue;
+    }
+    const nextRank = GENE_ANNOTATION_TYPE_RANK[feature.type] ?? 99;
+    const existingRank = GENE_ANNOTATION_TYPE_RANK[existing.type] ?? 99;
+    if (nextRank < existingRank) {
+      byLocusTag.set(locusTag, feature);
+    }
+  }
+  return Array.from(byLocusTag.values());
+}
 
 export class GFFParser {
   private gffCache: Map<string, SimpleFeatureSerialized[]> = new Map();
@@ -16,21 +60,12 @@ export class GFFParser {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
       const arrayBuffer = await response.arrayBuffer();
-      let gffFile = new Uint8Array(arrayBuffer);
+      const gffFile = new Uint8Array(arrayBuffer);
       const isGzip = gffFile[0] === 0x1f && gffFile[1] === 0x8b;
 
-      let gffContents: string;
-      if (isGzip) {
-        try {
-          const compressedData = await this.decompressBgzip(gffFile);
-          gffContents = new TextDecoder('utf-8').decode(compressedData);
-        } catch {
-          const compressedData = await unzip(gffFile);
-          gffContents = new TextDecoder('utf-8').decode(compressedData);
-        }
-      } else {
-        gffContents = new TextDecoder('utf-8').decode(gffFile);
-      }
+      const gffContents = isGzip
+        ? new TextDecoder('utf-8').decode(await unzip(gffFile))
+        : new TextDecoder('utf-8').decode(gffFile);
 
       const features: SimpleFeatureSerialized[] = [];
       const lines = gffContents.split('\n');
@@ -41,18 +76,9 @@ export class GFFParser {
         if (parts.length < 9) continue;
 
         const [refName, , type, start, end, , strand] = parts;
-        const attributes: Record<string, string> = {};
-        const attrString = parts[8];
-        const attrPairs = attrString.split(';');
+        const attributes = parseGffAttributes(parts[8]);
 
-        for (const pair of attrPairs) {
-          const [key, ...valueParts] = pair.split('=');
-          if (key && valueParts.length > 0) {
-            attributes[key.trim()] = valueParts.join('=').trim();
-          }
-        }
-
-        if (type === 'gene' && attributes.locus_tag) {
+        if (GENE_ANNOTATION_TYPES.has(type) && attributes.locus_tag) {
           const gffStart = parseInt(start, 10);
           const gffEnd = parseInt(end, 10);
           features.push({
@@ -68,55 +94,13 @@ export class GFFParser {
         }
       }
 
-      this.gffCache.set(gffLocation, features);
-      return features;
+      const dedupedFeatures = dedupeByLocusTag(features);
+      this.gffCache.set(gffLocation, dedupedFeatures);
+      return dedupedFeatures;
     } catch (error) {
       console.error('Error fetching GFF file:', error);
       return [];
     }
-  }
-
-  private async decompressBgzip(data: Uint8Array): Promise<Uint8Array> {
-    try {
-      return new Uint8Array(pako.inflate(data));
-    } catch {
-      // continue
-    }
-    try {
-      return new Uint8Array(pako.inflateRaw(data));
-    } catch {
-      // continue
-    }
-    if (typeof window !== 'undefined' && 'DecompressionStream' in window) {
-      try {
-        const stream = new ReadableStream({
-          start(controller) {
-            controller.enqueue(data);
-            controller.close();
-          },
-        });
-        const decompressedStream = stream.pipeThrough(new DecompressionStream('gzip'));
-        const reader = decompressedStream.getReader();
-        const chunks: Uint8Array[] = [];
-        let reading = true;
-        while (reading) {
-          const { done, value } = await reader.read();
-          if (done) reading = false;
-          else chunks.push(value);
-        }
-        const totalLength = chunks.reduce((acc, chunk) => acc + chunk.length, 0);
-        const result = new Uint8Array(totalLength);
-        let offset = 0;
-        for (const chunk of chunks) {
-          result.set(chunk, offset);
-          offset += chunk.length;
-        }
-        return result;
-      } catch {
-        // continue
-      }
-    }
-    return unzip(data);
   }
 
   filterFeaturesByRegion(features: SimpleFeatureSerialized[], region: { refName: string; start: number; end: number }) {

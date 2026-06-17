@@ -18,14 +18,17 @@ export type DisplayedRegionInput = {
   assemblyName: string;
 };
 
+export type SessionViewOptions = {
+  displayedRegions?: DisplayedRegionInput[];
+  bpPerPx?: number;
+  offsetPx?: number;
+};
+
 const getDefaultSessionConfig = (
   genomeMeta: GenomeMeta | null,
   assembly: AssemblyConfig | null,
   tracks: Array<Record<string, unknown>>,
-  options?: {
-    displayedRegions?: DisplayedRegionInput[];
-    bpPerPx?: number;
-  }
+  options?: SessionViewOptions
 ) => {
   if (!genomeMeta || !assembly) {
     return null;
@@ -42,6 +45,7 @@ const getDefaultSessionConfig = (
     }));
 
   const bpPerPx = options?.bpPerPx ?? ZOOM_LEVELS.BP_PER_PX;
+  const offsetPx = options?.offsetPx ?? 0;
 
   return {
     name: 'Gene Viewer Session',
@@ -127,7 +131,7 @@ const getDefaultSessionConfig = (
         showGridlines: true,
         scale: 1,
         bpPerPx,
-        offsetPx: 0,
+        offsetPx,
       },
     ],
   };
@@ -135,8 +139,24 @@ const getDefaultSessionConfig = (
 
 export default getDefaultSessionConfig;
 
-export function bpPerPxForGenotypeFocus(start: number, end: number): number {
-  const span = Math.max(1, end - start);
-  const raw = span / ZOOM_LEVELS.GENOTYPE_FOCUS_VIEWPORT_BP;
-  return Math.min(ZOOM_LEVELS.BP_PER_PX_MAX, Math.max(ZOOM_LEVELS.BP_PER_PX_MIN, raw));
+export type GenotypeViewport = { bpPerPx: number; offsetPx: number };
+
+function clampGenotypeBpPerPx(raw: number): number {
+  return Math.min(
+    ZOOM_LEVELS.GENOTYPE_BP_PER_PX_MAX,
+    Math.max(ZOOM_LEVELS.BP_PER_PX_MIN, raw)
+  );
+}
+
+/** Initial zoom + scroll position for a genotype row: gene-centered with neighboring context. */
+export function getGenotypeViewport(start: number, end: number): GenotypeViewport {
+  const geneSpan = Math.max(1, end - start);
+  const targetViewportBp = Math.min(
+    Math.max(geneSpan * ZOOM_LEVELS.GENOTYPE_NEIGHBOR_PADDING, ZOOM_LEVELS.GENOTYPE_MIN_VIEWPORT_BP),
+    ZOOM_LEVELS.GENOTYPE_MAX_VIEWPORT_BP
+  );
+  const bpPerPx = clampGenotypeBpPerPx(targetViewportBp / ZOOM_LEVELS.VIEWPORT_WIDTH_PX);
+  const centerBp = Math.max(0, (start + end) / 2);
+  const offsetPx = Math.max(0, centerBp / bpPerPx - ZOOM_LEVELS.VIEWPORT_WIDTH_PX / 2);
+  return { bpPerPx, offsetPx };
 }

@@ -25,7 +25,7 @@ const getTracks = (assemblyName: string, gffUri: string) => {
       gffGzLocation: { uri: gffUri },
       index: {
         location: {
-          uri: `${gffUri}.tbi`,
+          uri: `${gffUri}.csi`,
         },
       },
     },
@@ -59,6 +59,9 @@ const getTracks = (assemblyName: string, gffUri: string) => {
           (get(feature, 'gene') && 'Gene: ' + get(feature, 'gene')  + '<br/>'  || '') +
           (get(feature, 'locus_tag') && 'Locus Tag: ' + get(feature, 'locus_tag') + '<br/>' || '') +
           (get(feature, 'product') && 'Product: ' + get(feature, 'product') + '<br/>' || '') +
+          (get(feature, 'amrfinderplus_element_symbol') && 'Element: ' + get(feature, 'amrfinderplus_element_symbol') + '<br/>' || '') +
+          (get(feature, 'amrfinderplus_element_name') && 'Element name: ' + get(feature, 'amrfinderplus_element_name') + '<br/>' || '') +
+          (get(feature, 'drug_class') && 'Drug class: ' + get(feature, 'drug_class') + '<br/>' || '') +
           (get(feature, 'Alias') && 'Alias: ' + get(feature, 'Alias') + '<br/>'  || '')
         `,
       },

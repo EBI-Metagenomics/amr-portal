@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { GFFParser } from '@/plugins/EnhancedGeneFeaturePlugin/services/GFFParser';
+import { buildFeatureAnnotations, type FeatureAnnotation } from './featureAnnotations';
 
 export type FeaturePanelFeature = {
   id: string;
@@ -14,6 +15,7 @@ export type FeaturePanelFeature = {
   strand: number;
   note: string | null;
   dbxref: string[];
+  annotations: FeatureAnnotation[];
 };
 
 const gffParser = new GFFParser();
@@ -49,7 +51,18 @@ function toFeaturePanelFeature(
     strand: typeof feature.strand === 'number' ? feature.strand : 0,
     note: attributes?.Note?.trim() || null,
     dbxref: splitAttributeList(attributes?.Dbxref),
+    annotations: buildFeatureAnnotations(attributes ?? {}),
   };
+}
+
+function indexFeature(
+  index: Map<string, FeaturePanelFeature>,
+  feature: FeaturePanelFeature
+): void {
+  index.set(feature.locusTag, feature);
+  if (feature.id !== feature.locusTag) {
+    index.set(feature.id, feature);
+  }
 }
 
 export function useFeatureDetails(gffUri: string | null, selectedLocusTag: string | null) {
@@ -63,7 +76,7 @@ export function useFeatureDetails(gffUri: string | null, selectedLocusTag: strin
       const features = await gffParser.parseGFF(gffUri);
       return features.reduce((acc, feature) => {
         const normalized = toFeaturePanelFeature(feature);
-        if (normalized) acc.set(normalized.locusTag, normalized);
+        if (normalized) indexFeature(acc, normalized);
         return acc;
       }, new Map<string, FeaturePanelFeature>());
     },
@@ -71,7 +84,8 @@ export function useFeatureDetails(gffUri: string | null, selectedLocusTag: strin
 
   const selectedFeature = useMemo(() => {
     if (!selectedLocusTag) return null;
-    return featureIndexQuery.data?.get(selectedLocusTag) ?? null;
+    const trimmed = selectedLocusTag.trim();
+    return featureIndexQuery.data?.get(trimmed) ?? null;
   }, [featureIndexQuery.data, selectedLocusTag]);
 
   return {
