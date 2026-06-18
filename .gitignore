@@ -24,6 +24,5 @@ frontend/app-dist
 # Local settings
 .vscode/settings.json
 .DS_Store
-/frontend/public/fasta/
-/frontend/public/gff/
 /frontend/public/genomes/
+/frontend/public/GCA/
