@@ -70,6 +70,10 @@ function hideJBrowseViewChrome(container: HTMLElement | null) {
       hideEmbeddedChrome(el as HTMLElement);
     });
   }
+  // LinearGenomeView TrackLabel close control (title set in plugin-linear-genome-view).
+  container.querySelectorAll('button[title="close this track"]').forEach(el => {
+    hideEmbeddedChrome(el as HTMLElement);
+  });
 }
 
 /**

@@ -24,7 +24,8 @@
 /* Suppress JBrowse app view shell controls (hamburger, minimize, close). */
 .jbrowseContainer :global([data-testid='view_menu_icon']),
 .jbrowseContainer :global([data-testid='close_view']),
-.jbrowseContainer :global([data-testid='minimize_view']) {
+.jbrowseContainer :global([data-testid='minimize_view']),
+.jbrowseContainer :global(button[title='close this track']) {
   display: none !important;
   visibility: hidden !important;
   pointer-events: none !important;
