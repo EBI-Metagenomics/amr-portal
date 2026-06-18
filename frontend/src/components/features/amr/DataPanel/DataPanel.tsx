@@ -36,6 +36,25 @@ type Props = {
 const panelSection = (extra?: string) =>
   [panelStyles.root, styles.root, extra].filter(Boolean).join(' ');
 
+const getEmptyResultsMessage = (
+  activeSearchQuery?: string,
+  selectedFilters: Array<{ category: string; value: string }> = []
+) => {
+  const hasSearch = Boolean(activeSearchQuery?.trim());
+  const hasFilters = selectedFilters.length > 0;
+
+  if (hasSearch && hasFilters) {
+    return 'No records match your search and selected filters. Try different keywords or adjust your filters.';
+  }
+  if (hasSearch) {
+    return 'No records match your search. Try different keywords or a broader query.';
+  }
+  if (hasFilters) {
+    return 'No records match the selected filters. Try removing or changing some filters.';
+  }
+  return 'No records found. Try adjusting your search or filters.';
+};
+
 const DataPanel = ({
   currentViewId,
   selectedFilters,
@@ -83,7 +102,9 @@ const DataPanel = ({
   if (data && !data.data.length && !isPlaceholderData) {
     return (
       <section className={panelSection()}>
-        <p>No data.</p>
+        <p className={styles.emptyState}>
+          {getEmptyResultsMessage(activeSearchQuery, selectedFilters)}
+        </p>
       </section>
     );
   }
