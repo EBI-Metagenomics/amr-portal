@@ -80,10 +80,16 @@ const useGeneViewerState = (
         });
 
         try {
-          const session = state.session;
+          const session = state.session as {
+            showWidget?: () => void;
+            addWidget?: () => void;
+            removeView?: () => void;
+          };
           if (session) {
             session.showWidget = () => undefined;
             session.addWidget = () => undefined;
+            // Prevent closing the sole embedded view via app-core ViewHeader.
+            session.removeView = () => undefined;
           }
         } catch (error) {
           console.warn('Failed to override widget methods:', error);

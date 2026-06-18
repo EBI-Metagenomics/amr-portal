@@ -21,6 +21,20 @@
   min-height: 0;
 }
 
+/* Suppress JBrowse app view shell controls (hamburger, minimize, close). */
+.jbrowseContainer :global([data-testid='view_menu_icon']),
+.jbrowseContainer :global([data-testid='close_view']),
+.jbrowseContainer :global([data-testid='minimize_view']) {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+/* JBrowse app-core ViewContainer uses margin: theme.spacing(0.5) (4px). */
+.jbrowseContainer :global(.MuiPaper-elevation12) {
+  margin-top: 0 !important;
+}
+
 .hoverCard {
   position: absolute;
   z-index: 5;

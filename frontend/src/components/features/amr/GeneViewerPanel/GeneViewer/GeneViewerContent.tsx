@@ -54,6 +54,24 @@ function triggerTrackReload(viewState: ViewState) {
   }
 }
 
+function hideEmbeddedChrome(element: HTMLElement) {
+  element.style.cssText =
+    'display:none!important;visibility:hidden!important;opacity:0!important;pointer-events:none!important;';
+  element.setAttribute('aria-hidden', 'true');
+}
+
+/** JBrowse app-core ViewHeader / ViewMenu test ids (see @jbrowse/app-core/ui/App/ViewHeader.js). */
+const HIDDEN_JBROWSE_VIEW_CONTROL_TEST_IDS = ['view_menu_icon', 'close_view', 'minimize_view'] as const;
+
+function hideJBrowseViewChrome(container: HTMLElement | null) {
+  if (!container) return;
+  for (const testId of HIDDEN_JBROWSE_VIEW_CONTROL_TEST_IDS) {
+    container.querySelectorAll(`[data-testid="${testId}"]`).forEach(el => {
+      hideEmbeddedChrome(el as HTMLElement);
+    });
+  }
+}
+
 /**
  * Embedded JBrowse linear genome view with METT-style chrome suppression (no app bar / feature drawer).
  */
@@ -63,6 +81,8 @@ const GeneViewerContent = ({ viewState, highlightLocusId, onFeatureSelect }: Pro
 
   useEffect(() => {
     const hideMenuBarAndFeaturePanel = () => {
+      hideJBrowseViewChrome(containerRef.current);
+
       const buttons = Array.from(document.querySelectorAll('button[data-testid="dropDownMenuButton"]'));
       const fileButton = buttons.find(btn => btn.textContent?.includes('File'));
       if (fileButton) {

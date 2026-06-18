@@ -7,7 +7,6 @@ type Props = {
   feature: FeaturePanelFeature | null;
   isLoading: boolean;
   error: Error | null;
-  onClose?: () => void;
 };
 
 type CollapsibleSectionProps = {
@@ -72,7 +71,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-const FeaturePanel = ({ feature, isLoading, error, onClose }: Props) => {
+const FeaturePanel = ({ feature, isLoading, error }: Props) => {
   const [expandedSections, setExpandedSections] =
     useState<Record<SectionId, boolean>>(DEFAULT_EXPANDED_SECTIONS);
 
@@ -117,11 +116,6 @@ const FeaturePanel = ({ feature, isLoading, error, onClose }: Props) => {
           <button type="button" className={styles.secondaryButton} onClick={toggleAll}>
             {allExpanded ? 'Collapse all' : 'Expand all'}
           </button>
-          {onClose ? (
-            <button type="button" className={styles.closeButton} onClick={onClose} aria-label="Reset selected feature">
-              ×
-            </button>
-          ) : null}
         </div>
       </div>
 

@@ -77,6 +77,7 @@ const getDefaultSessionConfig = (
         },
         hideTrackSelector: true,
         hideVerticalResizeHandle: true,
+        closable: false,
         displayedRegions,
         tracks: [
           {

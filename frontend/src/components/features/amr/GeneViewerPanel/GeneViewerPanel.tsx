@@ -198,7 +198,6 @@ const GeneViewerPanel = ({
                   feature={featureDetails.selectedFeature}
                   isLoading={featureDetails.isLoading}
                   error={featureDetails.error instanceof Error ? featureDetails.error : null}
-                  onClose={() => setManualSelection({ key: rowSelectionKey, locusTag: rowLocusTag })}
                 />
               </div>
             </div>
