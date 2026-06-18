@@ -152,7 +152,7 @@ export function useGenomeBrowserResources(
           assemblyName: assemblyId,
         },
       ];
-      ({ bpPerPx, offsetPx } = getGenotypeViewport(clampedStart, clampedEnd));
+      ({ bpPerPx, offsetPx } = getGenotypeViewport(clampedStart, clampedEnd, seq.length));
     }
 
     return {

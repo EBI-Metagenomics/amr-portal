@@ -149,14 +149,25 @@ function clampGenotypeBpPerPx(raw: number): number {
 }
 
 /** Initial zoom + scroll position for a genotype row: gene-centered with neighboring context. */
-export function getGenotypeViewport(start: number, end: number): GenotypeViewport {
+export function getGenotypeViewport(start: number, end: number, contigLength: number): GenotypeViewport {
   const geneSpan = Math.max(1, end - start);
-  const targetViewportBp = Math.min(
+  const contigSpan = Math.max(1, contigLength);
+  let targetViewportBp = Math.min(
     Math.max(geneSpan * ZOOM_LEVELS.GENOTYPE_NEIGHBOR_PADDING, ZOOM_LEVELS.GENOTYPE_MIN_VIEWPORT_BP),
-    ZOOM_LEVELS.GENOTYPE_MAX_VIEWPORT_BP
+    ZOOM_LEVELS.GENOTYPE_MAX_VIEWPORT_BP,
+    contigSpan
   );
   const bpPerPx = clampGenotypeBpPerPx(targetViewportBp / ZOOM_LEVELS.VIEWPORT_WIDTH_PX);
+  const visibleBp = ZOOM_LEVELS.VIEWPORT_WIDTH_PX * bpPerPx;
+
+  // Entire contig fits — fill the panel width and align to the start (no empty grey tail).
+  if (contigSpan <= visibleBp) {
+    return { bpPerPx, offsetPx: 0 };
+  }
+
   const centerBp = Math.max(0, (start + end) / 2);
-  const offsetPx = Math.max(0, centerBp / bpPerPx - ZOOM_LEVELS.VIEWPORT_WIDTH_PX / 2);
+  const maxOffsetPx = Math.max(0, contigSpan / bpPerPx - ZOOM_LEVELS.VIEWPORT_WIDTH_PX);
+  const centeredOffset = centerBp / bpPerPx - ZOOM_LEVELS.VIEWPORT_WIDTH_PX / 2;
+  const offsetPx = Math.min(maxOffsetPx, Math.max(0, centeredOffset));
   return { bpPerPx, offsetPx };
 }
