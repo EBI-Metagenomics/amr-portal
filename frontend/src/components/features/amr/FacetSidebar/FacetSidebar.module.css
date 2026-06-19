@@ -216,6 +216,7 @@
   min-height: 0;
   max-height: 100%;
   overflow-y: auto;
+  scrollbar-gutter: stable;
   scrollbar-width: thin;
   scrollbar-color: #b8c2cc #eef2f6;
 }
@@ -393,8 +394,13 @@
 
 .optionListHeader span:last-child {
   flex-shrink: 0;
-  min-width: 4.5rem;
+  min-width: 5rem;
   text-align: right;
+}
+
+.optionListHeaderScrollable {
+  /* Keep "Matches" aligned with counts when a scrollbar gutter is reserved. */
+  padding-right: 10px;
 }
 
 .optionList {
@@ -406,7 +412,8 @@
 .optionListScrollable {
   max-height: 260px;
   overflow-y: auto;
-  padding-right: 4px;
+  scrollbar-gutter: stable;
+  padding-right: 10px;
   scrollbar-width: thin;
   scrollbar-color: #b8c2cc #eef2f6;
 }
@@ -450,7 +457,7 @@
 
 .optionCount {
   flex-shrink: 0;
-  min-width: 4.5rem;
+  min-width: 5rem;
   text-align: right;
   color: #374151;
   font-size: 12px;

@@ -221,9 +221,16 @@ const FacetSidebar = ({
               if (a.selected !== b.selected) return a.selected ? -1 : 1;
               return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' });
             });
+            const optionListScrollable = sortedOptions.length > 10;
             const optionListClass = [
               styles.optionList,
-              sortedOptions.length > 10 ? styles.optionListScrollable : '',
+              optionListScrollable ? styles.optionListScrollable : '',
+            ]
+              .filter(Boolean)
+              .join(' ');
+            const optionListHeaderClass = [
+              styles.optionListHeader,
+              optionListScrollable ? styles.optionListHeaderScrollable : '',
             ]
               .filter(Boolean)
               .join(' ');
@@ -280,7 +287,7 @@ const FacetSidebar = ({
                       placeholder={`Search ${facet.label.toLowerCase()}`}
                       onChange={event => onFacetSearch(facet.id, event.target.value)}
                     />
-                    <div className={styles.optionListHeader} aria-hidden="true">
+                    <div className={optionListHeaderClass} aria-hidden="true">
                       <span>Value</span>
                       <span>Matches</span>
                     </div>
