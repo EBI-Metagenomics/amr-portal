@@ -221,19 +221,6 @@ const FacetSidebar = ({
               if (a.selected !== b.selected) return a.selected ? -1 : 1;
               return a.label.localeCompare(b.label, undefined, { sensitivity: 'base' });
             });
-            const optionListScrollable = sortedOptions.length > 10;
-            const optionListClass = [
-              styles.optionList,
-              optionListScrollable ? styles.optionListScrollable : '',
-            ]
-              .filter(Boolean)
-              .join(' ');
-            const optionListHeaderClass = [
-              styles.optionListHeader,
-              optionListScrollable ? styles.optionListHeaderScrollable : '',
-            ]
-              .filter(Boolean)
-              .join(' ');
             const headerSummary = buildFacetHeaderSummary(facet, scopeTotal);
             return (
               <section key={facet.id} className={styles.facetSection}>
@@ -287,11 +274,11 @@ const FacetSidebar = ({
                       placeholder={`Search ${facet.label.toLowerCase()}`}
                       onChange={event => onFacetSearch(facet.id, event.target.value)}
                     />
-                    <div className={optionListHeaderClass} aria-hidden="true">
+                    <div className={styles.optionListHeader} aria-hidden="true">
                       <span>Value</span>
                       <span>Matches</span>
                     </div>
-                    <div className={optionListClass}>
+                    <div className={styles.optionList}>
                       {sortedOptions.map(option => {
                         const checked = selectedMap.has(`${facet.id}::${option.value}`);
                         return (

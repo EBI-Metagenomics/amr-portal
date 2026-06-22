@@ -1,6 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { FeaturePanelFeature } from './useFeatureDetails';
 import { ALL_SECTION_IDS, DEFAULT_EXPANDED_SECTIONS, type SectionId } from './constants';
+import {
+  formatKeggDisplayId,
+  generateExternalDbLink,
+  splitAnnotationIds,
+} from '@utils/common/annotationLinks';
 import styles from './FeaturePanel.module.css';
 
 type Props = {
@@ -67,6 +72,36 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
     <div className={styles.field}>
       <span className={styles.label}>{label}</span>
       <div className={styles.value}>{value}</div>
+    </div>
+  );
+}
+
+function renderLinkedAnnotationIds(key: string, value: string): React.ReactNode {
+  if (key !== 'kegg' && key !== 'cog') {
+    return value;
+  }
+
+  const dbType = key === 'kegg' ? 'KEGG' : 'COG';
+  const ids = splitAnnotationIds(value);
+  if (!ids.length) return value;
+
+  return (
+    <div className={styles.linkList}>
+      {ids.map(id => {
+        const displayId = key === 'kegg' ? formatKeggDisplayId(id) : id;
+        return (
+          <div key={`${dbType}-${id}`} className={styles.linkRow}>
+            <a
+              href={generateExternalDbLink(dbType, id)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.externalLink}
+            >
+              {displayId}
+            </a>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -138,6 +173,7 @@ const FeaturePanel = ({ feature, isLoading, error }: Props) => {
               <Field label="Locus Tag" value={<span className={styles.locusBadge}>{feature.locusTag}</span>} />
               {feature.gene ? <Field label="Gene" value={feature.gene} /> : null}
               {feature.product ? <Field label="Product" value={feature.product} /> : null}
+              {feature.productSource ? <Field label="Product source" value={feature.productSource} /> : null}
               {feature.alias.length ? <Field label="Alias" value={feature.alias.join(', ')} /> : null}
             </CollapsibleSection>
 
@@ -163,7 +199,11 @@ const FeaturePanel = ({ feature, isLoading, error }: Props) => {
                 {feature.note ? <Field label="Note" value={feature.note} /> : null}
                 {feature.dbxref.length ? <Field label="Dbxref" value={feature.dbxref.join(', ')} /> : null}
                 {feature.annotations.map(annotation => (
-                  <Field key={annotation.key} label={annotation.label} value={annotation.value} />
+                  <Field
+                    key={annotation.key}
+                    label={annotation.label}
+                    value={renderLinkedAnnotationIds(annotation.key, annotation.value)}
+                  />
                 ))}
               </CollapsibleSection>
             ) : null}

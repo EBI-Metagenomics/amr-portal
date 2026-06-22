@@ -227,7 +227,8 @@ const HomePage = () => {
                 onSortChange={toggleSort}
                 onClearFilters={clearAllFilters}
                 selectedRowIndex={selectedRowIndex}
-                onRowSelect={handleRowSelect}
+                onRowSelect={genomeViewerEnabled ? handleRowSelect : undefined}
+                genomeViewerEnabled={genomeViewerEnabled}
               />
             </div>
           </div>

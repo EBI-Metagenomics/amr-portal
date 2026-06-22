@@ -8,6 +8,7 @@ export type FeaturePanelFeature = {
   locusTag: string;
   gene: string | null;
   product: string | null;
+  productSource: string | null;
   alias: string[];
   seqId: string;
   start: number;
@@ -44,6 +45,7 @@ function toFeaturePanelFeature(
     locusTag,
     gene: attributes?.gene?.trim() || attributes?.Name?.trim() || null,
     product: attributes?.product?.trim() || null,
+    productSource: attributes?.product_source?.trim() || null,
     alias: splitAttributeList(attributes?.Alias),
     seqId: feature.refName,
     start: feature.start,

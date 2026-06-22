@@ -10,6 +10,7 @@ const CORE_ATTRIBUTE_KEYS = new Set([
   'gene',
   'Name',
   'product',
+  'product_source',
   'Alias',
   'Note',
   'Dbxref',
@@ -27,11 +28,10 @@ const ANNOTATION_ORDER = [
   'kegg',
   'eggNOG',
   'inference',
-  'product_source',
 ] as const;
 
 const ATTRIBUTE_LABELS: Record<string, string> = {
-  amrfinderplus_element_symbol: 'Element symbol',
+  amrfinderplus_element_symbol: 'AMR element symbol',
   amrfinderplus_element_name: 'Element name',
   amrfinderplus_scope: 'Scope',
   element_type: 'Element type',
@@ -42,7 +42,6 @@ const ATTRIBUTE_LABELS: Record<string, string> = {
   kegg: 'KEGG',
   eggNOG: 'eggNOG',
   inference: 'Inference',
-  product_source: 'Product source',
 };
 
 function formatAttributeLabel(key: string): string {

@@ -284,6 +284,32 @@
   background: #bae6fd;
 }
 
+.browserColumn {
+  width: 7.5rem;
+  white-space: nowrap;
+}
+
+.browserButton {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 0;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.browserButton:hover {
+  color: #1d4ed8;
+}
+
+.browserUnavailable {
+  color: #94a3b8;
+}
+
 .tableContainer tbody tr + tr {
   border-top: 1px solid #b7c0c8;
 }

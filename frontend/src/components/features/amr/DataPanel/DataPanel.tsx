@@ -3,6 +3,7 @@ import type { AMRColumnMeta, AMRRecord, AMRRecordValue } from '@interfaces/amrRe
 import type { AMRRecordsResponse } from '@interfaces/amrApi';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import ActionButtons from '@components/features/amr/ActionButtons/ActionButtons';
+import { buildGenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
 import styles from './DataPanel.module.css';
 
 type SortState = {
@@ -31,6 +32,8 @@ type Props = {
   /** When set, rows are selectable for actions such as opening the genome browser. */
   selectedRowIndex?: number | null;
   onRowSelect?: (rowIndex: number, record: AMRRecord) => void;
+  /** When true, show a per-row action to open the genome browser. */
+  genomeViewerEnabled?: boolean;
 };
 
 const panelSection = (extra?: string) =>
@@ -73,6 +76,7 @@ const DataPanel = ({
   onClearFilters,
   selectedRowIndex = null,
   onRowSelect,
+  genomeViewerEnabled = false,
 }: Props) => {
   const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
   const columns = useMemo(() => data?.meta.columns ?? [], [data]);
@@ -134,6 +138,9 @@ const DataPanel = ({
   ]
     .filter(Boolean)
     .join(' ');
+
+  const showBrowserColumn = genomeViewerEnabled && Boolean(onRowSelect);
+  const numericViewId = currentViewId != null ? Number(currentViewId) : null;
 
   return (
     <section className={panelSection()}>
@@ -199,6 +206,7 @@ const DataPanel = ({
         <table>
           <thead>
             <tr>
+              {showBrowserColumn ? <th className={styles.browserColumn}>Genome browser</th> : null}
               {visibleColumns.map(column => {
                 const isSortedColumn = sort?.category === column.id;
                 return (
@@ -252,6 +260,27 @@ const DataPanel = ({
                     : undefined
                 }
               >
+                {showBrowserColumn && onRowSelect ? (
+                  <td className={styles.browserColumn}>
+                    {numericViewId != null && buildGenomeViewerRowContext(record, columns, numericViewId) ? (
+                      <button
+                        type="button"
+                        className={styles.browserButton}
+                        aria-label="View this record in the genome browser"
+                        onClick={event => {
+                          event.stopPropagation();
+                          onRowSelect(index, record);
+                        }}
+                      >
+                        View in browser
+                      </button>
+                    ) : (
+                      <span className={styles.browserUnavailable} title="Assembly ID not available for this row">
+                        —
+                      </span>
+                    )}
+                  </td>
+                ) : null}
                 {visibleColumns.map(column => {
                   const value = record[column.id];
                   return (
