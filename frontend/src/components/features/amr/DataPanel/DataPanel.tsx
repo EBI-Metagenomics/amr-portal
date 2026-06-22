@@ -206,7 +206,9 @@ const DataPanel = ({
         <table>
           <thead>
             <tr>
-              {showBrowserColumn ? <th className={styles.browserColumn}>Genome browser</th> : null}
+              {showBrowserColumn ? (
+                <th className={styles.browserColumn}>View in Browser</th>
+              ) : null}
               {visibleColumns.map(column => {
                 const isSortedColumn = sort?.category === column.id;
                 return (
@@ -242,37 +244,30 @@ const DataPanel = ({
             </tr>
           </thead>
           <tbody aria-busy={isFetching && isPlaceholderData}>
-            {data.data.map((record, index) => (
+            {data.data.map((record, index) => {
+              /* Row click to open genome browser is disabled for now; use the browser column button instead. */
+              return (
               <tr
                 key={index}
                 aria-selected={onRowSelect ? selectedRowIndex === index : undefined}
-                className={[
-                  onRowSelect ? styles.clickableRow : '',
-                  selectedRowIndex === index ? styles.rowSelected : '',
-                ]
-                  .filter(Boolean)
-                  .join(' ')}
-                onClick={
-                  onRowSelect
-                    ? () => {
-                        onRowSelect(index, record);
-                      }
-                    : undefined
-                }
+                className={[selectedRowIndex === index ? styles.rowSelected : ''].filter(Boolean).join(' ')}
               >
                 {showBrowserColumn && onRowSelect ? (
                   <td className={styles.browserColumn}>
                     {numericViewId != null && buildGenomeViewerRowContext(record, columns, numericViewId) ? (
                       <button
                         type="button"
-                        className={styles.browserButton}
-                        aria-label="View this record in the genome browser"
-                        onClick={event => {
-                          event.stopPropagation();
-                          onRowSelect(index, record);
-                        }}
+                        className={[
+                          styles.browserButton,
+                          selectedRowIndex === index ? styles.browserButtonActive : '',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        aria-label="Open genome browser for this record"
+                        title="Open genome browser"
+                        onClick={() => onRowSelect(index, record)}
                       >
-                        View in browser
+                        <GenomeBrowserIcon />
                       </button>
                     ) : (
                       <span className={styles.browserUnavailable} title="Assembly ID not available for this row">
@@ -290,7 +285,8 @@ const DataPanel = ({
                   );
                 })}
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -391,6 +387,13 @@ const ExternalLink = ({
 const ExternalLinkIcon = () => (
   <svg viewBox="0 0 32 32" aria-hidden="true">
     <path d="M22,5.2l-0.1,0.1L13.4,14c-1,1-1,2.5,0,3.5l1.2,1.2c1,1,2.5,1,3.5,0l8.5-8.7l0.1-0.1l2.6,2.7c1,1,1.7,0.6,1.7-0.7V1.8C31,1.4,30.6,1,30.2,1h-9.8c-1.4,0-1.7,0.8-0.7,1.8L22,5.2z M6,1C3.2,1,1,3.2,1,6v20c0,2.8,2.2,5,5,5h20c2.8,0,5-2.2,5-5V13.1v7.1L26,16v7.5c0,1.4-1.1,2.5-2.5,2.5h-15C7.1,26,6,24.9,6,23.5v-15C6,7.1,7.1,6,8.5,6H16l-4.2-5h7.1H6z" />
+  </svg>
+);
+
+const GenomeBrowserIcon = () => (
+  <svg viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M2.5 11.25h19v1.5H2.5z" />
+    <path d="M6 7.75h3.25v8.5H6zM11 9h5.25v6H11zM17.25 7.25h2.75v9.5h-2.75z" />
   </svg>
 );
 
