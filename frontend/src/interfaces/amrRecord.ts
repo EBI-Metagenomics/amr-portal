@@ -1,4 +1,4 @@
-export type AMRColumnType = 'string' | 'link' | 'array-link' | 'labelled-link';
+export type AMRColumnType = 'string' | 'number' | 'link' | 'array-link' | 'labelled-link';
 
 export type AMRColumnMeta = {
   id: string;
