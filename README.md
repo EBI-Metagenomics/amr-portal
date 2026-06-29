@@ -157,7 +157,7 @@ curl -X 'POST' \
 }'
 ```
 
-### Frontend
+### Frontend - Static Pages
 
 Prerequisite: need to have Node installed. As a rule of thumb, always use the latest LTS version of Node.
 
@@ -167,12 +167,10 @@ npm install
 npm run dev
 ```
 
-## Production build
-
-### Frontend
+### Frontend - React App
 
 ```
-cd portal-static
+cd frontend
 npm install
 npm run build
 ```
