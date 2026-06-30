@@ -18,7 +18,7 @@ The antimicrobial resistance (AMR) portal contains three main data resources
 
 ## How to access portal data via FTP
 
-Genome annotation (available in GFF format) and AMFinderPlus results are available [from our genomes FTP site](https://ftp.ebi.ac.uk/pub/databases/amr_portal/genomes/). Our denormalised AMR data representations are available in parquet, CSV and DuckDB formats all of which are available from our [releases FTP site](https://ftp.ebi.ac.uk/pub/databases/amr_portal/releases/). Information on how to navigate and use these resources are available via our [download and developer documentation pages](/amr/developers).
+Genome annotation (available in GFF format) and AMFinderPlus results are available [from our genomes FTP site](https://ftp.ebi.ac.uk/pub/databases/amr_portal/genomes/). Our denormalised AMR data representations are available in parquet, CSV and DuckDB formats all of which are available from our [releases FTP site](https://ftp.ebi.ac.uk/pub/databases/amr_portal/releases/). Information on how to navigate and use these resources are available via our [download and developer documentation pages](/developers/).
 
 ## How to explore the AMR data in the portal
 
