@@ -7,7 +7,7 @@ layout: "layouts/documentation.njk"
 
 # How to use the Antimicrobial resistance (AMR) portal
 
-The antimicrobial resistance (AMR) portal contains three main data resources
+The antimicrobial resistance (AMR) portal contains three main data resources:
 
 - **AMR phenotypes**  - AMR was determined experimentally and taken from
   CABBAGE antibiograms catalogue.
@@ -22,80 +22,73 @@ Genome annotation (available in GFF format) and AMFinderPlus results are availab
 
 ## How to explore the AMR data in the portal
 
-You can explore the three antimicrobial resistance (AMR) data resources
-by selecting one of the links on the home page ie 'Experimental AMR'.
+You can start exploring from the [portal home page](/). The home page provides:
+
+- A **global search** box that searches across combined phenotypes and genotypes.
+- Links to each of the three data resources: **AMR phenotypes**, **AMR genotypes**, and **Combined phenotypes and genotypes**.
 
 <figure>
-  <img src="/assets/images/content/howto/home-page-amr-f1.webp" />
+  <img src="/assets/images/content/howto/home-page-amr-f1.png" alt="AMR portal home page with global search and links to the three data resources" />
   <figcaption>
-    Fig 1. A view of the antimicrobial resistance portal home page showing links to all three data resources AMR phenotypes, AMR genotypes and Experimental and Combined phenotypes and genotypes.
+    Fig 1. The portal home page. Use the search box to jump straight to matching records, or choose one of the three data resources (AMR phenotypes, AMR genotypes and Experimental, and Combined phenotypes and genotypes) below.
   </figcaption>
 </figure>
 
-The will take you to the data set ie AMR phenotypes and a
-view of the antibiotics for which experimental antimicrobial resistance
-data is available.
+Selecting a data-resource link opens the data explorer with a **faceted search panel** on the left and a **results table** on the right.
 
 <figure>
-  <img src="/assets/images/content/howto/experimental-amr-f2.png" />
-  <figcaption> 
-    Fig 2. A view of the AMR phenotypes data resource showing the antibiotics for which experimental AMR data is available.
+  <img src="/assets/images/content/howto/portal-overview-f2.png" alt="AMR data explorer showing the facet sidebar and results table" />
+  <figcaption>
+    Fig 2. The data explorer. Faceted filters are in the left panel; matching records appear in the table on the right.
   </figcaption>
 </figure>
 
-### How to choose an AMR data resource
+### Choosing a data resource
 
-To choose an alternative AMR data resource select either
+Within the explorer, switch between data resources using the **Result type** cards at the top of the left panel:
 
+- AMR phenotypes
 - AMR genotypes
-or
 - Combined phenotypes and genotypes
 
-under the 'Data' heading in the left hand column, both are highlighted
-in blue.
-
-## How to use the AMR data resource
-
-### Selecting AMR data for antibiotics
-
-The AMR data resource selected will show a view of the antibiotics for
-which antimicrobial resistance data is available by default.
-
-To select antibiotics of interest:
-
-- Select the check box one or more antibiotics of interest e.g.
-  azithromycin was selected in the example shown below.
-- You can scroll through available checkboxes by moving the horizontal
-  scroll bar under the list of checkboxes to the right.
+Only one result type is active at a time. The available facet filters and table columns change when you switch type.
 
 <figure>
-  <img src="/assets/images/content/howto/azithromycin-amr-f3.png" />
+  <img src="/assets/images/content/howto/result-type-f3.png" alt="Result type selector showing AMR phenotypes, AMR genotypes, and Combined phenotypes and genotypes" />
   <figcaption>
-    Fig 3. A view showing the selection of azithromycin from list of antibiotics for which experimental anti-microbial resistance data is available.
+    Fig 3. Use the Result type cards to switch between AMR phenotypes, AMR genotypes, and Combined phenotypes and genotypes.
   </figcaption>
 </figure>
 
-A table of results will be showed on the bottom half of the screen,
-below the antibiotic table.
+## Global search
+
+Global search lets you find records by sample accession, assembly accession, gene symbol, species name, antibiotic name, and other indexed text.
+
+You can start a search from:
+
+- The **home page search box**, which opens the combined data resource with your query applied.
+- The **Global search** field at the top of the facet sidebar while browsing any data resource.
+
+Enter at least three characters. As you type, a hint appears until the minimum length is reached. When active, your search appears as a tag under **Active filters**, and result-type cards show match counts for your query.
 
 <figure>
-  <img src="/assets/images/content/howto/azithromycin-results-table-amr-f4.png" />
+  <img src="/assets/images/content/howto/global-search-f4.png" alt="Global search field with an active search query" />
   <figcaption>
-    Fig 4. A view showing the table of results for azithromycin from the experimental antimicrobial resistance data resource.
+    Fig 4. Global search in the facet sidebar. Enter sample accessions (e.g. SAMD…), assembly accessions (e.g. GCA…), gene symbols, or other keywords.
   </figcaption>
 </figure>
 
-### How to filter the data
+Global search can be combined with facet filters. Both narrow the results table together.
 
-The additional ways each antimicrobial resistance data resource can be
-filtered are listed alongside the 'Filter by' header at the top of the
-antibiotic table.
+## Faceted search (filters)
 
-Each of the three AMR data resources has a specific set of filters.
+Filters are organised as collapsible **facets** in the left panel under the **Filters** heading. Each facet corresponds to an attribute such as antibiotic, species, or collection year.
 
-eg In the view shown below for AMR phenotypes the data can be further
-filtered by:
+Each data resource has its own set of facets:
 
+**AMR phenotypes**
+
+- Antibiotic
 - Species
 - Genus
 - Resistance phenotype
@@ -105,165 +98,150 @@ filtered by:
 - Geographical subregion
 - Country
 
+**AMR genotypes**
+
+- Antibiotic
+- Species
+- Genus
+- Annotation tool mode
+
+**Combined phenotypes and genotypes**
+
+- Antibiotic
+- Species
+- Genus
+- Resistance phenotype
+- Isolation source category
+- Testing method
+- Collection year
+- Geographical subregion
+- Country
+- Annotation tool mode
+
 <figure>
-  <img src="/assets/images/content/howto/species-amr-f5.png" />
+  <img src="/assets/images/content/howto/faceted-filters-f5.png" alt="Expanded facet filters showing checkboxes and match counts" />
   <figcaption>
-    Fig 5. A view highlighting the Species filter in the horizontal list of all filters available for the AMR phenotypes data.
+    Fig 5. Facet filters. Click a facet heading to expand it, then select one or more values. The <em>Matches</em> column shows how many records match each value in the current scope.
   </figcaption>
 </figure>
 
-AMR genotypes data can be filtered by:
-
-- Species
-- Genus
-- AMR class
-
-Combined phenotypes and genotypes data can be filtered by:
-
-- Species
-- Genus
-- Resistance Phenotype - (select true to show phenotypic data)
-- Isolation source category  (select true to show those with genotype data - select
-  false to show those without genotype data )  
-- Testing method
-- Collection year  
-- Geographical subregion
-- Country
+### Using facets
 
 To filter the data:
 
-- Find a filter of interest alongside the \"Filter by\" header,
-  highlighted in blue, ie Species.
-- Select the filter ie Species Click on the check box alongside a
-  species of interest to begin subsetting the data.
-- You can scroll through available checkboxes by moving the horizontal
-  scroll bar under the list of checkboxes to the right.
-- You may continue to add any filter available for an AMR data resource
-  by repeating this process.
-- A reduced and more specific table of results will be displayed on the
-  bottom half of the page as additional filters are added.
-- If you swap to another AMR data resource, the filter criteria will
-  change to fit the new resource.
+1. Expand a facet by clicking its heading (for example, **Antibiotic** or **Species**).
+2. Optionally use the facet's own search box to find values in long lists.
+3. Tick one or more checkboxes. Selected values appear under **Active filters** at the top of the panel.
+4. Add further facets to narrow results. Match counts update as filters are applied.
+5. Click **Load all** at the bottom of a facet when more values are available than shown initially.
+
+To remove a single filter, click the ✕ on its tag under **Active filters**. To remove all filters and the active global search at once, click **Clear all**.
 
 <figure>
-  <img src="/assets/images/content/howto/species-selected-amr-f6.png" />
+  <img src="/assets/images/content/howto/active-filters-f6.png" alt="Active filters showing selected facet values and a Clear all button" />
   <figcaption>
-    Fig 6. A view showing the selection of a species e.g. Escherichia coli from the Species filter and highlighting the subsequent reduction in the number of results for experimental antimicrobial resistance to azithromycin for AMR phenotypes data.
+    Fig 6. Active filters. Selected facet values (and an active global search, if any) are listed here and can be removed individually or cleared together.
   </figcaption>
 </figure>
 
-## What can you find in the results table?
+When you switch result type, the facet list and table columns change to match the new resource. Your global search is kept; facet selections are reset.
 
-The results table displays all the available information for each data
-point in the AMR data resource used.
+## The results table
 
-The information displayed in the results table for each AMR data
-resource is different.
+The results table shows the records that match your current result type, global search, and facet selections.
 
-For example the AMR phenotype resource results table displays:
-
-- Antibiotic name
-- Antibiotic abbreviation
-- Resistance phenotype
-- Ast standard
-- Laboratory typing method
-- Platform
-- Biosample ID
-- Assembly ID
-- Genus
-- Species
-- Organism
-- Host
-- INSDC secondary accession
-- Antibiotic ontology
-- Collection year
-- ISO country code
-- Host age
-- Isolate
-- Isolation source
-- Lat long
-- AMR associated publications
-- Updated phenotype CLSI	
-- Updated phenotype EUCAST	
-- Used ECOFF	
-- Source	
-- Country
-- Geographical region	
-- Geographical subregion
-
-Different information is displayed in the results table for 
-
-- AMR genotypes**
-- Combined phenotypes and genotypes
+The columns shown depend on the active data resource. For example, the AMR phenotypes table includes fields such as antibiotic name, resistance phenotype, BioSample ID, assembly ID, genus, species, and collection metadata. AMR genotypes and the combined resource include additional annotation fields (for example gene symbol, region coordinates, and AMR element details).
 
 <figure>
-  <img src="/assets/images/content/howto/results-table-azith-species-amr-f7.png" />
+  <img src="/assets/images/content/howto/results-table-f7.png" alt="Results table showing AMR phenotype records" />
   <figcaption>
-    Fig 7. A view of the results table for isolates of *Escherichia coli* resistant to azithromycin from the AMR phenotypes data resource.
-  </figcaption> 
+    Fig 7. The results table. The total number of matching records is shown above the table.
   </figcaption>
 </figure>
 
-The results table has many columns which are off screen and can be viewed by
-moving the scroll bar on the bottom of the results table to the right.
+### Pagination and sorting
 
-The number of rows in the results table will depend on how you have
-filtered the data.
+Above the table you can:
 
-### How to navigate the results table
-
-- To **reveal all the columns** in the results table - move the scroll
-  bar on the bottom of the results table to the right.
-
-- To **reveal all the rows** in the table move the scroll bar on far right
-  of the results table down.
+- Change **rows per page** (100, 200, 500, or 1000).
+- Move between pages with the previous/next controls, or type a page number directly.
+- **Sort** by clicking a column heading where a sort arrow is shown.
 
 <figure>
-  <img src="/assets/images/content/howto/scrolling-results-table-amr-f8.png" />
+  <img src="/assets/images/content/howto/pagination-f8.png" alt="Pagination controls above the results table" />
   <figcaption>
-    Fig 8. A view showing the horizontal and vertical scroll bars in the results table. 
-</figure>
-
-### How to navigate the results table
-
-- To **change the number of results** displayed per page by using the
-  drop-down menu.
-
-<figure>
-  <img src="/assets/images/content/howto/items-on-a-page-results-table-amr-f9.png" />
-  <figcaption>
-    Fig 9. A view highlighting where to change the number of rows displayed in the results table.
+    Fig 8. Pagination and rows-per-page controls above the results table.
   </figcaption>
 </figure>
 
-- To **clear your results** click on the blue recycle bin icon on the
-  right hand side of the results table.
+Many columns contain links (for example to BioSample or assembly records) that open in a new browser tab.
+
+### Column selector
+
+As of now, every column is shown by default. To choose which columns appear:
+
+1. Click the **column selector** icon in the action rail on the right-hand side of the table.
+2. Tick or untick columns in the **Select columns to display** panel.
+3. Use **Select all** or **Deselect all** to show or hide every column at once.
 
 <figure>
-  <img src="/assets/images/content/howto/results-table-delete-amr-f10.png"/>
+  <img src="/assets/images/content/howto/column-selector-f9.png" alt="Column selector popover listing table columns" />
   <figcaption>
-    Fig 10. A view highlighting the blue bin icon which you select to delete the results table. 
+    Fig 9. The column selector. Choose which columns are visible in the results table.
   </figcaption>
 </figure>
 
-### How to download the results table
+### Clearing and downloading results
 
-To **download the results** table
+The action rail on the right of the table provides three further actions:
 
-- select the download arrow on the right hand side of the results table.
-
+- **Clear filters** — removes all facet selections, the global search, and column visibility choices (after confirmation).
+- **Download** — downloads the current result set as a CSV file, or links to the FTP site for full data releases.
+- 
 <figure>
-  <img src="/assets/images/content/howto/results-table-download-amr-f11.png" />
+  <img src="/assets/images/content/howto/clear-filters-f10.png" alt="Action rail beside the results table" />
   <figcaption>
-    Fig 11. A view highlighting the download icon which you need to select to download the results table. 
+    Fig 10. The clear filters: removes all facet selections, the global search, and column visibility choices.
   </figcaption>
 </figure>
 
-- select the download button and a CSV version of the results table will be downloaded onto your computer.
+<!-- SCREENSHOT: download-dialog-f11.png — download popover with Download and FTP link -->
 
 <figure>
-   <img src="/assets/images/content/howto/results-download-button-amr-f12.png" />
+  <img src="/assets/images/content/howto/download-dialog-f11.png" alt="Download popover with CSV download and FTP link" />
   <figcaption>
-    Fig 12. A view highlighting the download button which you need to select to download the results table. 
+    Fig 11. The download panel. Click <strong>Download</strong> for a CSV of the current filtered results, or follow the FTP link for full release files.
+  </figcaption>
+</figure>
+
+The number of rows in the results table depends on your global search, facet filters, and pagination settings. The CSV download includes all records matching the current filters, not only the current page.
+
+## Genome browser
+
+The portal includes an integrated **genome browser** (based on JBrowse 2) for inspecting assembly annotation alongside your search results.
+
+When the genome browser is enabled, a collapsible panel appears above the explorer. To use it:
+
+1. Filter or search until the record of interest appears in the results table.
+2. Click the **View in Browser** button in the first column of that row (rows without an assembly ID show — instead).
+3. The genome browser panel expands and loads the assembly, zooming to the relevant region when coordinate data is available (for example on genotype rows).
+4. Click a feature in the browser track to see annotation details in the panel beside the view.
+5. Collapse the panel with the toggle control at the left edge when you want more space for the table.
+
+<!-- SCREENSHOT: view-in-browser-f13.png — results table row with View in Browser button highlighted -->
+
+<figure>
+  <img src="/assets/images/content/howto/view-in-browser-f13.png" alt="View in Browser button in the results table" />
+  <figcaption>
+    Fig 12. Click <strong>View in Genome Browser</strong> on a row to open that record in the genome browser.
+  </figcaption>
+</figure>
+
+<!-- SCREENSHOT: genome-browser-f12.png — expanded genome browser with track and feature details -->
+
+<figure>
+  <img src="/assets/images/content/howto/genome-browser-f12.png" alt="Genome browser showing an assembly track and feature detail panel" />
+  <figcaption>
+    Fig 13. The genome browser. The assembly and GFF annotation load for the selected row; click a feature to inspect its attributes.
   </figcaption>
 </figure>
