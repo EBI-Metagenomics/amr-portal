@@ -30,7 +30,7 @@ You can start exploring from the [portal home page](/). The home page provides:
 <figure>
   <img src="/assets/images/content/howto/home-page-amr-f1.png" alt="AMR portal home page with global search and links to the three data resources" />
   <figcaption>
-    Fig 1. The portal home page. Use the search box to jump straight to matching records, or choose one of the three data resources (AMR phenotypes, AMR genotypes and Experimental, and Combined phenotypes and genotypes) below.
+    Fig 1. The portal home page. Use the search box to jump straight to matching records, or choose one of the three data resources (AMR phenotypes, AMR genotypes, and Combined phenotypes and genotypes) below.
   </figcaption>
 </figure>
 

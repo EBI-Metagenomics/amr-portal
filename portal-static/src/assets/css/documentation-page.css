@@ -25,20 +25,23 @@ main {
 
 /* NOTE: some of the amr-panel styles are copied from shared-panel-styles.ts */
 amr-panel {
+  --documentation-aside-width: 150px;
+  --documentation-text-max-width: 80ch;
+
   display: block;
   flex-grow: 1;
-  width: calc(100% - var(--standard-gutter) - var(--double-standard-gutter));
+  width: calc(100% - 2 * var(--standard-gutter));
   margin-left: var(--standard-gutter);
   border-radius: var(--panel-border-radius);
   background-color: var(--color-white);
   padding-right: var(--standard-gutter);
-  padding-left: var(--double-standard-gutter);
+  padding-left: var(--standard-gutter);
   padding-top: 50px;
   padding-bottom: 50px;
 
 
-  h1, h2, h3, h4, h5, h6, p, ul {
-    max-width: 80ch;
+  h1, h2, h3, h4, h5, h6, p, ul, ol {
+    max-width: var(--documentation-text-max-width);
   }
 
   ul, ol {
@@ -70,8 +73,7 @@ amr-panel {
 
   .grid {
     display: grid;
-    grid-template-columns: repeat(2, auto);
-    grid-template-columns: 170px auto;
+    grid-template-columns: var(--documentation-aside-width) minmax(0, 1fr);
     column-gap: var(--standard-gutter);
   }
 
@@ -107,15 +109,17 @@ amr-panel {
   }
 
   figure, img, pre {
-    max-width: 800px;
+    max-width: 85%;
   }
 
   figure {
     margin-top: 20px;
+    width: 100%;
   }
 
   figure img {
     width: 100%;
+    height: auto;
     border: 1px solid var(--color-medium-dark-grey);
   }
 
