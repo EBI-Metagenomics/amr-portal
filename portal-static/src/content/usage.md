@@ -28,7 +28,7 @@ You can start exploring from the [portal home page](/). The home page provides:
 - Links to each of the three data resources: **AMR phenotypes**, **AMR genotypes**, and **Combined phenotypes and genotypes**.
 
 <figure>
-  <img src="/assets/images/content/howto/home-page-amr-f1.png" alt="AMR portal home page with global search and links to the three data resources" />
+  <img src="/assets/images/content/howto/F1-home-page-amr.png" alt="AMR portal home page with global search and links to the three data resources" />
   <figcaption>
     Fig 1. The portal home page. Use the search box to jump straight to matching records, or choose one of the three data resources (AMR phenotypes, AMR genotypes, and Combined phenotypes and genotypes) below.
   </figcaption>
@@ -37,7 +37,7 @@ You can start exploring from the [portal home page](/). The home page provides:
 Selecting a data-resource link opens the data explorer with a **faceted search panel** on the left and a **results table** on the right.
 
 <figure>
-  <img src="/assets/images/content/howto/portal-overview-f2.png" alt="AMR data explorer showing the facet sidebar and results table" />
+  <img src="/assets/images/content/howto/F2-portal-overview.png" alt="AMR data explorer showing the facet sidebar and results table" />
   <figcaption>
     Fig 2. The data explorer. Faceted filters are in the left panel; matching records appear in the table on the right.
   </figcaption>
@@ -54,7 +54,7 @@ Within the explorer, switch between data resources using the **Result type** car
 Only one result type is active at a time. The available facet filters and table columns change when you switch type.
 
 <figure>
-  <img src="/assets/images/content/howto/result-type-f3.png" alt="Result type selector showing AMR phenotypes, AMR genotypes, and Combined phenotypes and genotypes" />
+  <img src="/assets/images/content/howto/F3-result-type.png" alt="Result type selector showing AMR phenotypes, AMR genotypes, and Combined phenotypes and genotypes" />
   <figcaption>
     Fig 3. Use the Result type cards to switch between AMR phenotypes, AMR genotypes, and Combined phenotypes and genotypes.
   </figcaption>
@@ -69,10 +69,10 @@ You can start a search from:
 - The **home page search box**, which opens the combined data resource with your query applied.
 - The **Global search** field at the top of the facet sidebar while browsing any data resource.
 
-Enter at least three characters. As you type, a hint appears until the minimum length is reached. When active, your search appears as a tag under **Active filters**, and result-type cards show match counts for your query.
+When active, your search query appears as a tag under **Active filters**, and result-type cards show match counts for your query.
 
 <figure>
-  <img src="/assets/images/content/howto/global-search-f4.png" alt="Global search field with an active search query" />
+  <img src="/assets/images/content/howto/F4-global-search.png" alt="Global search field with an active search query" />
   <figcaption>
     Fig 4. Global search in the facet sidebar. Enter sample accessions (e.g. SAMD…), assembly accessions (e.g. GCA…), gene symbols, or other keywords.
   </figcaption>
@@ -119,7 +119,7 @@ Each data resource has its own set of facets:
 - Annotation tool mode
 
 <figure>
-  <img src="/assets/images/content/howto/faceted-filters-f5.png" alt="Expanded facet filters showing checkboxes and match counts" />
+  <img src="/assets/images/content/howto/F5-faceted-filters.png" alt="Expanded facet filters showing checkboxes and match counts" />
   <figcaption>
     Fig 5. Facet filters. Click a facet heading to expand it, then select one or more values. The <em>Matches</em> column shows how many records match each value in the current scope.
   </figcaption>
@@ -130,15 +130,15 @@ Each data resource has its own set of facets:
 To filter the data:
 
 1. Expand a facet by clicking its heading (for example, **Antibiotic** or **Species**).
-2. Optionally use the facet's own search box to find values in long lists.
+2. Optionally use the facet's own search box to find specific terms in long lists.
 3. Tick one or more checkboxes. Selected values appear under **Active filters** at the top of the panel.
 4. Add further facets to narrow results. Match counts update as filters are applied.
-5. Click **Load all** at the bottom of a facet when more values are available than shown initially.
+5. Click **Load all** at the bottom of a facet to display the complete list of options when only a subset is shown initially.
 
 To remove a single filter, click the ✕ on its tag under **Active filters**. To remove all filters and the active global search at once, click **Clear all**.
 
 <figure>
-  <img src="/assets/images/content/howto/active-filters-f6.png" alt="Active filters showing selected facet values and a Clear all button" />
+  <img src="/assets/images/content/howto/F6-active-filters.png" alt="Active filters showing selected facet values and a Clear all button" />
   <figcaption>
     Fig 6. Active filters. Selected facet values (and an active global search, if any) are listed here and can be removed individually or cleared together.
   </figcaption>
@@ -153,7 +153,7 @@ The results table shows the records that match your current result type, global 
 The columns shown depend on the active data resource. For example, the AMR phenotypes table includes fields such as antibiotic name, resistance phenotype, BioSample ID, assembly ID, genus, species, and collection metadata. AMR genotypes and the combined resource include additional annotation fields (for example gene symbol, region coordinates, and AMR element details).
 
 <figure>
-  <img src="/assets/images/content/howto/results-table-f7.png" alt="Results table showing AMR phenotype records" />
+  <img src="/assets/images/content/howto/F7-results-table.png" alt="Results table showing AMR phenotype records" />
   <figcaption>
     Fig 7. The results table. The total number of matching records is shown above the table.
   </figcaption>
@@ -168,7 +168,7 @@ Above the table you can:
 - **Sort** by clicking a column heading where a sort arrow is shown.
 
 <figure>
-  <img src="/assets/images/content/howto/pagination-f8.png" alt="Pagination controls above the results table" />
+  <img src="/assets/images/content/howto/F8-pagination.png" alt="Pagination controls above the results table" />
   <figcaption>
     Fig 8. Pagination and rows-per-page controls above the results table.
   </figcaption>
@@ -185,7 +185,7 @@ As of now, every column is shown by default. To choose which columns appear:
 3. Use **Select all** or **Deselect all** to show or hide every column at once.
 
 <figure>
-  <img src="/assets/images/content/howto/column-selector-f9.png" alt="Column selector popover listing table columns" />
+  <img src="/assets/images/content/howto/F9-column-selector.png" alt="Column selector popover listing table columns" />
   <figcaption>
     Fig 9. The column selector. Choose which columns are visible in the results table.
   </figcaption>
@@ -197,18 +197,18 @@ The action rail on the right of the table provides three further actions:
 
 - **Clear filters** — removes all facet selections, the global search, and column visibility choices (after confirmation).
 - **Download** — downloads the current result set as a CSV file, or links to the FTP site for full data releases.
-- 
+
 <figure>
-  <img src="/assets/images/content/howto/clear-filters-f10.png" alt="Action rail beside the results table" />
+  <img src="/assets/images/content/howto/F10-clear-filters.png" alt="Action rail beside the results table" />
   <figcaption>
-    Fig 10. The clear filters: removes all facet selections, the global search, and column visibility choices.
+    Fig 10. The clear filters action: removes all facet selections, the global search, and column visibility choices.
   </figcaption>
 </figure>
 
 <!-- SCREENSHOT: download-dialog-f11.png — download popover with Download and FTP link -->
 
 <figure>
-  <img src="/assets/images/content/howto/download-dialog-f11.png" alt="Download popover with CSV download and FTP link" />
+  <img src="/assets/images/content/howto/F11-download-dialog.png" alt="Download popover with CSV download and FTP link" />
   <figcaption>
     Fig 11. The download panel. Click <strong>Download</strong> for a CSV of the current filtered results, or follow the FTP link for full release files.
   </figcaption>
@@ -222,25 +222,20 @@ The portal includes an integrated **genome browser** (based on JBrowse 2) for in
 
 When the genome browser is enabled, a collapsible panel appears above the explorer. To use it:
 
-1. Filter or search until the record of interest appears in the results table.
-2. Click the **View in Browser** button in the first column of that row (rows without an assembly ID show — instead).
-3. The genome browser panel expands and loads the assembly, zooming to the relevant region when coordinate data is available (for example on genotype rows).
-4. Click a feature in the browser track to see annotation details in the panel beside the view.
-5. Collapse the panel with the toggle control at the left edge when you want more space for the table.
-
-<!-- SCREENSHOT: view-in-browser-f13.png — results table row with View in Browser button highlighted -->
+1. Click the **View in Browser** button in the first column of a row (only available for rows that include an assembly ID).
+2. The genome browser panel expands and loads the assembly, zooming to the relevant region when genomic coordinates are available (for example, on genotype rows).
+3. Click a feature in the browser track to see annotation details in the panel beside the genome view.
+4. Collapse the panel with the toggle control at the left edge when you want more space for the table.
 
 <figure>
-  <img src="/assets/images/content/howto/view-in-browser-f13.png" alt="View in Browser button in the results table" />
+  <img src="/assets/images/content/howto/F12-view-in-browser.png" alt="View in Browser button in the results table" />
   <figcaption>
     Fig 12. Click <strong>View in Genome Browser</strong> on a row to open that record in the genome browser.
   </figcaption>
 </figure>
 
-<!-- SCREENSHOT: genome-browser-f12.png — expanded genome browser with track and feature details -->
-
 <figure>
-  <img src="/assets/images/content/howto/genome-browser-f12.png" alt="Genome browser showing an assembly track and feature detail panel" />
+  <img src="/assets/images/content/howto/F13-genome-browser.png" alt="Genome browser showing an assembly track and feature detail panel" />
   <figcaption>
     Fig 13. The genome browser. The assembly and GFF annotation load for the selected row; click a feature to inspect its attributes.
   </figcaption>
