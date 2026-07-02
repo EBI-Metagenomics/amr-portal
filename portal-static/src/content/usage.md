@@ -131,7 +131,7 @@ To filter the data:
 
 1. Expand a facet by clicking its heading (for example, **Antibiotic** or **Species**).
 2. Optionally use the facet's own search box to find specific terms in long lists.
-3. Tick one or more checkboxes. Selected values appear under **Active filters** at the top of the panel.
+3. Tick one or more checkboxes. Selected items appear under **Active filters** at the top of the panel.
 4. Add further facets to narrow results. Match counts update as filters are applied.
 5. Click **Load all** at the bottom of a facet to display the complete list of options when only a subset is shown initially.
 
