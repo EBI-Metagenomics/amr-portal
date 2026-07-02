@@ -1,32 +1,59 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# shellcheck source=lib/common.sh
-source "${SCRIPT_DIR}/lib/common.sh"
-# shellcheck source=lib/cli.sh
-source "${SCRIPT_DIR}/lib/cli.sh"
-# shellcheck source=lib/background.sh
-source "${SCRIPT_DIR}/lib/background.sh"
-# shellcheck source=lib/discovery.sh
-source "${SCRIPT_DIR}/lib/discovery.sh"
-# shellcheck source=lib/paths.sh
-source "${SCRIPT_DIR}/lib/paths.sh"
-# shellcheck source=lib/process.sh
-source "${SCRIPT_DIR}/lib/process.sh"
+BASE_DIR="${1:?Usage: $0 <genomes_base_dir>}"
 
-gff_fasta_prep_parse_args "$(basename "$0")" "$@"
+find "$BASE_DIR" -type f -name "*.gff.gz" | while read -r file; do
+    echo "Processing $file"
 
-gff_fasta_prep_maybe_detach \
-  "$GFF_FASTA_PREP_BASE_DIR" \
-  "$GFF_FASTA_PREP_RUN_BACKGROUND" \
-  "$GFF_FASTA_PREP_LOG_FILE" \
-  "${SCRIPT_DIR}/$(basename "$0")"
+    dir="$(dirname "$file")"
 
-log "Scanning $GFF_FASTA_PREP_BASE_DIR for *_annotations.gff.gz"
+    filename="$(basename "$file")"
 
-while IFS= read -r file; do
-  gff_fasta_prep_process_annotation_gff "$file"
-done < <(gff_fasta_prep_find_annotation_gffs "$GFF_FASTA_PREP_BASE_DIR")
+    # Keep original GFF name
+    gff_base="${filename%.gff.gz}"
 
-log "Done."
+    # Extract assembly accession for FASTA
+    assembly="$(echo "$filename" | sed -E 's/^((GCA|GCF)_[0-9]+\.[0-9]+).*/\1/')"
+
+    temp_gff="${dir}/${gff_base}.tmp.gff"
+
+    final_gff="${dir}/${gff_base}.gff.gz"
+    fasta="${dir}/${assembly}.fasta"
+
+    # Skip if already created
+    if [[ -f "${final_gff}.csi" && -f "${fasta}.gz.fai" ]]; then
+        echo "Skipping $base; indexed files already exist"
+        continue
+    fi
+
+    # Split GFF annotations and appended FASTA
+    gunzip -c "$file" | awk -v gff="$temp_gff" -v fasta="$fasta" '
+    /^##FASTA$/ {f=1; next}
+    !f {print > gff}
+    f  {print > fasta}
+    '
+
+    # Sort GFF and compress as BGZF using final name
+    {
+        grep '^#' "$temp_gff" || true
+        grep -v '^#' "$temp_gff" | sort -k1,1 -k4,4n
+    } | bgzip -c > "$final_gff"
+
+    # Create CSI index
+    tabix -p gff -C "$final_gff"
+
+    # Compress FASTA and index
+    bgzip -c "$fasta" > "${fasta}.gz"
+    samtools faidx "${fasta}.gz"
+
+    # Cleanup
+    rm -f "$temp_gff" "$fasta"
+
+    echo "Created:"
+    echo "  $final_gff"
+    echo "  ${final_gff}.csi"
+    echo "  ${fasta}.gz"
+    echo "  ${fasta}.gz.fai"
+    echo
+done
