@@ -178,7 +178,7 @@ const ActionButtons = ({
             rel="noopener noreferrer"
           >
             <ExternalLinkIcon />
-            Get data from the ftp site
+            Get data from the FTP site
           </a>
           <div className={styles.confirmActions}>
             <a
