@@ -264,7 +264,7 @@ const DataPanel = ({
                           .filter(Boolean)
                           .join(' ')}
                         aria-label="Open genome browser for this record"
-                        title="Open genome browser"
+                        title="View in Genome Browser"
                         onClick={() => onRowSelect(index, record)}
                       >
                         <GenomeBrowserIcon />
