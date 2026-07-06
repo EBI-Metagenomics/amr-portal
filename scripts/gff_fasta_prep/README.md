@@ -36,7 +36,7 @@ Each genome directory should contain `{ACCESSION}_annotations.gff.gz`. Sibling f
 
 ## SLURM array (large batches)
 
-For ~170K genomes, use one array task per GFF file rather than one long sequential job.
+Each genome takes only ~1–2 seconds, so **one array task per genome is inefficient** (scheduler + conda overhead dominates) and 170K also exceeds the cluster `MaxArraySize`. Instead, each array task processes a **chunk** of `CHUNK_SIZE` genomes (default 500).
 
 ```bash
 cd scripts/gff_fasta_prep
@@ -44,64 +44,73 @@ cd scripts/gff_fasta_prep
 # 1. Build work list (once) — searches recursively for *_annotations.gff.gz
 ./generate_gff_file_list.sh --genomes-dir /path/to/genomes --output gff_files.lst
 
-# 2. Pilot on first 100 genomes (must sbatch from this directory)
+# 2. Compute number of array tasks from list size and chunk size
 N=$(wc -l < gff_files.lst)
+CHUNK=500
+TASKS=$(( (N + CHUNK - 1) / CHUNK ))     # ceil(N / CHUNK)
 mkdir -p logs
-JOB_ID=$(sbatch --parsable --array=1-100%20 submit_gff_prep_array.slurm)
 
-# 3. After pilot finishes, summarize wall time / memory
+# 3. Pilot: first few chunks
+JOB_ID=$(sbatch --parsable --export=ALL,CHUNK_SIZE=$CHUNK \
+  --array=1-2%2 submit_gff_prep_array.slurm)
+
+# 4. After pilot finishes, summarize wall time / memory
 ./summarize_pilot_metrics.sh logs/gff-prep-metrics.tsv "$JOB_ID"
 
-# If wall_sec / MaxRSS columns are empty in the metrics TSV, sacct is used automatically.
+# If wall_sec / MaxRSS columns are empty, sacct is used automatically.
 # You can also save sacct output explicitly:
 #   sacct -j "$JOB_ID" --format=JobID,State,Elapsed,TotalCPU,MaxRSS,AllocCPUS,ExitCode -P -n > logs/pilot.sacct.tsv
 #   SACCT_FILE=logs/pilot.sacct.tsv ./summarize_pilot_metrics.sh logs/gff-prep-metrics.tsv
 
-# 4. Submit full run using suggested --mem / --time from the summary
-sbatch --array=1-${N}%100 submit_gff_prep_array.slurm
+# 5. Full run
+sbatch --export=ALL,CHUNK_SIZE=$CHUNK --array=1-${TASKS}%50 submit_gff_prep_array.slurm
 ```
 
-Each array task appends one row to `logs/gff-prep-metrics.tsv` (wall time, MaxRSS, skipped/processed/failed). Use the pilot summary to pick resources for the full run.
+Metrics and failures are still recorded **per genome** (not per chunk): each genome appends one row to `logs/gff-prep-metrics.tsv`, and any failing genome appends its path to `logs/gff-prep-failed.lst`.
 
 **Important:** run `sbatch` from `scripts/gff_fasta_prep`. SLURM copies the job script to a spool directory; the script uses `SLURM_SUBMIT_DIR` to find `lib/` and write logs/metrics in the right place.
 
-Failed tasks also append their GFF path to `logs/gff-prep-failed.lst` (one per line), so you can re-run just the failures without re-scanning the tree.
+### Choosing CHUNK_SIZE and resources
 
-Suggested per-task resources (tune after pilot):
+At ~1.5s/genome:
+
+| CHUNK_SIZE | Genomes/task | Approx task time | Tasks for 170K |
+|-----------|--------------|------------------|----------------|
+| 200 | 200 | ~5 min | 850 |
+| 500 | 500 | ~12 min | 340 |
+| 1000 | 1000 | ~25 min | 170 |
+
+Keep total tasks under `MaxArraySize` (check with `scontrol show config | grep MaxArraySize`). Suggested resources (pipeline is single-threaded):
 
 | Setting | Value |
 |---------|-------|
-| `--cpus-per-task` | 2 |
-| `--mem` | 16G |
-| `--time` | 1:00:00 |
-| Array concurrency | `%50`–`%200` |
+| `--cpus-per-task` | 1 |
+| `--mem` | 4G |
+| `--time` | 2:00:00 (headroom for a full chunk) |
+| Array concurrency | `%50`–`%100` |
 
-Override paths when submitting:
+Override paths and chunk size when submitting:
 
 ```bash
-sbatch --export=ALL,GFF_LIST=/data/gff_files.lst,CONDA_ENV=gff-tools \
-  --array=1-170000%100 submit_gff_prep_array.slurm
+sbatch --export=ALL,GFF_LIST=/data/gff_files.lst,CONDA_ENV=gff-tools,CHUNK_SIZE=500 \
+  --array=1-340%50 submit_gff_prep_array.slurm
 ```
 
 ## Re-running failed tasks
 
-Failed GFF paths are collected automatically in `logs/gff-prep-failed.lst`. To re-run only those, feed that file back in as the work list:
+Failed GFF paths are collected automatically in `logs/gff-prep-failed.lst`. To re-run only those, feed that file back in as the work list. Failures are usually few, so use `CHUNK_SIZE=1` (one task per genome) for easy per-genome logs:
 
 ```bash
 cd scripts/gff_fasta_prep
 
-# Re-run failures as a fresh array (start clean so a new failed list is written)
+# Start clean so a new failed list is written for this retry
 mv logs/gff-prep-failed.lst logs/gff-prep-retry.lst
 N=$(wc -l < logs/gff-prep-retry.lst)
-sbatch --export=ALL,GFF_LIST=logs/gff-prep-retry.lst \
+sbatch --export=ALL,GFF_LIST=logs/gff-prep-retry.lst,CHUNK_SIZE=1 \
   --array=1-${N}%50 submit_gff_prep_array.slurm
 ```
 
-Already-processed genomes are skipped on re-run (`.csi` + `.fasta.gz.fai` present), so re-submitting is always safe. If you instead know the specific array indices, you can target them directly:
-
-```bash
-sbatch --array=1234,5678,9012 submit_gff_prep_array.slurm
-```
+Already-processed genomes are skipped on re-run (`.csi` + `.fasta.gz.fai` present), so re-submitting is always safe.
 
 ## Dependencies
 
