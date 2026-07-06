@@ -52,6 +52,11 @@ JOB_ID=$(sbatch --parsable --array=1-100%20 submit_gff_prep_array.slurm)
 # 3. After pilot finishes, summarize wall time / memory
 ./summarize_pilot_metrics.sh logs/gff-prep-metrics.tsv "$JOB_ID"
 
+# If wall_sec / MaxRSS columns are empty in the metrics TSV, sacct is used automatically.
+# You can also save sacct output explicitly:
+#   sacct -j "$JOB_ID" --format=JobID,State,Elapsed,TotalCPU,MaxRSS,AllocCPUS,ExitCode -P -n > logs/pilot.sacct.tsv
+#   SACCT_FILE=logs/pilot.sacct.tsv ./summarize_pilot_metrics.sh logs/gff-prep-metrics.tsv
+
 # 4. Submit full run using suggested --mem / --time from the summary
 sbatch --array=1-${N}%100 submit_gff_prep_array.slurm
 ```
