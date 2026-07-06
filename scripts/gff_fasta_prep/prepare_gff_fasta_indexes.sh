@@ -17,13 +17,19 @@ source "${SCRIPT_DIR}/lib/process.sh"
 
 gff_fasta_prep_parse_args "$(basename "$0")" "$@"
 
+if [[ -n "$GFF_FASTA_PREP_GFF_FILE" ]]; then
+  gff_fasta_prep_process_annotation_gff "$GFF_FASTA_PREP_GFF_FILE"
+  log "Done."
+  exit 0
+fi
+
 gff_fasta_prep_maybe_detach \
   "$GFF_FASTA_PREP_BASE_DIR" \
   "$GFF_FASTA_PREP_RUN_BACKGROUND" \
   "$GFF_FASTA_PREP_LOG_FILE" \
   "${SCRIPT_DIR}/$(basename "$0")"
 
-log "Scanning $GFF_FASTA_PREP_BASE_DIR for *_annotations.gff.gz"
+log "Scanning $GFF_FASTA_PREP_BASE_DIR for $ANNOTATION_GFF_GLOB"
 
 while IFS= read -r file; do
   gff_fasta_prep_process_annotation_gff "$file"
