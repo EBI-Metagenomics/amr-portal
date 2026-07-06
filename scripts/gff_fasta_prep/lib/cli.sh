@@ -81,12 +81,12 @@ gff_fasta_prep_parse_args() {
         exit 1
     fi
 
-    if [[ -z "$GFF_FASTA_PREP_GFF_FILE && -z "$GFF_FASTA_PREP_BASE_DIR" ]]; then
+    if [[ -z "$GFF_FASTA_PREP_GFF_FILE" && -z "$GFF_FASTA_PREP_BASE_DIR" ]]; then
         gff_fasta_prep_usage "$script_name" >&2
         exit 1
     fi
 
-    if [[ -n "$GFF_FASTA_PREP_GFF_FILE ]]; then
+    if [[ -n "$GFF_FASTA_PREP_GFF_FILE" ]]; then
         if [[ "$GFF_FASTA_PREP_RUN_BACKGROUND" -eq 1 ]]; then
             echo "--background is not supported with --gff-file (use sbatch for cluster runs)." >&2
             exit 1
