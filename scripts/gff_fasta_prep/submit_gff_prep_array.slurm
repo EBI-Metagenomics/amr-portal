@@ -6,7 +6,7 @@
 #SBATCH --output=logs/gff-prep-%A_%a.log
 #
 # Submit with:
-#   ./generate_gff_file_list.sh /path/to/genomes gff_files.lst
+#   ./generate_gff_file_list.sh --genomes-dir /path/to/genomes -o gff_files.lst
 #   N=$(wc -l < gff_files.lst)
 #   mkdir -p logs
 #   sbatch --array=1-100%20 submit_gff_prep_array.slurm
@@ -32,7 +32,7 @@ source "${SCRIPT_DIR}/lib/metrics.sh"
 
 if [[ ! -f "$GFF_LIST" ]]; then
     echo "GFF list not found: $GFF_LIST" >&2
-    echo "Run: ./generate_gff_file_list.sh /path/to/genomes $GFF_LIST" >&2
+    echo "Run: ./generate_gff_file_list.sh --genomes-dir /path/to/genomes -o $GFF_LIST" >&2
     exit 1
 fi
 

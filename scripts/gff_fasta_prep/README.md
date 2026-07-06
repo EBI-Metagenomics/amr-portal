@@ -41,8 +41,8 @@ For ~170K genomes, use one array task per GFF file rather than one long sequenti
 ```bash
 cd scripts/gff_fasta_prep
 
-# 1. Build work list (once)
-./generate_gff_file_list.sh /path/to/genomes gff_files.lst
+# 1. Build work list (once) — searches recursively for *_annotations.gff.gz
+./generate_gff_file_list.sh --genomes-dir /path/to/genomes --output gff_files.lst
 
 # 2. Pilot on first 100 genomes
 N=$(wc -l < gff_files.lst)
