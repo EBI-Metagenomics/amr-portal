@@ -28,9 +28,14 @@ fi
 METRICS_FILE="${1:-logs/gff-prep-metrics.tsv}"
 SLURM_JOB_ID="${2:-}"
 
+if [[ "$METRICS_FILE" != /* ]]; then
+  METRICS_FILE="${SCRIPT_DIR}/${METRICS_FILE}"
+fi
+
 if [[ ! -f "$METRICS_FILE" ]]; then
   echo "Metrics file not found: $METRICS_FILE" >&2
-  echo "Run a pilot array job first (see README)." >&2
+  echo "If the pilot job failed immediately, check logs/gff-prep-<jobid>_*.log for errors." >&2
+  echo "Common cause: sbatch was not run from scripts/gff_fasta_prep (see README)." >&2
   exit 1
 fi
 

@@ -44,7 +44,7 @@ cd scripts/gff_fasta_prep
 # 1. Build work list (once) — searches recursively for *_annotations.gff.gz
 ./generate_gff_file_list.sh --genomes-dir /path/to/genomes --output gff_files.lst
 
-# 2. Pilot on first 100 genomes
+# 2. Pilot on first 100 genomes (must sbatch from this directory)
 N=$(wc -l < gff_files.lst)
 mkdir -p logs
 JOB_ID=$(sbatch --parsable --array=1-100%20 submit_gff_prep_array.slurm)
@@ -57,6 +57,8 @@ sbatch --array=1-${N}%100 submit_gff_prep_array.slurm
 ```
 
 Each array task appends one row to `logs/gff-prep-metrics.tsv` (wall time, MaxRSS, skipped/processed/failed). Use the pilot summary to pick resources for the full run.
+
+**Important:** run `sbatch` from `scripts/gff_fasta_prep`. SLURM copies the job script to a spool directory; the script uses `SLURM_SUBMIT_DIR` to find `lib/` and write logs/metrics in the right place.
 
 Failed tasks also append their GFF path to `logs/gff-prep-failed.lst` (one per line), so you can re-run just the failures without re-scanning the tree.
 
