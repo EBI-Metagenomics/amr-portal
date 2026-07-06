@@ -61,11 +61,12 @@ import os
 import re
 import statistics
 import sys
+from typing import Dict, List, Optional
 
 metrics_file = os.environ["METRICS_FILE"]
 sacct_dump = os.environ.get("SACCT_DUMP", "")
 
-def parse_elapsed(value: str) -> float | None:
+def parse_elapsed(value: str) -> Optional[float]:
     value = (value or "").strip()
     if not value or value in ("Unknown", "None"):
         return None
@@ -82,7 +83,7 @@ def parse_elapsed(value: str) -> float | None:
     except ValueError:
         return None
 
-def parse_maxrss(value: str) -> int | None:
+def parse_maxrss(value: str) -> Optional[int]:
     value = (value or "").strip()
     if not value or value in ("Unknown", "None"):
         return None
@@ -98,7 +99,7 @@ def parse_maxrss(value: str) -> int | None:
         return amount * 1024 * 1024
     return None
 
-def parse_totalcpu(value: str) -> float | None:
+def parse_totalcpu(value: str) -> Optional[float]:
     value = (value or "").strip()
     if not value or value in ("Unknown", "None"):
         return None
@@ -108,14 +109,14 @@ def parse_totalcpu(value: str) -> float | None:
         return int(days or 0) * 86400 + int(hours) * 3600 + int(minutes) * 60 + int(seconds)
     return parse_elapsed(value)
 
-def pct(values: list[float], p: float) -> float:
+def pct(values: List[float], p: float) -> float:
     if not values:
         return 0.0
     ordered = sorted(values)
     idx = max(0, min(len(ordered) - 1, int((p / 100) * len(ordered) + 0.999999) - 1))
     return ordered[idx]
 
-def summarize(values: list[float]) -> dict:
+def summarize(values: List[float]) -> dict:
     return {
         "count": len(values),
         "avg": statistics.mean(values),
@@ -123,7 +124,7 @@ def summarize(values: list[float]) -> dict:
         "max": max(values),
     }
 
-def print_stats_block(title: str, values: list[float], unit: str, formatter) -> None:
+def print_stats_block(title: str, values: List[float], unit: str, formatter) -> None:
     if not values:
         return
     stats = summarize(values)
@@ -136,8 +137,8 @@ def print_stats_block(title: str, values: list[float], unit: str, formatter) -> 
 
 def load_metrics_tsv(path: str):
     processed = skipped = failed = 0
-    wall: list[float] = []
-    rss_kb: list[int] = []
+    wall: List[float] = []
+    rss_kb: List[int] = []
     with open(path, encoding="utf-8") as handle:
         header = handle.readline().rstrip("\n").split("\t")
         for line in handle:
@@ -161,11 +162,11 @@ def load_metrics_tsv(path: str):
     return processed, skipped, failed, wall, rss_kb
 
 def load_sacct(path: str):
-    wall: list[float] = []
-    rss_kb: list[int] = []
-    cpu_sec: list[float] = []
-    alloc_cpus: list[int] = []
-    states: dict[str, int] = {}
+    wall: List[float] = []
+    rss_kb: List[int] = []
+    cpu_sec: List[float] = []
+    alloc_cpus: List[int] = []
+    states: Dict[str, int] = {}
     if not path or not os.path.isfile(path):
         return states, wall, rss_kb, cpu_sec, alloc_cpus
 
