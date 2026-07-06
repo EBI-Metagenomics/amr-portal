@@ -9,7 +9,8 @@ Prepares annotation GFF and assembly FASTA files for the gene viewer: splits emb
 | `prepare_gff_fasta_indexes.sh` | Entrypoint: single file or directory scan |
 | `generate_gff_file_list.sh` | Build sorted work list for SLURM arrays |
 | `submit_gff_prep_array.slurm` | SLURM array job template (records per-task metrics) |
-| `summarize_pilot_metrics.sh` | Average / p95 wall time and memory from pilot |
+| `verify_processed_outputs.py` | Random spot-check of processed outputs |
+| `tests/test_verify_processed_outputs.py` | Unit tests for output validation logic |
 | `lib/cli.sh` | Argument parsing and usage |
 | `lib/background.sh` | `nohup` detach for long interactive runs |
 | `lib/discovery.sh` | Find and validate `*_annotations.gff.gz` |
@@ -111,6 +112,32 @@ sbatch --export=ALL,GFF_LIST=logs/gff-prep-retry.lst,CHUNK_SIZE=1 \
 ```
 
 Already-processed genomes are skipped on re-run (`.csi` + `.fasta.gz.fai` present), so re-submitting is always safe.
+
+## Verify processed outputs
+
+After a run (or on a random sample from the full 170K), spot-check that outputs look correct:
+
+```bash
+# Random sample from the work list (recommended after full run)
+./verify_processed_outputs.py --gff-list gff_files.lst --sample 20 --seed 42
+
+# Or scan a genomes tree directly
+./verify_processed_outputs.py --genomes-dir /path/to/genomes --sample 10
+```
+
+Each genome is checked for:
+
+- `{ACCESSION}_annotations.gff.gz` + `.csi`
+- `{ACCESSION}.fasta.gz` + `.fasta.gz.fai`
+- No leftover `.tmp.gff` or plain `.fasta`
+- GFF no longer contains embedded `##FASTA`
+- `bgzip -t`, `tabix -l`, and `samtools faidx` (when available)
+
+Run unit tests locally:
+
+```bash
+python3 tests/test_verify_processed_outputs.py -v
+```
 
 ## Dependencies
 
