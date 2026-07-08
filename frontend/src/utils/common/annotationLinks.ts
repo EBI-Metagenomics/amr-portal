@@ -1,6 +1,6 @@
 export const EXTERNAL_DB_URLS = {
   KEGG: import.meta.env.VITE_KEGG_URL || 'https://www.genome.jp/entry/',
-  COG: import.meta.env.VITE_COG_URL || 'https://www.ncbi.nlm.nih.gov/research/cog/cog/',
+  COG: import.meta.env.VITE_COG_URL || 'https://www.ncbi.nlm.nih.gov/research/cog/cogcategory/',
   COG_CATEGORY: import.meta.env.VITE_COG_CATEGORY_URL || 'https://www.ncbi.nlm.nih.gov/research/cog/cogcategory/',
 } as const;
 
