@@ -43,15 +43,15 @@ export const useAmrPortalState = () => {
     return { viewIdFromUrl, searchFromUrl };
   }, []);
 
+  const initialCommittedSearch = isGlobalSearchActive(initialUrlState.searchFromUrl)
+    ? initialUrlState.searchFromUrl
+    : '';
   const [searchQuery, setSearchQueryState] = useState(initialUrlState.searchFromUrl);
-  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState(initialUrlState.searchFromUrl);
+  const [committedSearchQuery, setCommittedSearchQuery] = useState(initialCommittedSearch);
 
-  useEffect(() => {
-    const timer = window.setTimeout(() => setDebouncedSearchQuery(searchQuery.trim()), 300);
-    return () => window.clearTimeout(timer);
-  }, [searchQuery]);
-
-  const activeSearchQuery = isGlobalSearchActive(debouncedSearchQuery) ? debouncedSearchQuery : undefined;
+  const activeSearchQuery = isGlobalSearchActive(committedSearchQuery)
+    ? committedSearchQuery
+    : undefined;
 
   const resolvedViewId = viewId ?? initialUrlState.viewIdFromUrl;
 
@@ -59,14 +59,13 @@ export const useAmrPortalState = () => {
     if (!resolvedViewId) return;
     const url = new URL(window.location.href);
     url.searchParams.set('view', String(resolvedViewId));
-    const trimmedSearch = searchQuery.trim();
-    if (isGlobalSearchActive(trimmedSearch)) {
-      url.searchParams.set(SEARCH_QUERY_URL_PARAM, trimmedSearch);
+    if (isGlobalSearchActive(committedSearchQuery)) {
+      url.searchParams.set(SEARCH_QUERY_URL_PARAM, committedSearchQuery);
     } else {
       url.searchParams.delete(SEARCH_QUERY_URL_PARAM);
     }
     window.history.replaceState(null, '', url);
-  }, [resolvedViewId, searchQuery]);
+  }, [resolvedViewId, committedSearchQuery]);
 
   const selectedFilters = useMemo(() => {
     if (!resolvedViewId) return [];
@@ -116,6 +115,22 @@ export const useAmrPortalState = () => {
 
   const setSearchQuery = useCallback((value: string) => {
     setSearchQueryState(value);
+  }, []);
+
+  const submitSearch = useCallback(() => {
+    const trimmed = searchQuery.trim();
+    if (trimmed === committedSearchQuery) {
+      return;
+    }
+    if (isGlobalSearchActive(trimmed) || trimmed === '') {
+      setCommittedSearchQuery(trimmed);
+      setPage(1);
+    }
+  }, [searchQuery, committedSearchQuery]);
+
+  const clearSearch = useCallback(() => {
+    setSearchQueryState('');
+    setCommittedSearchQuery('');
     setPage(1);
   }, []);
 
@@ -129,7 +144,7 @@ export const useAmrPortalState = () => {
 
   const clearActiveFilters = useCallback(() => {
     setSearchQueryState('');
-    setDebouncedSearchQuery('');
+    setCommittedSearchQuery('');
     setSelectedFiltersByView({});
     setFacetPagingByView({});
     setFacetOperatorsByView({});
@@ -242,6 +257,8 @@ export const useAmrPortalState = () => {
     setPerPage,
     toggleSort,
     setSearchQuery,
+    submitSearch,
+    clearSearch,
     clearAllFilters,
     clearActiveFilters,
     facetPaging,

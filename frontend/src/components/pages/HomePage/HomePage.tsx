@@ -44,6 +44,8 @@ const HomePage = () => {
     activeSearchQuery,
     isGlobalSearchActive,
     setSearchQuery,
+    submitSearch,
+    clearSearch,
   } = state;
   const numericStateViewId =
     typeof viewId === 'number'
@@ -195,6 +197,8 @@ const HomePage = () => {
                 activeSearchQuery={activeSearchQuery}
                 isGlobalSearchActive={isGlobalSearchActive}
                 onSearchQueryChange={setSearchQuery}
+                onSearchSubmit={submitSearch}
+                onClearSearch={clearSearch}
                 onClearActiveFilters={clearActiveFilters}
                 onViewChange={setCurrentView}
                 onFilterToggle={toggleFilter}

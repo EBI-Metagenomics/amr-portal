@@ -57,12 +57,55 @@
   display: block;
 }
 
-.globalSearchInput {
+.globalSearchField {
+  display: flex;
+  align-items: stretch;
   width: 100%;
+}
+
+.globalSearchInput {
+  flex: 1;
+  min-width: 0;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-right: 0;
+  border-radius: 6px 0 0 6px;
   padding: 10px 12px;
   font-size: 14px;
+}
+
+.globalSearchInput:focus {
+  outline: 2px solid var(--amr-accent-blue);
+  outline-offset: -2px;
+  z-index: 1;
+}
+
+.globalSearchButton {
+  flex-shrink: 0;
+  margin: 0;
+  border: 0;
+  border-radius: 0 6px 6px 0;
+  padding: 0 12px;
+  background-color: var(--amr-accent-blue-dark);
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.globalSearchButton:hover {
+  background-color: var(--amr-accent-blue);
+}
+
+.globalSearchButton:focus-visible {
+  outline: 2px solid var(--amr-accent-blue-dark);
+  outline-offset: 2px;
+}
+
+.searchIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .globalSearchHint {
@@ -142,8 +185,8 @@
 }
 
 .activeFilterTagSearch {
-  border-color: #93c5fd;
-  background: #eff6ff;
+  border-color: var(--amr-accent-blue-border);
+  background: var(--amr-accent-blue-tint);
 }
 
 .activeFilterTagLabel {
@@ -192,7 +235,7 @@
 .clearButton {
   border: 0;
   background: transparent;
-  color: #2563eb;
+  color: var(--amr-accent-blue);
   cursor: pointer;
   font-size: 13px;
 }
@@ -219,11 +262,13 @@
 }
 
 .dataTypeCardActive {
-  border-color: #1d4ed8;
-  background: #f8fbff;
+  border-color: var(--amr-accent-blue);
+  background: var(--amr-accent-blue-tint);
   color: #111827;
   font-weight: 700;
-  box-shadow: inset 0 0 0 1px #2563eb, 0 2px 8px rgba(37, 99, 235, 0.2);
+  box-shadow:
+    inset 0 0 0 1px var(--amr-accent-blue),
+    0 2px 8px var(--amr-accent-blue-shadow);
 }
 
 .facetList {
@@ -426,7 +471,7 @@
 .loadMoreButton {
   border: 0;
   background: transparent;
-  color: #1d4ed8;
+  color: var(--amr-accent-blue-dark);
   cursor: pointer;
   margin-top: 8px;
   font-size: 13px;

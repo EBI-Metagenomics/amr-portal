@@ -5,6 +5,7 @@ import panelStyles from '@components/ui/Panel/Panel.module.css';
 import { buildFacetMetaMap, formatFacetFilterTagLabel } from './activeFilterLabels';
 import { buildFacetHeaderSummary, getActiveScopeTotal } from './facetHeaderSummary';
 import FilterIcon from './FilterIcon';
+import SearchIcon from './SearchIcon';
 import styles from './FacetSidebar.module.css';
 
 type Props = {
@@ -15,6 +16,8 @@ type Props = {
   activeSearchQuery?: string;
   isGlobalSearchActive: boolean;
   onSearchQueryChange: (value: string) => void;
+  onSearchSubmit: () => void;
+  onClearSearch: () => void;
   onClearActiveFilters: () => void;
   onViewChange: (viewId: string | number) => void;
   onFilterToggle: (category: string, value: string, isSelected: boolean) => void;
@@ -37,6 +40,8 @@ const FacetSidebar = ({
   activeSearchQuery,
   isGlobalSearchActive,
   onSearchQueryChange,
+  onSearchSubmit,
+  onClearSearch,
   onClearActiveFilters,
   onViewChange,
   onFilterToggle,
@@ -83,17 +88,34 @@ const FacetSidebar = ({
           >
             Global search
           </label>
-          <input
-            id="global-search-input"
-            className={styles.globalSearchInput}
-            type="search"
-            value={searchQuery}
-            placeholder="Search sample accessions, genome accessions, or genes..."
-            onChange={event => onSearchQueryChange(event.target.value)}
-          />
+          <div className={styles.globalSearchField}>
+            <input
+              id="global-search-input"
+              className={styles.globalSearchInput}
+              type="search"
+              value={searchQuery}
+              placeholder="Search sample accessions, genome accessions, or genes..."
+              onChange={event => onSearchQueryChange(event.target.value)}
+              onKeyDown={event => {
+                if (event.key === 'Enter') {
+                  event.preventDefault();
+                  onSearchSubmit();
+                }
+              }}
+            />
+            <button
+              type="button"
+              className={styles.globalSearchButton}
+              aria-label="Search"
+              onClick={onSearchSubmit}
+            >
+              <SearchIcon />
+            </button>
+          </div>
           {showSearchMinLengthHint ? (
             <p className={styles.globalSearchHint}>
-              Enter at least {GLOBAL_SEARCH_MIN_LENGTH} characters to search.
+              Enter at least {GLOBAL_SEARCH_MIN_LENGTH} characters, then press Enter or click
+              search.
             </p>
           ) : null}
         </div>
@@ -160,7 +182,7 @@ const FacetSidebar = ({
                     type="button"
                     className={styles.activeFilterRemove}
                     aria-label={`Remove search ${activeSearchQuery}`}
-                    onClick={() => onSearchQueryChange('')}
+                    onClick={onClearSearch}
                   >
                     ✕
                   </button>

@@ -14,4 +14,12 @@
   --amr-gene-viewer-expanded-total: calc(
     var(--amr-top-panel-height) + var(--amr-gene-viewer-browser-min-height)
   );
+  /* Matches action rail / portal accent blue. */
+  --amr-accent-blue: #1093df;
+  --amr-accent-blue-dark: #0d7fc4;
+  --amr-accent-blue-tint: #f0f9ff;
+  --amr-accent-blue-tint-row: #e8f5fc;
+  --amr-accent-blue-tint-row-hover: #d4ecfa;
+  --amr-accent-blue-border: #7ec8ea;
+  --amr-accent-blue-shadow: rgba(16, 147, 223, 0.2);
 }
