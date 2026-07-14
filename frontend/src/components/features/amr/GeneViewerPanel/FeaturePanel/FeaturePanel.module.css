@@ -186,12 +186,19 @@
   line-height: 1.4;
 }
 
+.inlineLinkList {
+  display: inline;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
 .externalLink {
-  color: #2563eb;
+  color: var(--amr-accent-blue-dark, #0d7fc4);
   text-decoration: none;
   font-weight: 500;
 }
 
 .externalLink:hover {
+  color: var(--amr-accent-blue, #1093df);
   text-decoration: underline;
 }

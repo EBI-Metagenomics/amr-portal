@@ -1,10 +1,16 @@
-import { useCallback, useMemo, useState } from 'react';
+import { Fragment, useCallback, useMemo, useState } from 'react';
 import type { FeaturePanelFeature } from './useFeatureDetails';
 import { ALL_SECTION_IDS, DEFAULT_EXPANDED_SECTIONS, type SectionId } from './constants';
 import {
+  COLUMN_LINKABLE_ANNOTATION_KEYS,
+  INLINE_LINKABLE_ANNOTATION_KEYS,
+  cogAccessionFromDbxref,
+  formatDbxrefDisplayId,
   formatKeggDisplayId,
   generateExternalDbLink,
+  isCogDbxref,
   splitAnnotationIds,
+  type ExternalAnnotationDb,
 } from '@utils/common/annotationLinks';
 import styles from './FeaturePanel.module.css';
 
@@ -76,33 +82,100 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function renderLinkedAnnotationIds(key: string, value: string): React.ReactNode {
-  if (key !== 'kegg' && key !== 'cog') {
-    return value;
-  }
+function ExternalIdLink({
+  dbType,
+  id,
+  displayId,
+}: {
+  dbType: ExternalAnnotationDb;
+  id: string;
+  displayId: string;
+}) {
+  return (
+    <a
+      href={generateExternalDbLink(dbType, id)}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={styles.externalLink}
+    >
+      {displayId}
+    </a>
+  );
+}
 
-  const dbType = key === 'kegg' ? 'KEGG' : 'COG';
-  const ids = splitAnnotationIds(value);
-  if (!ids.length) return value;
+function renderInlineLinkedIds(dbType: ExternalAnnotationDb, ids: string[]): React.ReactNode {
+  return (
+    <span className={styles.inlineLinkList}>
+      {ids.map((id, index) => (
+        <Fragment key={`${dbType}-${id}-${index}`}>
+          {index > 0 ? ', ' : null}
+          <ExternalIdLink dbType={dbType} id={id} displayId={id} />
+        </Fragment>
+      ))}
+    </span>
+  );
+}
 
+function renderColumnLinkedIds(
+  dbType: ExternalAnnotationDb,
+  ids: string[],
+  formatDisplayId: (id: string) => string = id => id
+): React.ReactNode {
   return (
     <div className={styles.linkList}>
-      {ids.map(id => {
-        const displayId = key === 'kegg' ? formatKeggDisplayId(id) : id;
+      {ids.map(id => (
+        <div key={`${dbType}-${id}`} className={styles.linkRow}>
+          <ExternalIdLink dbType={dbType} id={id} displayId={formatDisplayId(id)} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function renderLinkedAnnotationIds(key: string, value: string): React.ReactNode {
+  const inlineDbType = INLINE_LINKABLE_ANNOTATION_KEYS[key];
+  if (inlineDbType) {
+    const ids = splitAnnotationIds(value);
+    return ids.length ? renderInlineLinkedIds(inlineDbType, ids) : value;
+  }
+
+  const columnDbType = COLUMN_LINKABLE_ANNOTATION_KEYS[key];
+  if (columnDbType) {
+    const ids = splitAnnotationIds(value);
+    if (!ids.length) return value;
+    return renderColumnLinkedIds(
+      columnDbType,
+      ids,
+      key === 'kegg' ? formatKeggDisplayId : id => id
+    );
+  }
+
+  return value;
+}
+
+function renderDbxrefValue(dbxrefs: string[]): React.ReactNode {
+  if (!dbxrefs.length) return null;
+
+  return (
+    <span className={styles.inlineLinkList}>
+      {dbxrefs.map((entry, index) => {
+        const display = formatDbxrefDisplayId(entry);
         return (
-          <div key={`${dbType}-${id}`} className={styles.linkRow}>
-            <a
-              href={generateExternalDbLink(dbType, id)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={styles.externalLink}
-            >
-              {displayId}
-            </a>
-          </div>
+          <Fragment key={`${entry}-${index}`}>
+            {index > 0 ? ', ' : null}
+            {isCogDbxref(entry) ? (
+              <ExternalIdLink
+                dbType="COG_ACCESSION"
+                id={cogAccessionFromDbxref(entry)}
+                displayId={display}
+              />
+            ) : (
+              display
+            )}
+          </Fragment>
         );
       })}
-    </div>
+    </span>
   );
 }
 
@@ -197,7 +270,9 @@ const FeaturePanel = ({ feature, isLoading, error }: Props) => {
                 onToggle={toggleSection}
               >
                 {feature.note ? <Field label="Note" value={feature.note} /> : null}
-                {feature.dbxref.length ? <Field label="Dbxref" value={feature.dbxref.join(', ')} /> : null}
+                {feature.dbxref.length ? (
+                  <Field label="Dbxref" value={renderDbxrefValue(feature.dbxref)} />
+                ) : null}
                 {feature.annotations.map(annotation => (
                   <Field
                     key={annotation.key}

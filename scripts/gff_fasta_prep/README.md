@@ -9,6 +9,7 @@ Prepares annotation GFF and assembly FASTA files for the gene viewer: splits emb
 | `prepare_gff_fasta_indexes.sh` | Entrypoint: single file or directory scan |
 | `generate_gff_file_list.sh` | Build sorted work list for SLURM arrays |
 | `submit_gff_prep_array.slurm` | SLURM array job template (records per-task metrics) |
+| `delete_amrfinderplus_tsv.sh` | Dry-run / delete `*_amrfinderplus.tsv(.gz)` under an FTP tree |
 | `verify_processed_outputs.py` | Random spot-check of processed outputs |
 | `tests/test_verify_processed_outputs.py` | Unit tests for output validation logic |
 | `lib/cli.sh` | Argument parsing and usage |
@@ -34,6 +35,13 @@ Prepares annotation GFF and assembly FASTA files for the gene viewer: splits emb
 ```
 
 Each genome directory should contain `{ACCESSION}_annotations.gff.gz`. Sibling files such as `{ACCESSION}_amrfinderplus.tsv.gz` are ignored. Already-processed genomes are skipped when `.csi` and `.fasta.gz.fai` exist.
+
+To remove redundant AMRFinderPlus TSVs from a prepared FTP tree (dry-run by default):
+
+```bash
+./delete_amrfinderplus_tsv.sh /path/to/genomes
+./delete_amrfinderplus_tsv.sh /path/to/genomes --delete --yes
+```
 
 ## SLURM array (large batches)
 
