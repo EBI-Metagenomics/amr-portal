@@ -10,17 +10,33 @@ search_query AS (
 )
 """.strip()
 
+# Split the query into tokens (spaces), prefix-match each token against
+# dict.term, and keep docs that match every token (AND).
+# Single-token queries behave as before (prefix LIKE). Multi-word phrases such
+# as "Staphylococcus aureus" or "aminocoumarin antibiotic" need this AND logic.
 _QTERMIDS_AND_MATCHING_DOCIDS_CTE = f"""
+search_tokens AS (
+    SELECT DISTINCT token
+    FROM (
+        SELECT trim(unnest(string_split(q.prefix, ' '))) AS token
+        FROM search_query AS q
+    )
+    WHERE token IS NOT NULL
+      AND token != ''
+      AND length(token) >= {_MIN_LEN}
+),
 qtermids AS (
-    SELECT dict.termid
-    FROM fts_main_global_search.dict AS dict, search_query AS q
-    WHERE length(q.prefix) >= {_MIN_LEN}
-      AND dict.term LIKE q.prefix || '%'
+    SELECT dict.termid, tokens.token
+    FROM fts_main_global_search.dict AS dict
+    CROSS JOIN search_tokens AS tokens
+    WHERE dict.term LIKE tokens.token || '%'
 ),
 matching_docids AS (
-    SELECT DISTINCT terms.docid
+    SELECT terms.docid
     FROM fts_main_global_search.terms AS terms
-    WHERE terms.termid IN (SELECT termid FROM qtermids)
+    INNER JOIN qtermids ON terms.termid = qtermids.termid
+    GROUP BY terms.docid
+    HAVING COUNT(DISTINCT qtermids.token) = (SELECT COUNT(*) FROM search_tokens)
 )
 """.strip()
 

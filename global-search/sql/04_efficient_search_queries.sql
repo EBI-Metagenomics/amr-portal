@@ -215,35 +215,36 @@ LIMIT 50;
 -- WHERE dict.term = lower(trim('tetA'));
 
 -- ---------------------------------------------------------------------------
--- 6. OPTIONAL: exact multi-token match (use when query contains spaces)
+-- 6. Multi-token prefix match (AND) — used by the API for spaced queries
+--    Example: "Staphylococcus aureus" / "aminocoumarin antibiotic"
+--    Each whitespace token is prefix-matched; docs must hit every token.
 -- ---------------------------------------------------------------------------
--- tokenize() returns VARCHAR[] — unnest before joining to dict.term.
---
--- WITH search_query AS (
---     SELECT lower(trim('tetA amikacin')) AS raw_query
--- ),
--- tokens AS (
---     SELECT DISTINCT t
---     FROM (
---         SELECT unnest(fts_main_global_search.tokenize(search_query.raw_query)) AS t
---         FROM search_query
---     )
---     WHERE t IS NOT NULL AND t != ''
--- ),
--- qtermids AS (
---     SELECT dict.termid
---     FROM fts_main_global_search.dict AS dict, tokens
---     WHERE dict.term = tokens.t
--- ),
--- matching_docids AS (
---     SELECT terms.docid
---     FROM fts_main_global_search.terms AS terms
---     WHERE terms.termid IN (SELECT termid FROM qtermids)
---     GROUP BY terms.docid
---     HAVING COUNT(DISTINCT terms.termid) = (SELECT COUNT(*) FROM tokens)
--- )
--- SELECT g.source_table, COUNT(*) AS search_count
--- FROM matching_docids AS md
--- INNER JOIN fts_main_global_search.docs AS docs ON md.docid = docs.docid
--- INNER JOIN global_search AS g ON g.rowid = docs.name
--- GROUP BY g.source_table;
+WITH search_query AS (
+    SELECT lower(trim('escherichia coli')) AS prefix
+),
+search_tokens AS (
+    SELECT DISTINCT token
+    FROM (
+        SELECT trim(unnest(string_split(q.prefix, ' '))) AS token
+        FROM search_query AS q
+    )
+    WHERE token IS NOT NULL AND token != '' AND length(token) >= 3
+),
+qtermids AS (
+    SELECT dict.termid, tokens.token
+    FROM fts_main_global_search.dict AS dict
+    CROSS JOIN search_tokens AS tokens
+    WHERE dict.term LIKE tokens.token || '%'
+),
+matching_docids AS (
+    SELECT terms.docid
+    FROM fts_main_global_search.terms AS terms
+    INNER JOIN qtermids ON terms.termid = qtermids.termid
+    GROUP BY terms.docid
+    HAVING COUNT(DISTINCT qtermids.token) = (SELECT COUNT(*) FROM search_tokens)
+)
+SELECT g.source_table, COUNT(*) AS search_count
+FROM matching_docids AS md
+INNER JOIN fts_main_global_search.docs AS docs ON md.docid = docs.docid
+INNER JOIN global_search AS g ON g.rowid = docs.name
+GROUP BY g.source_table;

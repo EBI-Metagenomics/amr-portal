@@ -158,6 +158,18 @@ def test_global_search_round_trip_in_memory():
     genus_counts = fetch_search_counts_by_dataset(conn, "escher")
     assert genus_counts.get("phenotype", 0) >= 1
 
+    # Multi-word: each whitespace token is prefix-matched and ANDed.
+    organism_counts = fetch_search_counts_by_dataset(conn, "escherichia coli")
+    assert organism_counts.get("phenotype", 0) >= 1
+    assert organism_counts.get("pheno_geno_merged", 0) >= 1
+
+    antibiotic_phrase_counts = fetch_search_counts_by_dataset(conn, "klebsiella pneumoniae")
+    assert antibiotic_phrase_counts.get("genotype", 0) >= 1
+
+    # Tokens that do not co-occur on the same document should not match.
+    mismatch_counts = fetch_search_counts_by_dataset(conn, "escherichia pneumoniae")
+    assert sum(mismatch_counts.values()) == 0
+
     taxon_counts = fetch_search_counts_by_dataset(conn, "562")
     assert taxon_counts.get("pheno_geno_merged", 0) == 1
     assert taxon_counts.get("phenotype", 0) == 0
