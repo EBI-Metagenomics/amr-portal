@@ -95,7 +95,16 @@ const FacetSidebar = ({
               type="search"
               value={searchQuery}
               placeholder="Search sample accessions, genome accessions, or genes..."
-              onChange={event => onSearchQueryChange(event.target.value)}
+              onChange={event => {
+                const value = event.target.value;
+                // Native search clear (✕) sets value to ""; also clear the committed
+                // active-filter chip, not only the draft input text.
+                if (value === '' && isGlobalSearchActive) {
+                  onClearSearch();
+                  return;
+                }
+                onSearchQueryChange(value);
+              }}
               onKeyDown={event => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
