@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FacetOperator, FacetPageState, SelectedFilter } from '@interfaces/amrApi';
 import { isGlobalSearchActive, SEARCH_QUERY_URL_PARAM } from '@/config/globalSearch';
+import { LANDING_SEARCH_PROVISIONAL_VIEW } from '@utils/search/pickSearchResultView';
 
 const DEFAULT_PER_PAGE = 100;
 const DEFAULT_VIEW_ID = 1;
@@ -34,13 +35,23 @@ export const useAmrPortalState = () => {
   const initialUrlState = useMemo(() => {
     const params = new URL(window.location.href).searchParams;
     const fromView = params.get('view');
-    let viewIdFromUrl = DEFAULT_VIEW_ID;
-    if (fromView) {
-      const parsed = Number(fromView);
-      viewIdFromUrl = Number.isInteger(parsed) ? parsed : (VIEW_SLUG_TO_ID[fromView] ?? DEFAULT_VIEW_ID);
-    }
     const searchFromUrl = params.get(SEARCH_QUERY_URL_PARAM)?.trim() ?? '';
-    return { viewIdFromUrl, searchFromUrl };
+    let hasViewInUrl = false;
+    let viewIdFromUrl = DEFAULT_VIEW_ID;
+
+    if (fromView) {
+      hasViewInUrl = true;
+      const parsed = Number(fromView);
+      viewIdFromUrl = Number.isInteger(parsed)
+        ? parsed
+        : (VIEW_SLUG_TO_ID[fromView] ?? DEFAULT_VIEW_ID);
+    } else if (isGlobalSearchActive(searchFromUrl)) {
+      // Landing search: `/data/?q=...` with no view. Use combined provisionally
+      // so facets can be fetched (API requires view_id); HomePage may then switch.
+      viewIdFromUrl = LANDING_SEARCH_PROVISIONAL_VIEW;
+    }
+
+    return { viewIdFromUrl, hasViewInUrl, searchFromUrl };
   }, []);
 
   const initialCommittedSearch = isGlobalSearchActive(initialUrlState.searchFromUrl)
@@ -56,7 +67,7 @@ export const useAmrPortalState = () => {
   const resolvedViewId = viewId ?? initialUrlState.viewIdFromUrl;
 
   useEffect(() => {
-    if (!resolvedViewId) return;
+    if (resolvedViewId == null) return;
     const url = new URL(window.location.href);
     url.searchParams.set('view', String(resolvedViewId));
     if (isGlobalSearchActive(committedSearchQuery)) {
@@ -241,6 +252,7 @@ export const useAmrPortalState = () => {
 
   return {
     viewId: resolvedViewId,
+    hasViewInUrl: initialUrlState.hasViewInUrl,
     selectedFilters,
     activeGroup,
     appliedFilterCount,

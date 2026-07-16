@@ -10,6 +10,7 @@ const GeneViewerPanel = lazy(
 );
 import { useAmrPortalState } from '@/hooks/useAmrPortalState';
 import { buildGenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
+import { pickSearchResultView } from '@utils/search/pickSearchResultView';
 import { isGenomeViewerEnabled } from '@/config/appEnv';
 import type { AMRRecord } from '@interfaces/amrRecord';
 import styles from './HomePage.module.css';
@@ -18,10 +19,10 @@ const HomePage = () => {
   const genomeViewerEnabled = useMemo(() => isGenomeViewerEnabled(), []);
   const [isGeneViewerCollapsed, setIsGeneViewerCollapsed] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
-  const lastAutoRedirectSearchRef = useRef<string | null>(null);
   const state = useAmrPortalState();
   const {
     viewId,
+    hasViewInUrl,
     selectedFilters,
     facetOperators,
     page,
@@ -48,6 +49,7 @@ const HomePage = () => {
     submitSearch,
     clearSearch,
   } = state;
+  const hasResolvedLandingViewRef = useRef(hasViewInUrl);
   const numericStateViewId =
     typeof viewId === 'number'
       ? viewId
@@ -128,51 +130,43 @@ const HomePage = () => {
 
   useEffect(() => {
     if (numericViewId !== null && numericStateViewId === null && resolvedViewId !== null) {
+      if (!hasViewInUrl && isGlobalSearchActive) {
+        return;
+      }
       setCurrentView(resolvedViewId);
     }
-  }, [numericViewId, numericStateViewId, resolvedViewId, setCurrentView]);
+  }, [
+    hasViewInUrl,
+    isGlobalSearchActive,
+    numericViewId,
+    numericStateViewId,
+    resolvedViewId,
+    setCurrentView,
+  ]);
 
   useEffect(() => {
     setSelectedRowIndex(null);
   }, [selectedFilters, page, perPage, sort, numericViewId, activeSearchQuery]);
 
-  // Landing page always redirects searches to `view=combined`.
-  // If the combined tab has zero hits but one of the other tabs has hits,
-  // automatically switch to the tab that has matches.
+  // Landing-page search arrives as `/data/?q=...` with no view. Pick a tab once
+  // from facet search counts; never re-run when the user searches from the sidebar.
   useEffect(() => {
+    if (hasResolvedLandingViewRef.current) return;
+    if (hasViewInUrl) return;
     if (!isGlobalSearchActive) return;
-    if (numericStateViewId !== 3) return; // combined
-    if (recordsQuery.isPlaceholderData) return;
-    if (facetsQuery.isPlaceholderData) return;
+    if (facetsQuery.isPlaceholderData || !facetsQuery.data) return;
 
-    const totalHits = recordsQuery.data?.meta.total_hits;
-    if (totalHits !== 0) return;
-
-    const search = activeSearchQuery?.trim();
-    if (!search) return;
-    if (lastAutoRedirectSearchRef.current === search) return;
-
-    const dataTypes = facetsQuery.data?.data_type ?? [];
-    const experimentsHits = dataTypes.find(type => type.id === 1)?.search_count ?? 0;
-    const predictionsHits = dataTypes.find(type => type.id === 2)?.search_count ?? 0;
-
-    if (experimentsHits > 0) {
-      lastAutoRedirectSearchRef.current = search;
-      setCurrentView(1);
-      return;
-    }
-    if (predictionsHits > 0) {
-      lastAutoRedirectSearchRef.current = search;
-      setCurrentView(2);
+    hasResolvedLandingViewRef.current = true;
+    const nextView = pickSearchResultView(facetsQuery.data.data_type);
+    if (numericStateViewId !== nextView) {
+      setCurrentView(nextView);
     }
   }, [
-    activeSearchQuery,
-    facetsQuery.data?.data_type,
+    facetsQuery.data,
     facetsQuery.isPlaceholderData,
+    hasViewInUrl,
     isGlobalSearchActive,
     numericStateViewId,
-    recordsQuery.data?.meta.total_hits,
-    recordsQuery.isPlaceholderData,
     setCurrentView,
   ]);
 
