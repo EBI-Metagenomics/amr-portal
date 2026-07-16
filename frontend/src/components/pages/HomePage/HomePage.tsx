@@ -1,4 +1,4 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { amrService } from '@services/amr/amrService';
 import FacetSidebar from '@components/features/amr/FacetSidebar/FacetSidebar';
@@ -18,6 +18,7 @@ const HomePage = () => {
   const genomeViewerEnabled = useMemo(() => isGenomeViewerEnabled(), []);
   const [isGeneViewerCollapsed, setIsGeneViewerCollapsed] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
+  const lastAutoRedirectSearchRef = useRef<string | null>(null);
   const state = useAmrPortalState();
   const {
     viewId,
@@ -135,6 +136,46 @@ const HomePage = () => {
     setSelectedRowIndex(null);
   }, [selectedFilters, page, perPage, sort, numericViewId, activeSearchQuery]);
 
+  // Landing page always redirects searches to `view=combined`.
+  // If the combined tab has zero hits but one of the other tabs has hits,
+  // automatically switch to the tab that has matches.
+  useEffect(() => {
+    if (!isGlobalSearchActive) return;
+    if (numericStateViewId !== 3) return; // combined
+    if (recordsQuery.isPlaceholderData) return;
+    if (facetsQuery.isPlaceholderData) return;
+
+    const totalHits = recordsQuery.data?.meta.total_hits;
+    if (totalHits !== 0) return;
+
+    const search = activeSearchQuery?.trim();
+    if (!search) return;
+    if (lastAutoRedirectSearchRef.current === search) return;
+
+    const dataTypes = facetsQuery.data?.data_type ?? [];
+    const experimentsHits = dataTypes.find(type => type.id === 1)?.search_count ?? 0;
+    const predictionsHits = dataTypes.find(type => type.id === 2)?.search_count ?? 0;
+
+    if (experimentsHits > 0) {
+      lastAutoRedirectSearchRef.current = search;
+      setCurrentView(1);
+      return;
+    }
+    if (predictionsHits > 0) {
+      lastAutoRedirectSearchRef.current = search;
+      setCurrentView(2);
+    }
+  }, [
+    activeSearchQuery,
+    facetsQuery.data?.data_type,
+    facetsQuery.isPlaceholderData,
+    isGlobalSearchActive,
+    numericStateViewId,
+    recordsQuery.data?.meta.total_hits,
+    recordsQuery.isPlaceholderData,
+    setCurrentView,
+  ]);
+
   useEffect(() => {
     if (selectedRowIndex === null) {
       setIsGeneViewerCollapsed(true);
@@ -155,8 +196,9 @@ const HomePage = () => {
     };
   }, [selectedRowIndex, recordsQuery.data, numericViewId]);
 
-  const handleRowSelect = useCallback((rowIndex: number, _record: AMRRecord) => {
+  const handleRowSelect = useCallback((rowIndex: number, record: AMRRecord) => {
     setSelectedRowIndex(rowIndex);
+    void record; // record isn't needed here, but keep signature stable for DataPanel
     if (genomeViewerEnabled) {
       setIsGeneViewerCollapsed(false);
     }
