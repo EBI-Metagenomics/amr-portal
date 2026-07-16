@@ -130,6 +130,16 @@ def test_global_search_round_trip_in_memory():
             'Klebsiella pneumoniae' AS organism,
             'Klebsiella' AS genus,
             'pneumoniae' AS species
+        UNION ALL SELECT
+            'SAMEA4',
+            'GCA_002',
+            'blaTEM',
+            'blaTEM',
+            'blaTEM',
+            'beta-lactam antibiotic',
+            'Staphylococcus aureus',
+            'Staphylococcus',
+            'aureus'
         """
     )
     conn.execute(
@@ -158,13 +168,18 @@ def test_global_search_round_trip_in_memory():
     genus_counts = fetch_search_counts_by_dataset(conn, "escher")
     assert genus_counts.get("phenotype", 0) >= 1
 
-    # Multi-word: each whitespace token is prefix-matched and ANDed.
+    # Multi-word / hyphenated: use FTS tokenize (splits on '-' as well as spaces).
     organism_counts = fetch_search_counts_by_dataset(conn, "escherichia coli")
     assert organism_counts.get("phenotype", 0) >= 1
     assert organism_counts.get("pheno_geno_merged", 0) >= 1
 
     antibiotic_phrase_counts = fetch_search_counts_by_dataset(conn, "klebsiella pneumoniae")
     assert antibiotic_phrase_counts.get("genotype", 0) >= 1
+
+    beta_counts = fetch_search_counts_by_dataset(conn, "beta-lactam antibiotic")
+    assert beta_counts.get("genotype", 0) >= 1
+    beta_short = fetch_search_counts_by_dataset(conn, "beta-lactam")
+    assert beta_short.get("genotype", 0) >= 1
 
     # Tokens that do not co-occur on the same document should not match.
     mismatch_counts = fetch_search_counts_by_dataset(conn, "escherichia pneumoniae")

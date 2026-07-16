@@ -10,15 +10,16 @@ search_query AS (
 )
 """.strip()
 
-# Split the query into tokens (spaces), prefix-match each token against
-# dict.term, and keep docs that match every token (AND).
-# Single-token queries behave as before (prefix LIKE). Multi-word phrases such
-# as "Staphylococcus aureus" or "aminocoumarin antibiotic" need this AND logic.
+# Tokenize with the same FTS tokenizer used to build the index.
+# Policy (see global-search/sql/02_create_fts_index.sql): hyphen is a separator;
+# dots / underscores / parentheses stay in tokens. Prefix-match each token and
+# AND docs that hit every token.
+# Examples: "Staphylococcus aureus", "beta-lactam antibiotic".
 _QTERMIDS_AND_MATCHING_DOCIDS_CTE = f"""
 search_tokens AS (
     SELECT DISTINCT token
     FROM (
-        SELECT trim(unnest(string_split(q.prefix, ' '))) AS token
+        SELECT unnest(fts_main_global_search.tokenize(q.prefix)) AS token
         FROM search_query AS q
     )
     WHERE token IS NOT NULL

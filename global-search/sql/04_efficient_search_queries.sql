@@ -215,17 +215,18 @@ LIMIT 50;
 -- WHERE dict.term = lower(trim('tetA'));
 
 -- ---------------------------------------------------------------------------
--- 6. Multi-token prefix match (AND) — used by the API for spaced queries
---    Example: "Staphylococcus aureus" / "aminocoumarin antibiotic"
---    Each whitespace token is prefix-matched; docs must hit every token.
+-- 6. Multi-token prefix match (AND) — used by the API for spaced / hyphenated
+--    queries. Uses the same FTS tokenize() as the index so "beta-lactam"
+--    becomes ["beta", "lactam"], matching indexed terms.
+--    Example: "Staphylococcus aureus" / "beta-lactam antibiotic"
 -- ---------------------------------------------------------------------------
 WITH search_query AS (
-    SELECT lower(trim('escherichia coli')) AS prefix
+    SELECT lower(trim('beta-lactam antibiotic')) AS prefix
 ),
 search_tokens AS (
     SELECT DISTINCT token
     FROM (
-        SELECT trim(unnest(string_split(q.prefix, ' '))) AS token
+        SELECT unnest(fts_main_global_search.tokenize(q.prefix)) AS token
         FROM search_query AS q
     )
     WHERE token IS NOT NULL AND token != '' AND length(token) >= 3

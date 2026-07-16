@@ -156,6 +156,24 @@ Then optionally:
 | Gene / AMR locus | `id`, `gene_symbol`, `amr_element_symbol` |
 | Antibiotic name | `antibiotic_name` |
 
+## Tokenisation policy
+
+Index and API query **must** use the same tokenizer (`fts_main_global_search.tokenize`).
+
+| Kept in a token | Split (separator) |
+|-----------------|-------------------|
+| letters, digits, `_`, `.`, `(` `)` | spaces, **hyphens**, other punctuation |
+
+Examples:
+
+- `beta-lactam antibiotic` → `beta` + `lactam` + `antibiotic` (AND at query time)
+- `GCA_000013465.1` → one token (dot kept)
+- `mph(A)` → one token (parentheses kept)
+
+Do **not** reintroduce hyphen into the FTS `ignore` keep-set without also changing the API query logic and adding migration notes — that would make `beta-lactam` a single dictionary term again and break space-separated user input.
+
+Configured in `sql/02_create_fts_index.sql`. Multi-token search SQL is in `sql/04_efficient_search_queries.sql` (§6) and `backend/core/sql/global_search.py`.
+
 ## Tests
 
 ```bash
@@ -179,11 +197,11 @@ Reasons:
 1. DuckDB evaluates this against **every** `global_search` row on large releases.
 2. `match_bm25` is implemented as `rowid IN (...)` with an internal **`LIMIT 1000`**, so it cannot produce accurate RESULT TYPE counts.
 
-**Instead**, start from the FTS inverted index (`dict` → `terms` → `docs`), then join to `global_search`. See `sql/04_efficient_search_queries.sql`.
+**Instead**, start from the FTS inverted index (`dict` → `terms` → `docs`), then join to `global_search`. For multi-word / hyphenated queries, tokenize with `fts_main_global_search.tokenize` and AND tokens — see `sql/04_efficient_search_queries.sql` (§6). The portal API uses that pattern in `backend/core/sql/global_search.py`.
 
 ### Default: prefix search (partial user input)
 
-Users usually type prefixes (`ERZ254`, `tet`, `amik`), not full indexed tokens (`erz25458162`). Use prefix lookup on `dict.term`:
+Users usually type prefixes (`ERZ254`, `tet`, `amik`), not full indexed tokens (`erz25458162`). For a **single** token, use prefix lookup on `dict.term`:
 
 ```sql
 WITH search_query AS (

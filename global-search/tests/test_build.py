@@ -165,6 +165,50 @@ def test_global_search_finds_genus_via_fts(conn):
     assert ("genotype", "Salmonella") in hits
 
 
+def test_fts_splits_hyphen_keeps_dot_and_parens(conn):
+    """Hyphen is a separator; dots and parentheses stay inside tokens."""
+    conn.execute(
+        """
+        INSERT INTO genotype
+        SELECT
+            'SAMEA_HYPHEN',
+            'GCA_000013465.1',
+            'locus_h',
+            'tetA',
+            'mph(A)',
+            'beta-lactam antibiotic',
+            'Staphylococcus aureus',
+            'Staphylococcus',
+            'aureus'
+        """
+    )
+    build_global_search(conn)
+
+    tokens = conn.execute(
+        "SELECT fts_main_global_search.tokenize('beta-lactam antibiotic')"
+    ).fetchone()[0]
+    assert tokens == ["beta", "lactam", "antibiotic"]
+
+    dict_terms = {
+        row[0]
+        for row in conn.execute(
+            """
+            SELECT term FROM fts_main_global_search.dict
+            WHERE term IN (
+                'beta', 'lactam', 'antibiotic', 'beta-lactam',
+                'gca_000013465.1', 'mph(a)'
+            )
+            """
+        ).fetchall()
+    }
+    assert "beta" in dict_terms
+    assert "lactam" in dict_terms
+    assert "antibiotic" in dict_terms
+    assert "beta-lactam" not in dict_terms
+    assert "gca_000013465.1" in dict_terms
+    assert "mph(a)" in dict_terms
+
+
 def test_global_search_taxon_id_stored_for_exact_lookup(conn):
     build_global_search(conn)
 
