@@ -77,7 +77,7 @@
 			"id":"annotation_tool_mode",
 			"label":"Annotation tool mode",
 			"filter_label":"annotation_tool_mode"
-		},				
+		},
 		{
 			"dataset":"pheno_geno_merged",
 			"id":"antibiotic_name",
@@ -180,7 +180,8 @@
 			"categoryGroups": [ { "name": "Antibiotic", "categories": ["antibiotic_name"] } ],
       		"otherCategoryGroups": [
       			{ "name": "Species", "categories": ["species"] },
-				{ "name": "Genus", "categories": ["genus"] }
+				{ "name": "Genus", "categories": ["genus"] },
+				{ "name": "Annotation tool mode", "categories": ["annotation_tool_mode"] }
       		],
       		"columns":[
       			{ "name": "BioSample_ID", "enabled":true, "rank":1},
@@ -227,7 +228,8 @@
         		{ "name": "Testing method", "categories": ["laboratory_typing_method"] },
         		{ "name": "Collection year", "categories":["collection_year"]},
 				{ "name": "Geo subregion", "categories":["geographical_subregion"]},
-				{ "name": "Country", "categories":["country"]}
+				{ "name": "Country", "categories":["country"]},
+				{ "name": "Annotation tool mode", "categories": ["annotation_tool_mode"] }
       		],
       		"columns":[
       			{ "name": "antibiotic_name", "enabled":true, "rank":1},
