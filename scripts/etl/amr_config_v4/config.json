@@ -240,7 +240,7 @@
       			{ "name": "class", "enabled":true, "rank":25},
 				{ "name": "subclass", "enabled":true, "rank":26},
       			{ "name": "gen_evidence_accession", "enabled":true, "rank":27},
-      			{ "name": "amrfinder_method", "enabled":true, "rank":28},
+      			{ "name": "amrfinderplus_method", "enabled":true, "rank":28},
       			{ "name": "HMM_evidence_description", "enabled":true, "rank":29},
 				{ "name": "gen_annotation_link", "enabled":true, "rank":30}
       		],
