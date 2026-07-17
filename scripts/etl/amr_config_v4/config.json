@@ -73,6 +73,12 @@
 			"filter_label":"antibiotic_name"
 		},
 		{
+			"dataset":"genotype",
+			"id":"annotation_tool_mode",
+			"label":"Annotation tool mode",
+			"filter_label":"annotation_tool_mode"
+		},				
+		{
 			"dataset":"pheno_geno_merged",
 			"id":"antibiotic_name",
 			"label":"Antibiotic",
@@ -125,6 +131,12 @@
 			"id":"country",
 			"label":"Country",
 			"filter_label":"country"
+		},
+		{
+			"dataset":"pheno_geno_merged",
+			"id":"annotation_tool_mode",
+			"label":"Annotation tool mode",
+			"filter_label":"annotation_tool_mode"
 		}
 	],
 	"views":[
