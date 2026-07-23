@@ -1,26 +1,30 @@
-import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { amrService } from '@services/amr/amrService';
 import FacetSidebar from '@components/features/amr/FacetSidebar/FacetSidebar';
-import { getActiveScopeTotal } from '@components/features/amr/FacetSidebar/facetHeaderSummary';
 import DataPanel from '@components/features/amr/DataPanel/DataPanel';
 
 const GeneViewerPanel = lazy(
   () => import('@components/features/amr/GeneViewerPanel/GeneViewerPanel')
 );
 import { useAmrPortalState } from '@/hooks/useAmrPortalState';
-import { buildGenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
+import {
+  AMR_VIEW_ID_PHENOTYPE,
+  buildGenomeViewerRowContext,
+} from '@utils/genomeViewer/recordContext';
+import { pickSearchResultView } from '@utils/search/pickSearchResultView';
 import { isGenomeViewerEnabled } from '@/config/appEnv';
 import type { AMRRecord } from '@interfaces/amrRecord';
 import styles from './HomePage.module.css';
 
 const HomePage = () => {
-  const genomeViewerEnabled = useMemo(() => isGenomeViewerEnabled(), []);
+  const genomeViewerFeatureEnabled = useMemo(() => isGenomeViewerEnabled(), []);
   const [isGeneViewerCollapsed, setIsGeneViewerCollapsed] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const state = useAmrPortalState();
   const {
     viewId,
+    hasViewInUrl,
     selectedFilters,
     facetOperators,
     page,
@@ -47,6 +51,7 @@ const HomePage = () => {
     submitSearch,
     clearSearch,
   } = state;
+  const hasResolvedLandingViewRef = useRef(hasViewInUrl);
   const numericStateViewId =
     typeof viewId === 'number'
       ? viewId
@@ -113,27 +118,54 @@ const HomePage = () => {
     placeholderData: keepPreviousData,
   });
 
-  const scopeTotal = useMemo(() => {
-    if (isGlobalSearchActive) {
-      return getActiveScopeTotal(facetsQuery.data?.data_type ?? [], numericViewId ?? 1, true);
-    }
-    return recordsQuery.data?.meta.total_hits ?? null;
-  }, [
-    isGlobalSearchActive,
-    facetsQuery.data?.data_type,
-    numericViewId,
-    recordsQuery.data?.meta.total_hits,
-  ]);
+  // Facet headers use the current table result count (search + filters), not search-only totals.
+  const scopeTotal = recordsQuery.data?.meta.total_hits ?? null;
 
   useEffect(() => {
     if (numericViewId !== null && numericStateViewId === null && resolvedViewId !== null) {
+      if (!hasViewInUrl && isGlobalSearchActive) {
+        return;
+      }
       setCurrentView(resolvedViewId);
     }
-  }, [numericViewId, numericStateViewId, resolvedViewId, setCurrentView]);
+  }, [
+    hasViewInUrl,
+    isGlobalSearchActive,
+    numericViewId,
+    numericStateViewId,
+    resolvedViewId,
+    setCurrentView,
+  ]);
 
   useEffect(() => {
     setSelectedRowIndex(null);
   }, [selectedFilters, page, perPage, sort, numericViewId, activeSearchQuery]);
+
+  // Landing-page search arrives as `/data/?q=...` with no view. Pick a tab once
+  // from facet search counts; never re-run when the user searches from the sidebar.
+  useEffect(() => {
+    if (hasResolvedLandingViewRef.current) return;
+    if (hasViewInUrl) return;
+    if (!isGlobalSearchActive) return;
+    if (facetsQuery.isPlaceholderData || !facetsQuery.data) return;
+
+    hasResolvedLandingViewRef.current = true;
+    const nextView = pickSearchResultView(facetsQuery.data.data_type);
+    if (numericStateViewId !== nextView) {
+      setCurrentView(nextView);
+    }
+  }, [
+    facetsQuery.data,
+    facetsQuery.isPlaceholderData,
+    hasViewInUrl,
+    isGlobalSearchActive,
+    numericStateViewId,
+    setCurrentView,
+  ]);
+
+  // Genome browser on genotype + combined tabs only (not phenotype / experiments).
+  const genomeViewerEnabled =
+    genomeViewerFeatureEnabled && numericViewId !== null && numericViewId !== AMR_VIEW_ID_PHENOTYPE;
 
   useEffect(() => {
     if (selectedRowIndex === null) {
@@ -155,8 +187,9 @@ const HomePage = () => {
     };
   }, [selectedRowIndex, recordsQuery.data, numericViewId]);
 
-  const handleRowSelect = useCallback((rowIndex: number, _record: AMRRecord) => {
+  const handleRowSelect = useCallback((rowIndex: number, record: AMRRecord) => {
     setSelectedRowIndex(rowIndex);
+    void record; // record isn't needed here, but keep signature stable for DataPanel
     if (genomeViewerEnabled) {
       setIsGeneViewerCollapsed(false);
     }
@@ -165,22 +198,23 @@ const HomePage = () => {
   const loadJbrowseData =
     genomeViewerEnabled && !isGeneViewerCollapsed && hasSelectedTableRow && genomeRowContext !== null;
 
+  // Hide the top strip until the user opens the browser; same full-height layout as phenotypes.
+  const genomeViewerOpen = genomeViewerEnabled && !isGeneViewerCollapsed;
+
   const contentLayoutClass = useMemo(() => {
-    if (!genomeViewerEnabled) return styles.contentLayoutGeneViewerDisabled;
-    return isGeneViewerCollapsed
-      ? styles.contentLayoutGeneViewerCollapsed
-      : styles.contentLayoutGeneViewerExpanded;
-  }, [genomeViewerEnabled, isGeneViewerCollapsed]);
+    if (!genomeViewerOpen) return styles.contentLayoutGeneViewerDisabled;
+    return styles.contentLayoutGeneViewerExpanded;
+  }, [genomeViewerOpen]);
 
   return (
     <div className={styles.root}>
       {numericViewId !== null ? (
         <>
-          {genomeViewerEnabled ? (
+          {genomeViewerOpen ? (
             <Suspense fallback={null}>
               <GeneViewerPanel
-                isCollapsed={isGeneViewerCollapsed}
-                onToggleCollapsed={() => setIsGeneViewerCollapsed(prev => !prev)}
+                isCollapsed={false}
+                onToggleCollapsed={() => setIsGeneViewerCollapsed(true)}
                 rowContext={genomeRowContext}
                 hasSelectedTableRow={hasSelectedTableRow}
                 loadData={loadJbrowseData}

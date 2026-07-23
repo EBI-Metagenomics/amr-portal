@@ -1,29 +1,11 @@
 {
   "info": {
-    "_postman_id": "c809bc90-c847-49af-9943-782d250d0096",
+    "_postman_id": "78d62b3f-8872-4d95-a0b4-b748aadf5373",
     "name": "AMR Data Portal",
     "description": "AMR Data Portal API collection with response validation tests. Set the `amr_current` collection variable (e.g. `localhost:8000`).",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "_exporter_id": "19420352"
   },
-  "variable": [
-    {
-      "key": "amr_current",
-      "value": "localhost:8000",
-      "type": "string"
-    }
-  ],
-  "event": [
-    {
-      "listen": "prerequest",
-      "script": {
-        "type": "text/javascript",
-        "exec": [
-          "// Collection-wide pre-request hook (extend as needed)"
-        ]
-      }
-    }
-  ],
   "item": [
     {
       "name": "AMR APIs",
@@ -33,27 +15,6 @@
           "item": [
             {
               "name": "API Health",
-              "request": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "http://{{amr_current}}/api/health",
-                  "protocol": "http",
-                  "host": [
-                    "{{amr_current}}"
-                  ],
-                  "path": [
-                    "api",
-                    "health"
-                  ]
-                },
-                "description": "Lightweight health check \u2014 verifies the API process is serving requests."
-              },
               "event": [
                 {
                   "listen": "test",
@@ -76,10 +37,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "Data Release",
+              ],
               "request": {
                 "method": "GET",
                 "header": [
@@ -89,18 +47,22 @@
                   }
                 ],
                 "url": {
-                  "raw": "http://{{amr_current}}/api/release",
+                  "raw": "http://{{amr_current}}/api/health",
                   "protocol": "http",
                   "host": [
                     "{{amr_current}}"
                   ],
                   "path": [
                     "api",
-                    "release"
+                    "health"
                   ]
                 },
-                "description": "Returns the current AMR data release label shown in the UI and exports."
+                "description": "Lightweight health check — verifies the API process is serving requests."
               },
+              "response": []
+            },
+            {
+              "name": "Data Release",
               "event": [
                 {
                   "listen": "test",
@@ -122,15 +84,7 @@
                     ]
                   }
                 }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "filters-config",
-          "item": [
-            {
-              "name": "filters-config",
+              ],
               "request": {
                 "method": "GET",
                 "header": [
@@ -140,18 +94,27 @@
                   }
                 ],
                 "url": {
-                  "raw": "http://{{amr_current}}/api/filters-config",
+                  "raw": "http://{{amr_current}}/api/release",
                   "protocol": "http",
                   "host": [
                     "{{amr_current}}"
                   ],
                   "path": [
                     "api",
-                    "filters-config"
+                    "release"
                   ]
                 },
-                "description": "Filter categories, views, grouped categories, and embedded release metadata."
+                "description": "Returns the current AMR data release label shown in the UI and exports."
               },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "filters-config",
+          "item": [
+            {
+              "name": "filters-config",
               "event": [
                 {
                   "listen": "test",
@@ -184,7 +147,29 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "http://{{amr_current}}/api/filters-config",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "filters-config"
+                  ]
+                },
+                "description": "Filter categories, views, grouped categories, and embedded release metadata."
+              },
+              "response": []
             }
           ]
         },
@@ -193,40 +178,6 @@
           "item": [
             {
               "name": "amr-facets",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "http://{{amr_current}}/api/amr-facets",
-                  "protocol": "http",
-                  "host": [
-                    "{{amr_current}}"
-                  ],
-                  "path": [
-                    "api",
-                    "amr-facets"
-                  ]
-                },
-                "description": "Facet buckets for phenotype view with no active filters.",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
               "event": [
                 {
                   "listen": "test",
@@ -260,10 +211,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "amr-facets-search-string",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -276,6 +224,15 @@
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-facets",
                   "protocol": "http",
@@ -287,17 +244,12 @@
                     "amr-facets"
                   ]
                 },
-                "description": "Global search mode with search_count per data type.",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"search_query\": \"SAMEA\",\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "Facet buckets for phenotype view with no active filters."
               },
+              "response": []
+            },
+            {
+              "name": "amr-facets-search-string",
               "event": [
                 {
                   "listen": "test",
@@ -321,10 +273,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "amr-facets-with-selected-filters",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -337,6 +286,15 @@
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"search_query\": \"SAMEA\",\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-facets",
                   "protocol": "http",
@@ -348,17 +306,12 @@
                     "amr-facets"
                   ]
                 },
-                "description": "Selected filter reflected in facet option state.",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 1\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "Global search mode with search_count per data type."
               },
+              "response": []
+            },
+            {
+              "name": "amr-facets-with-selected-filters",
               "event": [
                 {
                   "listen": "test",
@@ -382,10 +335,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "amr-facets-genotype-view",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -398,6 +348,15 @@
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 1\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-facets",
                   "protocol": "http",
@@ -409,17 +368,12 @@
                     "amr-facets"
                   ]
                 },
-                "description": "Genotype view (view_id=2) facet response.",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 2\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "Selected filter reflected in facet option state."
               },
+              "response": []
+            },
+            {
+              "name": "amr-facets-genotype-view",
               "event": [
                 {
                   "listen": "test",
@@ -440,10 +394,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "amr-facets-search-performance",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -456,6 +407,15 @@
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 2\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-facets",
                   "protocol": "http",
@@ -467,17 +427,12 @@
                     "amr-facets"
                   ]
                 },
-                "description": "Heavier facet query with multiple genotype filters and search.",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"genotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        },\n        {\n            \"category\": \"genotype-antibiotic_name\",\n            \"value\": \"aminocoumarin antibiotic\"\n        },\n        {\n            \"category\": \"genotype-antibiotic_name\",\n            \"value\": \"ampicillin\"\n        }\n    ],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 2,\n    \"search_query\": \"samea\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "Genotype view (view_id=2) facet response."
               },
+              "response": []
+            },
+            {
+              "name": "amr-facets-search-performance",
               "event": [
                 {
                   "listen": "test",
@@ -499,10 +454,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "amr-facets-invalid-view",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -515,6 +467,15 @@
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"genotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        },\n        {\n            \"category\": \"genotype-antibiotic_name\",\n            \"value\": \"aminocoumarin antibiotic\"\n        },\n        {\n            \"category\": \"genotype-antibiotic_name\",\n            \"value\": \"ampicillin\"\n        }\n    ],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 2,\n    \"search_query\": \"samea\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-facets",
                   "protocol": "http",
@@ -526,7 +487,42 @@
                     "amr-facets"
                   ]
                 },
-                "description": "Invalid view_id should return 400.",
+                "description": "Heavier facet query with multiple genotype filters and search."
+              },
+              "response": []
+            },
+            {
+              "name": "amr-facets-invalid-view",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 400\", function () {",
+                      "    pm.response.to.have.status(400);",
+                      "});",
+                      "pm.test(\"Error detail mentions view ID\", function () {",
+                      "    pm.expect(pm.response.json().detail).to.include(\"Failed\");",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"view_id\": 999\n}",
@@ -535,24 +531,114 @@
                       "language": "json"
                     }
                   }
-                }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-facets",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-facets"
+                  ]
+                },
+                "description": "Invalid view_id should return 400."
               },
+              "response": []
+            },
+            {
+              "name": "amr-facets-multi-word-search",
               "event": [
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"Status code is 400\", function () {",
-                      "    pm.response.to.have.status(400);",
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
                       "});",
-                      "pm.test(\"Error detail mentions view ID\", function () {",
-                      "    pm.expect(pm.response.json().detail).to.include(\"999\");",
+                      "pm.test(\"Response time is under 30s\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
+                      "});",
+                      "pm.test(\"Search counts are populated\", function () {",
+                      "    const counts = pm.response.json().data_type.map(function (dt) {",
+                      "        return dt.search_count;",
+                      "    });",
+                      "    pm.expect(counts.some(function (c) { return c > 0; })).to.be.true;",
+                      "});",
+                      "",
+                      "pm.test(\"Facets still returned for active view\", function () {",
+                      "    pm.expect(pm.response.json().facets).to.be.an(\"array\").that.is.not.empty;",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/plain, */*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 2,\n    \"search_query\": \"aminocoumarin antibiotic\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-facets",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-facets"
+                  ]
+                }
+              },
+              "response": []
             }
           ]
         },
@@ -561,6 +647,51 @@
           "item": [
             {
               "name": "amr-records-phenotype-01",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test(\"Response time is under 30s\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
+                      "});",
+                      "pm.test(\"Response has meta and data\", function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.all.keys(\"meta\", \"data\");",
+                      "    pm.expect(json.data).to.be.an(\"array\");",
+                      "});",
+                      "pm.test(\"Meta pagination fields are valid\", function () {",
+                      "    const meta = pm.response.json().meta;",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    pm.expect(meta.page).to.eql(body.page || 1);",
+                      "    pm.expect(meta.per_page).to.eql(body.per_page || 100);",
+                      "    pm.expect(meta.total_hits).to.be.a(\"number\").and.at.least(0);",
+                      "    pm.expect(meta.columns).to.be.an(\"array\").that.is.not.empty;",
+                      "});",
+                      "pm.test(\"Column metadata shape\", function () {",
+                      "    pm.response.json().meta.columns.forEach(function (col) {",
+                      "        pm.expect(col).to.include.keys(\"id\", \"label\", \"sortable\", \"type\");",
+                      "    });",
+                      "});",
+                      "pm.test(\"Data rows do not exceed per_page\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    const perPage = body.per_page || 100;",
+                      "    pm.expect(pm.response.json().data.length).to.be.at.most(perPage);",
+                      "});",
+                      "pm.test(\"Filtered query returns hits when filters are set\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    if ((body.selected_filters || []).length > 0) {",
+                      "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
+                      "    }",
+                      "});"
+                    ]
+                  }
+                }
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -573,18 +704,6 @@
                     "value": "application/json"
                   }
                 ],
-                "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
-                  "host": [
-                    "{{amr_current}}"
-                  ],
-                  "path": [
-                    "api",
-                    "amr-records"
-                  ]
-                },
-                "description": "Phenotype records filtered by antibiotic, species, and genus.",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        },\n        {\n            \"category\": \"phenotype-species\",\n            \"value\": \"Acinetobacter baumannii\"\n        },\n        {\n            \"category\": \"phenotype-genus\",\n            \"value\": \"Acinetobacter\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100,\n    \"facet_operators\": {}\n}",
@@ -593,8 +712,24 @@
                       "language": "json"
                     }
                   }
-                }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-records",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records"
+                  ]
+                },
+                "description": "Phenotype records filtered by antibiotic, species, and genus."
               },
+              "response": []
+            },
+            {
+              "name": "AMR-Records",
               "event": [
                 {
                   "listen": "test",
@@ -639,10 +774,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "AMR-Records",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -655,18 +787,6 @@
                     "value": "application/json"
                   }
                 ],
-                "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
-                  "host": [
-                    "{{amr_current}}"
-                  ],
-                  "path": [
-                    "api",
-                    "amr-records"
-                  ]
-                },
-                "description": "Basic phenotype records query with a single antibiotic filter.",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100\n}",
@@ -675,68 +795,7 @@
                       "language": "json"
                     }
                   }
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.test(\"Status code is 200\", function () {",
-                      "    pm.response.to.have.status(200);",
-                      "});",
-                      "pm.test(\"Response time is under 30s\", function () {",
-                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
-                      "});",
-                      "pm.test(\"Response has meta and data\", function () {",
-                      "    const json = pm.response.json();",
-                      "    pm.expect(json).to.have.all.keys(\"meta\", \"data\");",
-                      "    pm.expect(json.data).to.be.an(\"array\");",
-                      "});",
-                      "pm.test(\"Meta pagination fields are valid\", function () {",
-                      "    const meta = pm.response.json().meta;",
-                      "    const body = JSON.parse(pm.request.body.raw);",
-                      "    pm.expect(meta.page).to.eql(body.page || 1);",
-                      "    pm.expect(meta.per_page).to.eql(body.per_page || 100);",
-                      "    pm.expect(meta.total_hits).to.be.a(\"number\").and.at.least(0);",
-                      "    pm.expect(meta.columns).to.be.an(\"array\").that.is.not.empty;",
-                      "});",
-                      "pm.test(\"Column metadata shape\", function () {",
-                      "    pm.response.json().meta.columns.forEach(function (col) {",
-                      "        pm.expect(col).to.include.keys(\"id\", \"label\", \"sortable\", \"type\");",
-                      "    });",
-                      "});",
-                      "pm.test(\"Data rows do not exceed per_page\", function () {",
-                      "    const body = JSON.parse(pm.request.body.raw);",
-                      "    const perPage = body.per_page || 100;",
-                      "    pm.expect(pm.response.json().data.length).to.be.at.most(perPage);",
-                      "});",
-                      "pm.test(\"Filtered query returns hits when filters are set\", function () {",
-                      "    const body = JSON.parse(pm.request.body.raw);",
-                      "    if ((body.selected_filters || []).length > 0) {",
-                      "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
-                      "    }",
-                      "});"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "AMR-Records-search-string",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-records",
                   "protocol": "http",
@@ -748,17 +807,12 @@
                     "amr-records"
                   ]
                 },
-                "description": "Global search for a BioSample accession prefix.",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"search_query\": \"SAMEA7526\",\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "Basic phenotype records query with a single antibiotic filter."
               },
+              "response": []
+            },
+            {
+              "name": "AMR-Records-search-string",
               "event": [
                 {
                   "listen": "test",
@@ -801,10 +855,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "amr-records-genotype-view",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -817,6 +868,15 @@
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"search_query\": \"SAMEA7526\",\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-records",
                   "protocol": "http",
@@ -828,7 +888,69 @@
                     "amr-records"
                   ]
                 },
-                "description": "Genotype view records with antibiotic filter.",
+                "description": "Global search for a BioSample accession prefix."
+              },
+              "response": []
+            },
+            {
+              "name": "amr-records-genotype-view",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test(\"Response time is under 30s\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
+                      "});",
+                      "pm.test(\"Response has meta and data\", function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.all.keys(\"meta\", \"data\");",
+                      "    pm.expect(json.data).to.be.an(\"array\");",
+                      "});",
+                      "pm.test(\"Meta pagination fields are valid\", function () {",
+                      "    const meta = pm.response.json().meta;",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    pm.expect(meta.page).to.eql(body.page || 1);",
+                      "    pm.expect(meta.per_page).to.eql(body.per_page || 100);",
+                      "    pm.expect(meta.total_hits).to.be.a(\"number\").and.at.least(0);",
+                      "    pm.expect(meta.columns).to.be.an(\"array\").that.is.not.empty;",
+                      "});",
+                      "pm.test(\"Column metadata shape\", function () {",
+                      "    pm.response.json().meta.columns.forEach(function (col) {",
+                      "        pm.expect(col).to.include.keys(\"id\", \"label\", \"sortable\", \"type\");",
+                      "    });",
+                      "});",
+                      "pm.test(\"Data rows do not exceed per_page\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    const perPage = body.per_page || 100;",
+                      "    pm.expect(pm.response.json().data.length).to.be.at.most(perPage);",
+                      "});",
+                      "pm.test(\"Filtered query returns hits when filters are set\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    if ((body.selected_filters || []).length > 0) {",
+                      "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
+                      "    }",
+                      "});"
+                    ]
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"genotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 2,\n    \"page\": 1,\n    \"per_page\": 50,\n    \"facet_operators\": {}\n}",
@@ -837,8 +959,24 @@
                       "language": "json"
                     }
                   }
-                }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-records",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records"
+                  ]
+                },
+                "description": "Genotype view records with antibiotic filter."
               },
+              "response": []
+            },
+            {
+              "name": "combined-records",
               "event": [
                 {
                   "listen": "test",
@@ -883,10 +1021,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "combined-records",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -899,18 +1034,6 @@
                     "value": "application/json"
                   }
                 ],
-                "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
-                  "host": [
-                    "{{amr_current}}"
-                  ],
-                  "path": [
-                    "api",
-                    "amr-records"
-                  ]
-                },
-                "description": "Combined phenotype/genotype view (view_id=3).",
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"pheno_geno_merged-antibiotic_name\",\n            \"value\": \"chloramphenicol\"\n        },\n        {\n            \"category\": \"pheno_geno_merged-antibiotic_name\",\n            \"value\": \"cefiderocol\"\n        },\n        {\n            \"category\": \"pheno_geno_merged-antibiotic_name\",\n            \"value\": \"ampicillin\"\n        }\n    ],\n    \"view_id\": 3,\n    \"page\": 1,\n    \"per_page\": 100,\n    \"facet_operators\": {}\n}",
@@ -919,68 +1042,7 @@
                       "language": "json"
                     }
                   }
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.test(\"Status code is 200\", function () {",
-                      "    pm.response.to.have.status(200);",
-                      "});",
-                      "pm.test(\"Response time is under 30s\", function () {",
-                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
-                      "});",
-                      "pm.test(\"Response has meta and data\", function () {",
-                      "    const json = pm.response.json();",
-                      "    pm.expect(json).to.have.all.keys(\"meta\", \"data\");",
-                      "    pm.expect(json.data).to.be.an(\"array\");",
-                      "});",
-                      "pm.test(\"Meta pagination fields are valid\", function () {",
-                      "    const meta = pm.response.json().meta;",
-                      "    const body = JSON.parse(pm.request.body.raw);",
-                      "    pm.expect(meta.page).to.eql(body.page || 1);",
-                      "    pm.expect(meta.per_page).to.eql(body.per_page || 100);",
-                      "    pm.expect(meta.total_hits).to.be.a(\"number\").and.at.least(0);",
-                      "    pm.expect(meta.columns).to.be.an(\"array\").that.is.not.empty;",
-                      "});",
-                      "pm.test(\"Column metadata shape\", function () {",
-                      "    pm.response.json().meta.columns.forEach(function (col) {",
-                      "        pm.expect(col).to.include.keys(\"id\", \"label\", \"sortable\", \"type\");",
-                      "    });",
-                      "});",
-                      "pm.test(\"Data rows do not exceed per_page\", function () {",
-                      "    const body = JSON.parse(pm.request.body.raw);",
-                      "    const perPage = body.per_page || 100;",
-                      "    pm.expect(pm.response.json().data.length).to.be.at.most(perPage);",
-                      "});",
-                      "pm.test(\"Filtered query returns hits when filters are set\", function () {",
-                      "    const body = JSON.parse(pm.request.body.raw);",
-                      "    if ((body.selected_filters || []).length > 0) {",
-                      "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
-                      "    }",
-                      "});"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "amr-records-with-sort",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-records",
                   "protocol": "http",
@@ -992,17 +1054,12 @@
                     "amr-records"
                   ]
                 },
-                "description": "Records sorted ascending by species column.",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 10,\n    \"order_by\": {\n        \"category\": \"phenotype-species\",\n        \"order\": \"ASC\"\n    }\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "Combined phenotype/genotype view (view_id=3)."
               },
+              "response": []
+            },
+            {
+              "name": "amr-records-with-sort",
               "event": [
                 {
                   "listen": "test",
@@ -1051,10 +1108,7 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "amr-records-missing-filters",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -1067,6 +1121,15 @@
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 10,\n    \"order_by\": {\n        \"category\": \"phenotype-species\",\n        \"order\": \"ASC\"\n    }\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-records",
                   "protocol": "http",
@@ -1078,7 +1141,40 @@
                     "amr-records"
                   ]
                 },
-                "description": "Browse mode without filters or search should return 400.",
+                "description": "Records sorted ascending by species column."
+              },
+              "response": []
+            },
+            {
+              "name": "amr-records-missing-filters",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
                   "raw": "{\n    \"selected_filters\": [],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 10\n}",
@@ -1087,39 +1183,7 @@
                       "language": "json"
                     }
                   }
-                }
-              },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.test(\"Status code is 400\", function () {",
-                      "    pm.response.to.have.status(400);",
-                      "});",
-                      "pm.test(\"Error explains filter or search requirement\", function () {",
-                      "    pm.expect(pm.response.json().detail).to.include(\"search_query\");",
-                      "});"
-                    ]
-                  }
-                }
-              ]
-            },
-            {
-              "name": "amr-records-short-search",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "application/json"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
+                },
                 "url": {
                   "raw": "http://{{amr_current}}/api/amr-records",
                   "protocol": "http",
@@ -1131,33 +1195,175 @@
                     "amr-records"
                   ]
                 },
-                "description": "Search shorter than minimum prefix length should return 400.",
+                "description": "Browse mode without filters or search should return 400."
+              },
+              "response": []
+            },
+            {
+              "name": "amr-records-short-search",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n    \"search_query\": \"ab\",\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 10\n}",
+                  "raw": "{\n    \"search_query\": \"\",\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 10\n}",
                   "options": {
                     "raw": {
                       "language": "json"
                     }
                   }
-                }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-records",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records"
+                  ]
+                },
+                "description": "Search shorter than minimum prefix length should return 400."
               },
+              "response": []
+            },
+            {
+              "name": "amr-records-multi-word-search",
               "event": [
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"Status code is 400\", function () {",
-                      "    pm.response.to.have.status(400);",
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
                       "});",
-                      "pm.test(\"Error mentions minimum search length\", function () {",
-                      "    pm.expect(pm.response.json().detail).to.match(/minimum 3 characters/i);",
+                      "pm.test(\"Response time is under 30s\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
+                      "});",
+                      "pm.test(\"Response has meta and data\", function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.all.keys(\"meta\", \"data\");",
+                      "    pm.expect(json.data).to.be.an(\"array\");",
+                      "});",
+                      "pm.test(\"Meta pagination fields are valid\", function () {",
+                      "    const meta = pm.response.json().meta;",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    pm.expect(meta.page).to.eql(body.page || 1);",
+                      "    pm.expect(meta.per_page).to.eql(body.per_page || 100);",
+                      "    pm.expect(meta.total_hits).to.be.a(\"number\").and.at.least(1);",
+                      "    pm.expect(meta.columns).to.be.an(\"array\").that.is.not.empty;",
+                      "});",
+                      "pm.test(\"Column metadata shape\", function () {",
+                      "    pm.response.json().meta.columns.forEach(function (col) {",
+                      "        pm.expect(col).to.include.keys(\"id\", \"label\", \"sortable\", \"type\");",
+                      "    });",
+                      "});",
+                      "pm.test(\"Data rows do not exceed per_page\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    const perPage = body.per_page || 100;",
+                      "    pm.expect(pm.response.json().data.length).to.be.at.most(perPage);",
+                      "});",
+                      "pm.test(\"Filtered query returns hits when filters are set\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    if ((body.selected_filters || []).length > 0) {",
+                      "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
+                      "    }",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/plain, */*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [],\n    \"view_id\": 2,\n    \"page\": 1,\n    \"per_page\": 100,\n    \"facet_operators\": {},\n    \"search_query\": \"aminocoumarin antibiotic\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-records",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records"
+                  ]
+                }
+              },
+              "response": []
             }
           ]
         },
@@ -1166,51 +1372,6 @@
           "item": [
             {
               "name": "download-csv-page",
-              "request": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Accept",
-                    "value": "text/csv"
-                  },
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json"
-                  }
-                ],
-                "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download",
-                  "protocol": "http",
-                  "host": [
-                    "{{amr_current}}"
-                  ],
-                  "path": [
-                    "api",
-                    "amr-records",
-                    "download"
-                  ],
-                  "query": [
-                    {
-                      "key": "scope",
-                      "value": "page"
-                    },
-                    {
-                      "key": "file_format",
-                      "value": "csv"
-                    }
-                  ]
-                },
-                "description": "POST /amr-records/download \u2014 download-csv-page",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 5\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
-              },
               "event": [
                 {
                   "listen": "test",
@@ -1240,24 +1401,30 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "download-json-page",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
                   {
                     "key": "Accept",
-                    "value": "application/json"
+                    "value": "text/csv"
                   },
                   {
                     "key": "Content-Type",
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download",
+                  "raw": "http://{{amr_current}}/api/amr-records/download?scope=page&file_format=csv",
                   "protocol": "http",
                   "host": [
                     "{{amr_current}}"
@@ -1274,21 +1441,16 @@
                     },
                     {
                       "key": "file_format",
-                      "value": "json"
+                      "value": "csv"
                     }
                   ]
                 },
-                "description": "POST /amr-records/download \u2014 download-json-page",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 3\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "POST /amr-records/download — download-csv-page"
               },
+              "response": []
+            },
+            {
+              "name": "download-json-page",
               "event": [
                 {
                   "listen": "test",
@@ -1318,24 +1480,30 @@
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "download-csv-all",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
                   {
                     "key": "Accept",
-                    "value": "text/csv"
+                    "value": "application/json"
                   },
                   {
                     "key": "Content-Type",
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 3\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download",
+                  "raw": "http://{{amr_current}}/api/amr-records/download?scope=page&file_format=json",
                   "protocol": "http",
                   "host": [
                     "{{amr_current}}"
@@ -1348,25 +1516,20 @@
                   "query": [
                     {
                       "key": "scope",
-                      "value": "all"
+                      "value": "page"
                     },
                     {
                       "key": "file_format",
-                      "value": "csv"
+                      "value": "json"
                     }
                   ]
                 },
-                "description": "POST /amr-records/download \u2014 download-csv-all",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        },\n        {\n            \"category\": \"phenotype-species\",\n            \"value\": \"Acinetobacter baumannii\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "POST /amr-records/download — download-json-page"
               },
+              "response": []
+            },
+            {
+              "name": "download-csv-all",
               "event": [
                 {
                   "listen": "test",
@@ -1396,10 +1559,86 @@
                     ]
                   }
                 }
-              ]
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "text/csv"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"amikacin\"\n        },\n        {\n            \"category\": \"phenotype-species\",\n            \"value\": \"Acinetobacter baumannii\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 100\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://{{amr_current}}/api/amr-records/download?scope=all&file_format=csv",
+                  "protocol": "http",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records",
+                    "download"
+                  ],
+                  "query": [
+                    {
+                      "key": "scope",
+                      "value": "all"
+                    },
+                    {
+                      "key": "file_format",
+                      "value": "csv"
+                    }
+                  ]
+                },
+                "description": "POST /amr-records/download — download-csv-all"
+              },
+              "response": []
             },
             {
               "name": "download-csv-get",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "type": "text/javascript",
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test(\"Response time is under 30s\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
+                      "});",
+                      "pm.test(\"CSV content type and attachment header\", function () {",
+                      "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/csv\");",
+                      "    pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"attachment\");",
+                      "    pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"amr_records.csv\");",
+                      "});",
+                      "pm.test(\"CSV has header row\", function () {",
+                      "    const lines = pm.response.text().trim().split(\"\\n\");",
+                      "    pm.expect(lines.length).to.be.above(0);",
+                      "    pm.expect(lines[0]).to.include(\"phenotype-antibiotic_name\");",
+                      "});",
+                      "pm.test(\"CSV row count matches page scope (header + 5 rows)\", function () {",
+                      "    const lines = pm.response.text().trim().split(\"\\n\");",
+                      "    pm.expect(lines.length).to.eql(6);",
+                      "});"
+                    ]
+                  }
+                }
+              ],
               "request": {
                 "method": "GET",
                 "header": [
@@ -1437,39 +1676,26 @@
                 },
                 "description": "GET variant of download using Base64-encoded payload query parameter."
               },
+              "response": []
+            },
+            {
+              "name": "download-no-results",
               "event": [
                 {
                   "listen": "test",
                   "script": {
                     "type": "text/javascript",
                     "exec": [
-                      "pm.test(\"Status code is 200\", function () {",
-                      "    pm.response.to.have.status(200);",
+                      "pm.test(\"Status code is 404\", function () {",
+                      "    pm.response.to.have.status(404);",
                       "});",
-                      "pm.test(\"Response time is under 30s\", function () {",
-                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
-                      "});",
-                      "pm.test(\"CSV content type and attachment header\", function () {",
-                      "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"text/csv\");",
-                      "    pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"attachment\");",
-                      "    pm.expect(pm.response.headers.get(\"Content-Disposition\")).to.include(\"amr_records.csv\");",
-                      "});",
-                      "pm.test(\"CSV has header row\", function () {",
-                      "    const lines = pm.response.text().trim().split(\"\\n\");",
-                      "    pm.expect(lines.length).to.be.above(0);",
-                      "    pm.expect(lines[0]).to.include(\"phenotype-antibiotic_name\");",
-                      "});",
-                      "pm.test(\"CSV row count matches page scope (header + 5 rows)\", function () {",
-                      "    const lines = pm.response.text().trim().split(\"\\n\");",
-                      "    pm.expect(lines.length).to.eql(6);",
+                      "pm.test(\"No data error message\", function () {",
+                      "    pm.expect(pm.response.json().detail).to.eql(\"No data found for the given filters\");",
                       "});"
                     ]
                   }
                 }
-              ]
-            },
-            {
-              "name": "download-no-results",
+              ],
               "request": {
                 "method": "POST",
                 "header": [
@@ -1482,8 +1708,17 @@
                     "value": "application/json"
                   }
                 ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"__nonexistent_antibiotic_xyz__\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 5\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download",
+                  "raw": "http://{{amr_current}}/api/amr-records/download?scope=page&file_format=csv",
                   "protocol": "http",
                   "host": [
                     "{{amr_current}}"
@@ -1504,37 +1739,30 @@
                     }
                   ]
                 },
-                "description": "POST /amr-records/download \u2014 download-no-results",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n    \"selected_filters\": [\n        {\n            \"category\": \"phenotype-antibiotic_name\",\n            \"value\": \"__nonexistent_antibiotic_xyz__\"\n        }\n    ],\n    \"view_id\": 1,\n    \"page\": 1,\n    \"per_page\": 5\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "POST /amr-records/download — download-no-results"
               },
-              "event": [
-                {
-                  "listen": "test",
-                  "script": {
-                    "type": "text/javascript",
-                    "exec": [
-                      "pm.test(\"Status code is 404\", function () {",
-                      "    pm.response.to.have.status(404);",
-                      "});",
-                      "pm.test(\"No data error message\", function () {",
-                      "    pm.expect(pm.response.json().detail).to.eql(\"No data found for the given filters\");",
-                      "});"
-                    ]
-                  }
-                }
-              ]
+              "response": []
             }
           ]
         }
       ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "// Collection-wide pre-request hook (extend as needed)"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "amr_current",
+      "value": "localhost:8000"
     }
   ]
 }

@@ -8,6 +8,10 @@ export type FacetHeaderSummary = {
 
 const formatCount = (value: number) => value.toLocaleString();
 
+/**
+ * Search-only hit count for the active result type (ignores facet filters).
+ * Used for result-type badges, not facet headers.
+ */
 export const getActiveScopeTotal = (
   dataTypes: FacetDataTypeSummary[],
   currentViewId: string | number,
@@ -30,23 +34,25 @@ const sumSelectedOptionCounts = (facet: FacetItem): number => {
 };
 
 /**
- * Build facet header labels that separate:
- * - how many facet values are selected (filter badge), vs
- * - how many records match in the current scope (match summary).
+ * Facet header labels use the **current result set** size (`resultTotal`, typically
+ * records `meta.total_hits` after search + filters), not search-only `search_count`.
+ *
+ * - No values selected in this facet: `All · N` (N = rows currently in the table).
+ * - Values selected: `N results`, or `N of M` when the selected-option sum differs from N.
  */
 export const buildFacetHeaderSummary = (
   facet: FacetItem,
-  scopeTotal: number | null
+  resultTotal: number | null
 ): FacetHeaderSummary => {
   const selectedCount = facet.selected_count;
 
   if (selectedCount === 0) {
-    if (scopeTotal != null && scopeTotal > 0) {
-      const matchText = `All · ${formatCount(scopeTotal)}`;
+    if (resultTotal != null && resultTotal > 0) {
+      const matchText = `All · ${formatCount(resultTotal)}`;
       return {
         filterSelectionCount: 0,
         matchText,
-        ariaLabel: `No ${facet.label.toLowerCase()} filters selected. ${matchText} records in scope.`,
+        ariaLabel: `No ${facet.label.toLowerCase()} filters selected. All ${formatCount(resultTotal)} current results included.`,
       };
     }
 
@@ -68,15 +74,20 @@ export const buildFacetHeaderSummary = (
   }
 
   const filteredCount = sumSelectedOptionCounts(facet);
+  const selectionLabel = `${selectedCount} ${facet.label.toLowerCase()} filter${
+    selectedCount === 1 ? '' : 's'
+  } selected`;
 
-  if (scopeTotal != null && filteredCount > 0) {
-    const matchText = `${formatCount(filteredCount)} of ${formatCount(scopeTotal)}`;
+  if (resultTotal != null && resultTotal > 0) {
+    // Prefer the live table total; only show "N of M" when option sums disagree (e.g. multi-select).
+    const matchText =
+      filteredCount > 0 && filteredCount !== resultTotal
+        ? `${formatCount(filteredCount)} of ${formatCount(resultTotal)}`
+        : `${formatCount(resultTotal)} results`;
     return {
       filterSelectionCount: selectedCount,
       matchText,
-      ariaLabel: `${selectedCount} ${facet.label.toLowerCase()} filter${
-        selectedCount === 1 ? '' : 's'
-      } selected. ${matchText} records.`,
+      ariaLabel: `${selectionLabel}. ${matchText}.`,
     };
   }
 
@@ -85,17 +96,13 @@ export const buildFacetHeaderSummary = (
     return {
       filterSelectionCount: selectedCount,
       matchText,
-      ariaLabel: `${selectedCount} ${facet.label.toLowerCase()} filter${
-        selectedCount === 1 ? '' : 's'
-      } selected. ${matchText}.`,
+      ariaLabel: `${selectionLabel}. ${matchText}.`,
     };
   }
 
   return {
     filterSelectionCount: selectedCount,
     matchText: '',
-    ariaLabel: `${selectedCount} ${facet.label.toLowerCase()} filter${
-      selectedCount === 1 ? '' : 's'
-    } selected`,
+    ariaLabel: selectionLabel,
   };
 };

@@ -46,7 +46,7 @@ export default defineConfig(({ mode }) => {
       target: 'es2020',
     },
     resolve: {
-      dedupe: ['react', 'react-dom'],
+      dedupe: ['react', 'react-dom', 'generic-filehandle2'],
       alias: {
         '@': src(''),
         '@components': src('components'),

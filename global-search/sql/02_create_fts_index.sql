@@ -12,9 +12,22 @@
 -- Tokenisation settings
 --   stemmer   = 'none'  : preserve gene symbols and accession tokens (e.g. tetA)
 --   stopwords = 'none'  : do not drop short tokens that may be accessions
---   ignore    = '[^a-zA-Z0-9_\\-\\.\\(\\)]+' : keep alphanumerics, underscore, hyphen, dot, brackets
 --   lower     = 1       : case-insensitive search
 --   overwrite = 1       : replace existing index on re-run
+--
+--   ignore = '[^a-zA-Z0-9_.()]+'
+--     Characters matching this regex are separators (not kept in tokens).
+--     Kept in tokens: letters, digits, underscore, dot, parentheses.
+--     Split on purpose: spaces, hyphens, and other punctuation.
+--
+--     Why split on hyphen:
+--       Antibiotic / compound names such as "beta-lactam antibiotic" and
+--       "trimethoprim-sulfamethoxazole" are searchable as AND of parts, whether
+--       the user types a hyphen or a space. The API query path must use the
+--       same tokenizer: fts_main_global_search.tokenize(query).
+--
+--     Why keep dot / underscore / parentheses:
+--       Accessions (GCA_000013465.1) and symbols like mph(A) stay single tokens.
 --
 -- Idempotency
 --   Safe to re-run with overwrite = 1.
@@ -40,7 +53,7 @@ PRAGMA create_fts_index(
     'species',
     stemmer = 'none',
     stopwords = 'none',
-    ignore = '[^a-zA-Z0-9_\\-\\.\\(\\)]+',
+    ignore = '[^a-zA-Z0-9_.()]+',
     lower = 1,
     overwrite = 1
 );

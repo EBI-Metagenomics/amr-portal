@@ -10,17 +10,34 @@ search_query AS (
 )
 """.strip()
 
+# Tokenize with the same FTS tokenizer used to build the index.
+# Policy (see global-search/sql/02_create_fts_index.sql): hyphen is a separator;
+# dots / underscores / parentheses stay in tokens. Prefix-match each token and
+# AND docs that hit every token.
+# Examples: "Staphylococcus aureus", "beta-lactam antibiotic".
 _QTERMIDS_AND_MATCHING_DOCIDS_CTE = f"""
+search_tokens AS (
+    SELECT DISTINCT token
+    FROM (
+        SELECT unnest(fts_main_global_search.tokenize(q.prefix)) AS token
+        FROM search_query AS q
+    )
+    WHERE token IS NOT NULL
+      AND token != ''
+      AND length(token) >= {_MIN_LEN}
+),
 qtermids AS (
-    SELECT dict.termid
-    FROM fts_main_global_search.dict AS dict, search_query AS q
-    WHERE length(q.prefix) >= {_MIN_LEN}
-      AND dict.term LIKE q.prefix || '%'
+    SELECT dict.termid, tokens.token
+    FROM fts_main_global_search.dict AS dict
+    CROSS JOIN search_tokens AS tokens
+    WHERE dict.term LIKE tokens.token || '%'
 ),
 matching_docids AS (
-    SELECT DISTINCT terms.docid
+    SELECT terms.docid
     FROM fts_main_global_search.terms AS terms
-    WHERE terms.termid IN (SELECT termid FROM qtermids)
+    INNER JOIN qtermids ON terms.termid = qtermids.termid
+    GROUP BY terms.docid
+    HAVING COUNT(DISTINCT qtermids.token) = (SELECT COUNT(*) FROM search_tokens)
 )
 """.strip()
 

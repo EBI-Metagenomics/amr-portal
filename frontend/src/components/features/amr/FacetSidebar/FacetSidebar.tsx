@@ -3,7 +3,7 @@ import type { AMRFacetsResponse, FacetOperator, SelectedFilter } from '@interfac
 import { GLOBAL_SEARCH_MIN_LENGTH } from '@/config/globalSearch';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import { buildFacetMetaMap, formatFacetFilterTagLabel } from './activeFilterLabels';
-import { buildFacetHeaderSummary, getActiveScopeTotal } from './facetHeaderSummary';
+import { buildFacetHeaderSummary } from './facetHeaderSummary';
 import FilterIcon from './FilterIcon';
 import SearchIcon from './SearchIcon';
 import styles from './FacetSidebar.module.css';
@@ -29,6 +29,7 @@ type Props = {
   hasFacetExpansionState: boolean;
   facetOperators: Record<string, FacetOperator>;
   onFacetOperatorChange: (facetId: string, operator: FacetOperator) => void;
+  /** Current result-set size for facet headers (search + filters). */
   scopeTotal?: number | null;
 };
 
@@ -66,12 +67,7 @@ const FacetSidebar = ({
   const showSearchMinLengthHint =
     trimmedSearchLength > 0 && trimmedSearchLength < GLOBAL_SEARCH_MIN_LENGTH;
   const facetMeta = useMemo(() => buildFacetMetaMap(facets), [facets]);
-  const scopeTotal = useMemo(() => {
-    if (scopeTotalProp != null) {
-      return scopeTotalProp;
-    }
-    return getActiveScopeTotal(dataTypes, currentViewId, isGlobalSearchActive);
-  }, [scopeTotalProp, dataTypes, currentViewId, isGlobalSearchActive]);
+  const scopeTotal = scopeTotalProp ?? null;
   const activeFilterCount =
     (isGlobalSearchActive ? 1 : 0) + selectedFilters.length;
   const showActiveFilters = activeFilterCount > 0;
@@ -95,7 +91,16 @@ const FacetSidebar = ({
               type="search"
               value={searchQuery}
               placeholder="Search sample accessions, genome accessions, or genes..."
-              onChange={event => onSearchQueryChange(event.target.value)}
+              onChange={event => {
+                const value = event.target.value;
+                // Native search clear (✕) sets value to ""; also clear the committed
+                // active-filter chip, not only the draft input text.
+                if (value === '' && isGlobalSearchActive) {
+                  onClearSearch();
+                  return;
+                }
+                onSearchQueryChange(value);
+              }}
               onKeyDown={event => {
                 if (event.key === 'Enter') {
                   event.preventDefault();
