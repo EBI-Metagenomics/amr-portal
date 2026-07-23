@@ -3,6 +3,7 @@
  * Uses `makeWorkerInstance` from `@jbrowse/react-app2` (Vite stubs it in dev when needed).
  */
 
+import '@/jbrowse/patchRemoteFileStat';
 import { useEffect, useState } from 'react';
 import { createViewState } from '@jbrowse/react-app2';
 import makeWorkerInstance from '@jbrowse/react-app2/esm/makeWorkerInstance';
