@@ -37,7 +37,7 @@
   );
 }
 
-/* Genome viewer strip not mounted (feature flag off): fill main area without top strip or extra gap. */
+/* Genome viewer not shown (feature off, phenotype tab, or not yet opened): fill main area. */
 .contentLayoutGeneViewerDisabled {
   height: calc(
     100dvh - var(--amr-header-height) - var(--amr-subheader-height) - var(--amr-main-vertical-padding)

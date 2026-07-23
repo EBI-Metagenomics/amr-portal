@@ -1,6 +1,7 @@
 import type { AMRColumnMeta, AMRRecord, AMRRecordValue } from '@interfaces/amrRecord';
 
-/** API view id: genotype (per README / filters). */
+/** API view ids (experiments / predictions / combined). */
+export const AMR_VIEW_ID_PHENOTYPE = 1;
 export const AMR_VIEW_ID_GENOTYPE = 2;
 
 export type GenomeViewerViewMode = 'genotype' | 'phenotype';
@@ -111,6 +112,9 @@ export function buildGenomeViewerRowContext(
   columns: AMRColumnMeta[],
   currentViewId: number
 ): GenomeViewerRowContext | null {
+  // Phenotype (experiments) tab: no genome browser — genotype + combined only.
+  if (currentViewId === AMR_VIEW_ID_PHENOTYPE) return null;
+
   const assemblyId = asTrimmedString(getMappedValue(record, columns, ASSEMBLY_KEYS));
   if (!assemblyId) return null;
 

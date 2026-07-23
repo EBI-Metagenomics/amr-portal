@@ -9,14 +9,17 @@ const GeneViewerPanel = lazy(
   () => import('@components/features/amr/GeneViewerPanel/GeneViewerPanel')
 );
 import { useAmrPortalState } from '@/hooks/useAmrPortalState';
-import { buildGenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
+import {
+  AMR_VIEW_ID_PHENOTYPE,
+  buildGenomeViewerRowContext,
+} from '@utils/genomeViewer/recordContext';
 import { pickSearchResultView } from '@utils/search/pickSearchResultView';
 import { isGenomeViewerEnabled } from '@/config/appEnv';
 import type { AMRRecord } from '@interfaces/amrRecord';
 import styles from './HomePage.module.css';
 
 const HomePage = () => {
-  const genomeViewerEnabled = useMemo(() => isGenomeViewerEnabled(), []);
+  const genomeViewerFeatureEnabled = useMemo(() => isGenomeViewerEnabled(), []);
   const [isGeneViewerCollapsed, setIsGeneViewerCollapsed] = useState(true);
   const [selectedRowIndex, setSelectedRowIndex] = useState<number | null>(null);
   const state = useAmrPortalState();
@@ -170,6 +173,10 @@ const HomePage = () => {
     setCurrentView,
   ]);
 
+  // Genome browser on genotype + combined tabs only (not phenotype / experiments).
+  const genomeViewerEnabled =
+    genomeViewerFeatureEnabled && numericViewId !== null && numericViewId !== AMR_VIEW_ID_PHENOTYPE;
+
   useEffect(() => {
     if (selectedRowIndex === null) {
       setIsGeneViewerCollapsed(true);
@@ -201,22 +208,23 @@ const HomePage = () => {
   const loadJbrowseData =
     genomeViewerEnabled && !isGeneViewerCollapsed && hasSelectedTableRow && genomeRowContext !== null;
 
+  // Hide the top strip until the user opens the browser; same full-height layout as phenotypes.
+  const genomeViewerOpen = genomeViewerEnabled && !isGeneViewerCollapsed;
+
   const contentLayoutClass = useMemo(() => {
-    if (!genomeViewerEnabled) return styles.contentLayoutGeneViewerDisabled;
-    return isGeneViewerCollapsed
-      ? styles.contentLayoutGeneViewerCollapsed
-      : styles.contentLayoutGeneViewerExpanded;
-  }, [genomeViewerEnabled, isGeneViewerCollapsed]);
+    if (!genomeViewerOpen) return styles.contentLayoutGeneViewerDisabled;
+    return styles.contentLayoutGeneViewerExpanded;
+  }, [genomeViewerOpen]);
 
   return (
     <div className={styles.root}>
       {numericViewId !== null ? (
         <>
-          {genomeViewerEnabled ? (
+          {genomeViewerOpen ? (
             <Suspense fallback={null}>
               <GeneViewerPanel
-                isCollapsed={isGeneViewerCollapsed}
-                onToggleCollapsed={() => setIsGeneViewerCollapsed(prev => !prev)}
+                isCollapsed={false}
+                onToggleCollapsed={() => setIsGeneViewerCollapsed(true)}
                 rowContext={genomeRowContext}
                 hasSelectedTableRow={hasSelectedTableRow}
                 loadData={loadJbrowseData}
