@@ -2,7 +2,6 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } fro
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
 import { amrService } from '@services/amr/amrService';
 import FacetSidebar from '@components/features/amr/FacetSidebar/FacetSidebar';
-import { getActiveScopeTotal } from '@components/features/amr/FacetSidebar/facetHeaderSummary';
 import DataPanel from '@components/features/amr/DataPanel/DataPanel';
 
 const GeneViewerPanel = lazy(
@@ -119,17 +118,8 @@ const HomePage = () => {
     placeholderData: keepPreviousData,
   });
 
-  const scopeTotal = useMemo(() => {
-    if (isGlobalSearchActive) {
-      return getActiveScopeTotal(facetsQuery.data?.data_type ?? [], numericViewId ?? 1, true);
-    }
-    return recordsQuery.data?.meta.total_hits ?? null;
-  }, [
-    isGlobalSearchActive,
-    facetsQuery.data?.data_type,
-    numericViewId,
-    recordsQuery.data?.meta.total_hits,
-  ]);
+  // Facet headers use the current table result count (search + filters), not search-only totals.
+  const scopeTotal = recordsQuery.data?.meta.total_hits ?? null;
 
   useEffect(() => {
     if (numericViewId !== null && numericStateViewId === null && resolvedViewId !== null) {
