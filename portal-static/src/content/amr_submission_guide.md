@@ -23,7 +23,7 @@ This has been converted to a JSON template for easy BioSamples submission (see �
 
 ## How to submit AMR data to BioSamples
 
-AMR data is classed as ‘structured data’ in BioSamples, which is added to an existing BioSample record. Thus the first step in AMR data submission is to create the BioSample record itself, containing information about the sequenced microbe.
+AMR data is classed as ‘structured data’ in BioSamples, which is added to an existing BioSample record. Thus, the first step in AMR data submission is to create the BioSample record itself, containing information about the sequenced microbe.
 
 ### 1. Creating a BioSample
 
@@ -53,7 +53,7 @@ Your JSON BioSample object should contain, as a minimum, the 13 mandatory sample
 
 For any of the ENA checklist (ERC000029) fields above, if a value cannot be provided you can select an appropriate term from the [INSDC Missing Value Reporting Terms](https://ena-docs.readthedocs.io/en/latest/submit/samples/missing-values.htm).
 
-For additional fields to include in your BioSample, please consult the BioSamples documentation[^8] and the ENA’s ERC000029 checklist6. It is also possible to add user-defined fields to your BioSample.
+For additional fields to include in your BioSample, please consult the [BioSamples documentation](https://read-docs-biosamples.readthedocs.io/en/latest/) and the ENA’s [ERC000029 checklist](https://www.ebi.ac.uk/ena/browser/view/ERC000029). It is also possible to add user-defined fields to your BioSample.
 
 An example JSON file containing the fields in Table 1 is below:
 
@@ -208,7 +208,23 @@ Details on how to create a BioSample record interactively can be found in the Bi
 
 It is only possible to submit AMR data to BioSamples programmatically, and only if a BioSample record already exists. This is because an AMR structured data submission is treated as a sample update.
 
-An example JSON file containing all AMR fields in Figure 1, is shown below.
+| Field                        | Description                                                                                                                                                                                                                        |
+|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **BioSample_ID**             | SAM accession attributed to a submitted sample, e.g. SAMEA3113869                                                                                                                                                                  |
+| **Species**                  | Species name                                                                                                                                                                                                                       |
+| **Antibiotic_name**          | Antibiotic name                                                                                                                                                                                                                    |
+| **AST_standard**             | Accepted Antimicrobial Susceptibility Testing (AST) standards are: CLSI, EUCAST, CA-SFM, BSAC, DIN, SIR and WRG                                                                                                                    |
+| **Breakpoint_version**       | Version of AST standard protocol used for the isolates (Free-text)                                                                                                                                                                 |
+| **Laboratory_typing_method** | Antibiotic susceptibility method used for the isolates. Choose from the following methods:<br>- Dilution methods: Broth dilution, Microbroth dilution, Agar dilution<br> - Diffusion methods: Disc-diffusion, Neo-sensitabs, Etest |
+| **Measurement**              | Can be a fixed number of a range. Ranges for dilution: 0.01 to 2048; ranges for diffusion: 6 to 29                                                                                                                                 |
+| **Measurement_units**        | For dilution methods: mg/L; for diffusion methods: mm                                                                                                                                                                              |
+| **Measurement_sign**         | \>, <, =                                                                                                                                                                                                                           |
+| **Resistance_phenotype**     | Intermediate, susceptible (or sensitive), resistant, non-susceptible, not defined                                                                                                                                                  |
+| **Platform**                 | Free text                                                                                                                                                                                                                          |
+
+***Table 2:** Descriptions of mandatory AMR fields for submission into BioSamples*
+
+An example JSON file containing all AMR fields in Figure 1 and Table 2, is shown below.
 
 ```json
 {  
