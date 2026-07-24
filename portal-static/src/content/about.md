@@ -9,13 +9,13 @@ The AMR (antimicrobial resistance) Portal is a collaboration between EMBL-EBI re
 
 ## CABBAGE
 
-The Comprehensive Assessment of Bacterial-Based Antimicrobial resistance prediction from GEnotypes (CABBAGE) project aims to provide a unified AMR phenotype–genotype database for the WHO Bacterial Priority Pathogens (currently following the 2017 WHO list). The database integrates genotype–phenotype information extracted from public resources (PATRIC, NCBI antibiograms, NARMS, NDARO, CDC, COMPARE, PathogenWatch, Microreact, and PubMLST) as well as large datasets obtained from the literature. Isolate metadata such as collection year and country were also retrieved from the BioSample database when missing from the original sources.
+The Comprehensive Assessment of Bacterial-Based Antimicrobial resistance prediction from GEnotypes (CABBAGE) project aims to provide a unified AMR phenotype–genotype database for the WHO Bacterial Priority Pathogens (currently following the 2017 WHO list). The database integrates genotype–phenotype information extracted from public resources (PATRIC, NCBI antibiograms, NARMS, NDARO, CDC, COMPARE, PathogenWatch, Microreact, and PubMLST) as well as large datasets obtained from the literature. Isolate metadata such as collection year and country were retrieved from the BioSample database when missing from the original sources.
 
 Each entry in the database is defined by an isolate BioSample ID and an antibiotic name, and includes either a measurement value (MIC or disk diffusion zone diameter), an SIR phenotype, or both. Additional SIR phenotype inferences were performed using the latest CLSI and EUCAST breakpoint values through the [AMR R package (v3.0.0)](https://amr-for-r.org/).
 
 To ensure comparability across sources, several data standardisation steps were applied. For example, antibiotic abbreviations were converted to full names using a single naming scheme. Further curation steps improved data quality, such as removing erroneous measurements and correcting AST method labels. A de-duplication process was finally implemented to merge duplicate entries and remove unresolved phenotype conflicts originating from different sources.
 
-Please note that not all entries have been manually curated, only those that were clearly inconsistent or conflicted. CABBAGE will continue to be refined as new data are added. The current version of the database contains 1.7M entries, representing 171k isolates.
+Please note that only entries that were clearly inconsistent or conflicted have been manually curated. CABBAGE will continue to be refined as new data are added. The current version of the database contains 1.7M entries, representing 171k isolates.
 
 More information on CABBAGE can be found in the preprint [Dickens E _et al._ 2025](https://doi.org/10.1101/2025.11.12.688105).
 
@@ -29,7 +29,7 @@ CABBAGE has catalogued an immense collection of antibiograms in a standardised f
 
 ## AMR Genotypes
 
-AMR Genotypes is a resource recording the detection and annotation of resistance-associated genes and mutations. All annotated genomes have been processed using the mettannotator workflow from EMBL-EBI's MGnify team and generates an exhaustive annotation of prokaryotic genomes using existing tools. We have currently run [AMRFinderPlus](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/AMRFinder/) from NCBI against these genomes. [UniProt's UniFIRE functional annotation system](https://gitlab.ebi.ac.uk/uniprot-public/unifire) will provide additional annotations. Results from these tools are normalised according to the same rules as our phenotype data.
+AMR Genotypes is a resource recording the detection and annotation of resistance-associated genes and mutations. All annotated genomes have been processed using the [mettannotator](https://github.com/EBI-Metagenomics/mettannotator) workflow from EMBL-EBI's MGnify team and generates an exhaustive annotation of prokaryotic genomes using existing tools. The workflow includes [AMRFinderPlus](https://www.ncbi.nlm.nih.gov/pathogens/antimicrobial-resistance/AMRFinder/) from NCBI. [UniProt's UniFIRE functional annotation system](https://gitlab.ebi.ac.uk/uniprot-public/unifire) will provide additional annotations. Results from these tools are normalised according to the same rules as our phenotype data.
 
 ## Portal contributors
 
@@ -48,7 +48,7 @@ The AMR portal is a collaboration between the following Imperial College London 
 
 This project represents phase one of our efforts. Future developments may include
 
-- Advanced querying including search by IDs
+- Advanced querying
 - Expanding AMR profiles to those from isolate genomes in culture collections
 - Expanding AMR profiles from text mining the literature
 - Submission flows allowing third parties to submit antibiograms and for these data to flow into this portal

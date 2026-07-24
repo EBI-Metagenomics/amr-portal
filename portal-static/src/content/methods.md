@@ -28,11 +28,13 @@ Genomes from the Comprehensive Assessment of Bacterial-Based AMR prediction from
 
 ### Annotation using mettannotator
 
-[mettannotator][mettannotator] is a bioinformatics pipeline that generates an exhaustive annotation of prokaryotic genomes using existing tools. The output is a GFF file that integrates the results of all pipeline components. Results of each individual tool are also provided. Version `4.0.23` of [AMRFinderPlus][AMRFinderPlus] was used alongside database version `4.0 2025-07-16.1`. In future versions [UniFIRE][UniFire] will be used to generate additional _in silico_ predictions. [v1.5.0 of mettannotator][mettannotatortag] was used by this portal.
+[mettannotator][mettannotator] is a bioinformatics pipeline that generates an exhaustive annotation of prokaryotic genomes using existing tools. The output is a GFF file that integrates the results of all pipeline components. Version `4.0.23` of [AMRFinderPlus][AMRFinderPlus] was used alongside database version `4.0 2025-07-16.1`. Mettannotator version used to annotate each genome in the portal is shown in the "Annotation tool version" column.
+
+Mettannotator can be executed in two modes: Fast or Full. Fast mode skips [InterProScan](https://github.com/ebi-pf-team/interproscan), [UniFire], and [SanntiS](https://github.com/Finn-Lab/SanntiS). The mode that was used for each genome is shown in the "Annotation tool mode" column. Over time, more genomes will be reannotated with the Full version of mettannotator.
 
 ### Parsing of results
 
-GFF and AMRFinderPlus' output is taken and parsed using our Python tool. We select records related to the class `AMR` and exclude those annotated as `STRESS` or `VIRULENCE`. Records which are supported by a hidden Markov model (HMM) have their accession noted.
+GFF and AMRFinderPlus' outputs are parsed using our [Python tool](https://github.com/EBI-Metagenomics/amr_genotypes). We select records related to the class `AMR` and exclude those annotated as `STRESS` or `VIRULENCE`. If a genome is processed but no AMR annotations are identified, its genotype is not displayed in the portal and is not included in the Parquet files; however, the full annotation remains available for download via FTP. Records which are supported by a hidden Markov model (HMM) have their accession noted.
 
 ### Normalisation
 

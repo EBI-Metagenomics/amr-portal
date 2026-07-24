@@ -24,7 +24,7 @@ Genome annotation (available in GFF format) and AMFinderPlus results are availab
 
 You can start exploring from the [portal home page](/). The home page provides:
 
-- A **global search** box that searches across combined phenotypes and genotypes.
+- A **global search** box that searches across all sections of the website.
 - Links to each of the three data resources: **AMR phenotypes**, **AMR genotypes**, and **Combined phenotypes and genotypes**.
 
 <figure>
@@ -223,7 +223,7 @@ The portal includes an integrated **genome browser** (based on JBrowse 2) for in
 When the genome browser is enabled, a collapsible panel appears above the explorer. To use it:
 
 1. Click the **View in Browser** button in the first column of a row (only available for rows that include an assembly ID).
-2. The genome browser panel expands and loads the assembly, zooming to the relevant region when genomic coordinates are available (for example, on genotype rows).
+2. The genome browser panel expands and loads the assembly, zooming to the relevant region.
 3. Click a feature in the browser track to see annotation details in the panel beside the genome view.
 4. Collapse the panel with the toggle control at the left edge when you want more space for the table.
 
