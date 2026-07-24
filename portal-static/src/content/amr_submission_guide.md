@@ -208,19 +208,19 @@ Details on how to create a BioSample record interactively can be found in the Bi
 
 It is only possible to submit AMR data to BioSamples programmatically, and only if a BioSample record already exists. This is because an AMR structured data submission is treated as a sample update.
 
-| Field                        | Description                                                                                                                                                                                                                        |
-|------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| **BioSample_ID**             | SAM accession attributed to a submitted sample, e.g. SAMEA3113869                                                                                                                                                                  |
-| **Species**                  | Species name                                                                                                                                                                                                                       |
-| **Antibiotic_name**          | Antibiotic name                                                                                                                                                                                                                    |
-| **AST_standard**             | Accepted Antimicrobial Susceptibility Testing (AST) standards are: CLSI, EUCAST, CA-SFM, BSAC, DIN, SIR and WRG                                                                                                                    |
-| **Breakpoint_version**       | Version of AST standard protocol used for the isolates (Free-text)                                                                                                                                                                 |
-| **Laboratory_typing_method** | Antibiotic susceptibility method used for the isolates. Choose from the following methods:<br>- Dilution methods: Broth dilution, Microbroth dilution, Agar dilution<br> - Diffusion methods: Disc-diffusion, Neo-sensitabs, Etest |
-| **Measurement**              | Can be a fixed number of a range. Ranges for dilution: 0.01 to 2048; ranges for diffusion: 6 to 29                                                                                                                                 |
-| **Measurement_units**        | For dilution methods: mg/L; for diffusion methods: mm                                                                                                                                                                              |
-| **Measurement_sign**         | \>, <, =                                                                                                                                                                                                                           |
-| **Resistance_phenotype**     | Intermediate, susceptible (or sensitive), resistant, non-susceptible, not defined                                                                                                                                                  |
-| **Platform**                 | Free text                                                                                                                                                                                                                          |
+| Field                      | Description                                                                                                                                                                                                                        |
+|----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| **accession**              | SAM accession attributed to a submitted sample, e.g. SAMEA3113869                                                                                                                                                                  |
+| **Species**                | Species name                                                                                                                                                                                                                       |
+| **antibioticName**         | Antibiotic name                                                                                                                                                                                                                    |
+| **astStandard**            | Accepted Antimicrobial Susceptibility Testing (AST) standards are: CLSI, EUCAST, CA-SFM, BSAC, DIN, SIR and WRG                                                                                                                    |
+| **breakpointVersion**      | Version of AST standard protocol used for the isolates (Free-text)                                                                                                                                                                 |
+| **laboratoryTypingMethod** | Antibiotic susceptibility method used for the isolates. Choose from the following methods:<br>- Dilution methods: Broth dilution, Microbroth dilution, Agar dilution<br> - Diffusion methods: Disc-diffusion, Neo-sensitabs, Etest |
+| **measurement**            | Can be a fixed number of a range. Ranges for dilution: 0.01 to 2048; ranges for diffusion: 6 to 29                                                                                                                                 |
+| **measurementUnits**       | For dilution methods: mg/L; for diffusion methods: mm                                                                                                                                                                              |
+| **measurementSign**        | \>, <, =                                                                                                                                                                                                                           |
+| **resistancePhenotype**    | Intermediate, susceptible (or sensitive), resistant, non-susceptible, not defined                                                                                                                                                  |
+| **platform**               | Free text                                                                                                                                                                                                                          |
 
 ***Table 2:** Descriptions of mandatory AMR fields for submission into BioSamples*
 
@@ -260,7 +260,7 @@ An example JSON file containing all AMR fields in Figure 1 and Table 2, is shown
         "value" : "mm",  
         "iri" : null  
       },  
-     "measurementSign " : {  
+     "measurementSign" : {  
         "value" : "==",  
         "iri" : null  
       },  
