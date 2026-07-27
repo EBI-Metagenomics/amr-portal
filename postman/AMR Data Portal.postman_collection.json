@@ -19,7 +19,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -34,7 +33,10 @@
                       "pm.test(\"Content-Type is JSON\", function () {",
                       "    pm.expect(pm.response.headers.get(\"Content-Type\")).to.include(\"application/json\");",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -47,8 +49,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "http://{{amr_current}}/api/health",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/health",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -67,7 +68,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -81,7 +81,10 @@
                       "    pm.expect(json.label).to.be.a(\"string\").and.not.empty;",
                       "    pm.expect(json.label).to.match(/^\\d{4}-\\d{2}$/);",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -94,8 +97,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "http://{{amr_current}}/api/release",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/release",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -119,7 +121,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -144,7 +145,10 @@
                       "    const label = pm.response.json().release.label;",
                       "    pm.expect(label).to.match(/^\\d{4}-\\d{2}$/);",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -157,8 +161,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "http://{{amr_current}}/api/filters-config",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/filters-config",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -182,7 +185,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -208,7 +210,10 @@
                       "    pm.expect(opt).to.include.keys(\"value\", \"label\", \"count\", \"selected\");",
                       "    pm.expect(opt.count).to.be.a(\"number\");",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -234,8 +239,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-facets",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-facets",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -254,7 +258,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -270,7 +273,10 @@
                       "pm.test(\"Facets still returned for active view\", function () {",
                       "    pm.expect(pm.response.json().facets).to.be.an(\"array\").that.is.not.empty;",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -296,8 +302,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-facets",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-facets",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -316,7 +321,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -332,7 +336,10 @@
                       "    pm.expect(selected).to.exist;",
                       "    pm.expect(selected.selected).to.be.true;",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -358,8 +365,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-facets",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-facets",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -378,7 +384,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -391,7 +396,10 @@
                       "    pm.expect(active.id).to.eql(2);",
                       "    pm.expect(active.name).to.eql(\"AMR genotypes\");",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -417,8 +425,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-facets",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-facets",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -437,7 +444,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -451,7 +457,10 @@
                       "    pm.expect(active.id).to.eql(2);",
                       "    pm.expect(active.search_count).to.be.a(\"number\");",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -477,8 +486,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-facets",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-facets",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -533,8 +541,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-facets",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-facets",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -548,7 +555,7 @@
               "response": []
             },
             {
-              "name": "amr-facets-multi-word-search",
+              "name": "amr-facets-multi-word-search-01",
               "event": [
                 {
                   "listen": "test",
@@ -627,8 +634,99 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-facets",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-facets",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-facets"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "amr-facets-multi-word-search-02",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test(\"Response time is under 30s\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
+                      "});",
+                      "pm.test(\"Search counts are populated\", function () {",
+                      "    const counts = pm.response.json().data_type.map(function (dt) {",
+                      "        return dt.search_count;",
+                      "    });",
+                      "    pm.expect(counts.some(function (c) { return c > 0; })).to.be.true;",
+                      "});",
+                      "",
+                      "pm.test(\"Facets still returned for active view\", function () {",
+                      "    pm.expect(pm.response.json().facets).to.be.an(\"array\").that.is.not.empty;",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/plain, */*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [],\n    \"facet_paging\": {},\n    \"facet_operators\": {},\n    \"view_id\": 2,\n    \"search_query\": \"beta-lactam antibiotic\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{amr_current}}/api/amr-facets",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -651,7 +749,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -688,7 +785,10 @@
                       "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
                       "    }",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -714,8 +814,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -734,7 +833,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -771,7 +869,10 @@
                       "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
                       "    }",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -797,8 +898,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -817,7 +917,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -852,7 +951,10 @@
                       "    pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
                       "    pm.expect(pm.response.json().data.length).to.be.above(0);",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -878,8 +980,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -898,7 +999,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -935,7 +1035,10 @@
                       "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
                       "    }",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -961,8 +1064,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -981,7 +1083,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -1018,7 +1119,10 @@
                       "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
                       "    }",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -1044,8 +1148,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1064,7 +1167,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -1105,7 +1207,10 @@
                       "    const body = JSON.parse(pm.request.body.raw);",
                       "    pm.expect(pm.response.json().data.length).to.be.at.most(body.per_page);",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -1131,8 +1236,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1185,8 +1289,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1239,8 +1342,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1254,7 +1356,7 @@
               "response": []
             },
             {
-              "name": "amr-records-multi-word-search",
+              "name": "amr-records-multi-word-search-01",
               "event": [
                 {
                   "listen": "test",
@@ -1352,8 +1454,229 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "amr-records-multi-word-search-02",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test(\"Response time is under 30s\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
+                      "});",
+                      "pm.test(\"Response has meta and data\", function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.all.keys(\"meta\", \"data\");",
+                      "    pm.expect(json.data).to.be.an(\"array\");",
+                      "});",
+                      "pm.test(\"Meta pagination fields are valid\", function () {",
+                      "    const meta = pm.response.json().meta;",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    pm.expect(meta.page).to.eql(body.page || 1);",
+                      "    pm.expect(meta.per_page).to.eql(body.per_page || 100);",
+                      "    pm.expect(meta.total_hits).to.be.a(\"number\").and.at.least(1);",
+                      "    pm.expect(meta.columns).to.be.an(\"array\").that.is.not.empty;",
+                      "});",
+                      "pm.test(\"Column metadata shape\", function () {",
+                      "    pm.response.json().meta.columns.forEach(function (col) {",
+                      "        pm.expect(col).to.include.keys(\"id\", \"label\", \"sortable\", \"type\");",
+                      "    });",
+                      "});",
+                      "pm.test(\"Data rows do not exceed per_page\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    const perPage = body.per_page || 100;",
+                      "    pm.expect(pm.response.json().data.length).to.be.at.most(perPage);",
+                      "});",
+                      "pm.test(\"Filtered query returns hits when filters are set\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    if ((body.selected_filters || []).length > 0) {",
+                      "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/plain, */*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [],\n    \"view_id\": 2,\n    \"page\": 1,\n    \"per_page\": 100,\n    \"facet_operators\": {},\n    \"search_query\": \"beta-lactam antibiotic\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{amr_current}}/api/amr-records",
+                  "host": [
+                    "{{amr_current}}"
+                  ],
+                  "path": [
+                    "api",
+                    "amr-records"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "amr-records-multi-word-search-03",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "pm.test(\"Response time is under 30s\", function () {",
+                      "    pm.expect(pm.response.responseTime).to.be.below(30000);",
+                      "});",
+                      "pm.test(\"Response has meta and data\", function () {",
+                      "    const json = pm.response.json();",
+                      "    pm.expect(json).to.have.all.keys(\"meta\", \"data\");",
+                      "    pm.expect(json.data).to.be.an(\"array\");",
+                      "});",
+                      "pm.test(\"Meta pagination fields are valid\", function () {",
+                      "    const meta = pm.response.json().meta;",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    pm.expect(meta.page).to.eql(body.page || 1);",
+                      "    pm.expect(meta.per_page).to.eql(body.per_page || 100);",
+                      "    pm.expect(meta.total_hits).to.be.a(\"number\").and.at.least(1);",
+                      "    pm.expect(meta.columns).to.be.an(\"array\").that.is.not.empty;",
+                      "});",
+                      "pm.test(\"Column metadata shape\", function () {",
+                      "    pm.response.json().meta.columns.forEach(function (col) {",
+                      "        pm.expect(col).to.include.keys(\"id\", \"label\", \"sortable\", \"type\");",
+                      "    });",
+                      "});",
+                      "pm.test(\"Data rows do not exceed per_page\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    const perPage = body.per_page || 100;",
+                      "    pm.expect(pm.response.json().data.length).to.be.at.most(perPage);",
+                      "});",
+                      "pm.test(\"Filtered query returns hits when filters are set\", function () {",
+                      "    const body = JSON.parse(pm.request.body.raw);",
+                      "    if ((body.selected_filters || []).length > 0) {",
+                      "        pm.expect(pm.response.json().meta.total_hits).to.be.above(0);",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Accept",
+                    "value": "application/json, text/plain, */*"
+                  },
+                  {
+                    "key": "Accept-Language",
+                    "value": "en-GB,en;q=0.9"
+                  },
+                  {
+                    "key": "Cache-Control",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Connection",
+                    "value": "keep-alive"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Origin",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028"
+                  },
+                  {
+                    "key": "Pragma",
+                    "value": "no-cache"
+                  },
+                  {
+                    "key": "Referer",
+                    "value": "http://hh-rke-wp-webadmin-52-master-1.caas.ebi.ac.uk:32028/"
+                  },
+                  {
+                    "key": "User-Agent",
+                    "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n    \"selected_filters\": [],\n    \"view_id\": 2,\n    \"page\": 1,\n    \"per_page\": 100,\n    \"facet_operators\": {},\n    \"search_query\": \"ATCC\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{amr_current}}/api/amr-records",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1376,7 +1699,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -1398,7 +1720,10 @@
                       "    const lines = pm.response.text().trim().split(\"\\n\");",
                       "    pm.expect(lines.length).to.eql(6);",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -1424,8 +1749,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download?scope=page&file_format=csv",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records/download?scope=page&file_format=csv",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1455,7 +1779,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -1477,7 +1800,10 @@
                       "        pm.expect(row).to.be.an(\"object\");",
                       "    });",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -1503,8 +1829,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download?scope=page&file_format=json",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records/download?scope=page&file_format=json",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1534,7 +1859,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -1556,7 +1880,10 @@
                       "    const lines = pm.response.text().trim().split(\"\\n\");",
                       "    pm.expect(lines.length).to.be.above(1);",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -1582,8 +1909,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download?scope=all&file_format=csv",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records/download?scope=all&file_format=csv",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1613,7 +1939,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 200\", function () {",
                       "    pm.response.to.have.status(200);",
@@ -1635,7 +1960,10 @@
                       "    const lines = pm.response.text().trim().split(\"\\n\");",
                       "    pm.expect(lines.length).to.eql(6);",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -1648,8 +1976,7 @@
                   }
                 ],
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download?payload=eyJzZWxlY3RlZF9maWx0ZXJzIjpbeyJjYXRlZ29yeSI6InBoZW5vdHlwZS1hbnRpYmlvdGljX25hbWUiLCJ2YWx1ZSI6ImFtaWthY2luIn1dLCJ2aWV3X2lkIjoxLCJwYWdlIjoxLCJwZXJfcGFnZSI6NX0&scope=page&file_format=csv",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records/download?payload=eyJzZWxlY3RlZF9maWx0ZXJzIjpbeyJjYXRlZ29yeSI6InBoZW5vdHlwZS1hbnRpYmlvdGljX25hbWUiLCJ2YWx1ZSI6ImFtaWthY2luIn1dLCJ2aWV3X2lkIjoxLCJwYWdlIjoxLCJwZXJfcGFnZSI6NX0&scope=page&file_format=csv",
                   "host": [
                     "{{amr_current}}"
                   ],
@@ -1684,7 +2011,6 @@
                 {
                   "listen": "test",
                   "script": {
-                    "type": "text/javascript",
                     "exec": [
                       "pm.test(\"Status code is 404\", function () {",
                       "    pm.response.to.have.status(404);",
@@ -1692,7 +2018,10 @@
                       "pm.test(\"No data error message\", function () {",
                       "    pm.expect(pm.response.json().detail).to.eql(\"No data found for the given filters\");",
                       "});"
-                    ]
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
                   }
                 }
               ],
@@ -1718,8 +2047,7 @@
                   }
                 },
                 "url": {
-                  "raw": "http://{{amr_current}}/api/amr-records/download?scope=page&file_format=csv",
-                  "protocol": "http",
+                  "raw": "{{amr_current}}/api/amr-records/download?scope=page&file_format=csv",
                   "host": [
                     "{{amr_current}}"
                   ],
