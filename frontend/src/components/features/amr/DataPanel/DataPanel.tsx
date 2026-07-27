@@ -1,10 +1,12 @@
-import { useMemo, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { AMRColumnMeta, AMRRecord, AMRRecordValue } from '@interfaces/amrRecord';
 import type { AMRRecordsResponse } from '@interfaces/amrApi';
 import panelStyles from '@components/ui/Panel/Panel.module.css';
 import ActionButtons from '@components/features/amr/ActionButtons/ActionButtons';
 import { buildGenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
 import styles from './DataPanel.module.css';
+
+type TableScrollPosition = { top: number; left: number };
 
 type SortState = {
   category: string;
@@ -79,6 +81,14 @@ const DataPanel = ({
   genomeViewerEnabled = false,
 }: Props) => {
   const [hiddenColumnIds, setHiddenColumnIds] = useState<string[]>([]);
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+  const scrollByViewRef = useRef<Record<string, TableScrollPosition>>({});
+  const committedViewIdRef = useRef<string | number | null>(currentViewId);
+  const navKeyByViewRef = useRef<Record<string, string>>({});
+  const ignoreScrollUntilRef = useRef(0);
+  const userScrollActiveRef = useRef(false);
+  const userScrollIdleTimerRef = useRef<number | null>(null);
+
   const columns = useMemo(() => data?.meta.columns ?? [], [data]);
   const visibleColumns = useMemo(
     () => columns.filter(column => !hiddenColumnIds.includes(column.id)),
@@ -88,6 +98,75 @@ const DataPanel = ({
     setHiddenColumnIds([]);
     onClearFilters();
   };
+
+  const sortKey = sort ? `${sort.category}:${sort.order}` : '';
+  const filtersKey = JSON.stringify(selectedFilters);
+  const navKey = `${page}|${perPage}|${sortKey}|${filtersKey}|${activeSearchQuery ?? ''}`;
+
+  const applyScroll = (top: number, left: number) => {
+    const el = tableContainerRef.current;
+    if (!el) return;
+    // Ignore browser-generated scroll events from layout/column changes after restore.
+    ignoreScrollUntilRef.current = performance.now() + 300;
+    el.scrollTop = top;
+    el.scrollLeft = left;
+  };
+
+  const markUserScroll = () => {
+    userScrollActiveRef.current = true;
+    if (userScrollIdleTimerRef.current != null) {
+      window.clearTimeout(userScrollIdleTimerRef.current);
+    }
+    userScrollIdleTimerRef.current = window.setTimeout(() => {
+      userScrollActiveRef.current = false;
+      userScrollIdleTimerRef.current = null;
+    }, 150);
+  };
+
+  const saveCurrentScroll = () => {
+    // Only persist intentional user scrolling. Layout clamps and programmatic
+    // restores fire `scroll` too and used to corrupt per-tab positions.
+    if (!userScrollActiveRef.current) return;
+    if (performance.now() < ignoreScrollUntilRef.current || isPlaceholderData) return;
+    const el = tableContainerRef.current;
+    const viewKey = currentViewId != null ? String(currentViewId) : null;
+    if (!el || !viewKey) return;
+    scrollByViewRef.current[viewKey] = { top: el.scrollTop, left: el.scrollLeft };
+  };
+
+  // Per-tab scroll. Outgoing position comes from onScroll only — reading
+  // scrollTop during view switch is unsafe because the browser column and
+  // placeholder rows change layout in the same commit and clamp/shift scroll.
+  useLayoutEffect(() => {
+    const previousViewId = committedViewIdRef.current;
+    const viewChanged = String(previousViewId) !== String(currentViewId);
+
+    if (viewChanged) {
+      committedViewIdRef.current = currentViewId;
+      if (currentViewId != null) {
+        navKeyByViewRef.current[String(currentViewId)] = navKey;
+      }
+      return;
+    }
+
+    if (currentViewId == null) return;
+    const viewKey = String(currentViewId);
+    const previousNavKey = navKeyByViewRef.current[viewKey];
+    navKeyByViewRef.current[viewKey] = navKey;
+    // First paint for this tab: remember nav key, keep scroll at default/restored value.
+    if (previousNavKey === undefined || previousNavKey === navKey) return;
+
+    applyScroll(0, 0);
+    scrollByViewRef.current[viewKey] = { top: 0, left: 0 };
+  }, [currentViewId, navKey]);
+
+  // Re-apply after data settles (including placeholder → real rows).
+  useLayoutEffect(() => {
+    const viewKey = currentViewId != null ? String(currentViewId) : null;
+    if (!viewKey || !tableContainerRef.current) return;
+    const saved = scrollByViewRef.current[viewKey] ?? { top: 0, left: 0 };
+    applyScroll(saved.top, saved.left);
+  }, [currentViewId, data, isPlaceholderData]);
 
   if (isLoading && !data) {
     return (
@@ -202,7 +281,15 @@ const DataPanel = ({
         <div className={styles.resultCount}>{data.meta.total_hits} results</div>
       </div>
 
-      <div className={tableWrapClass}>
+      <div
+        ref={tableContainerRef}
+        className={tableWrapClass}
+        onScroll={saveCurrentScroll}
+        onWheel={markUserScroll}
+        onTouchStart={markUserScroll}
+        onPointerDown={markUserScroll}
+        onKeyDown={markUserScroll}
+      >
         <table>
           <thead>
             <tr>
