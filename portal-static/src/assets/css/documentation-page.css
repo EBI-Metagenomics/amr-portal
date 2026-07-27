@@ -134,6 +134,20 @@ amr-panel {
     white-space: pre-wrap;
   }
 
+  /* Inline code: soft highlight; keep monospace for real identifiers/SQL */
+  :not(pre) > code {
+    font-family: var(--font-family-monospace);
+    font-size: 0.92em;
+    background: var(--color-light-grey);
+    padding: 0.1em 0.35em;
+    border-radius: 3px;
+  }
+
+  .article table {
+    margin-top: 16px;
+    margin-bottom: 24px;
+  }
+
 
   /* STYLES FOR THE ASIDE WITH NAVIGATION */
   .aside-content {
