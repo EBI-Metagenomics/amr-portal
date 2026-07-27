@@ -10,7 +10,7 @@ tags: usage
 
 ## 2026-07
 
-- A subset of 347,082 genomes has been re-annotated using the **Full** mode of mettannotator, which includes InterProScan, UniFIRE and SanntiS annotations.
+- A subset of 37,907 genomes has been re-annotated using the **Full** mode of mettannotator, which includes InterProScan, UniFIRE and SanntiS annotations.
 - Columns in the **AMR genotypes** and **Combined phenotypes and genotypes** tables across the portal, Parquet files, and DuckDB have been updated:
 
 | Change | Previous name | New name |
