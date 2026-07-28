@@ -3,9 +3,17 @@ name: Build and Publish Images to Quay
 on:
   workflow_dispatch:
 
+# Temporary backup registry while office GitLab is unreliable.
+# Image names match the Quay repos (not the GitLab/EBI *-backend/*-frontend names).
+#
+# Build contexts stay in sync with .gitlab-ci.yml and build-and-push-gitlab.yml:
+#   backend:  -f backend/Dockerfile  backend/
+#   frontend: -f frontend/Dockerfile .
 
 env:
-  QUAY_ORG: microbiome-informatics
+  QUAY_NAMESPACE: vikasguptaebi
+  BACKEND_IMAGE: amr-portal-api
+  FRONTEND_IMAGE: amr-portal-app
   IMAGE_TAG: ${{ github.ref_name }}
 
 jobs:
@@ -31,13 +39,13 @@ jobs:
       - name: Build backend Docker image
         run: |
           docker build \
-            -t quay.io/${{ env.QUAY_ORG }}/amr-portal-backend:${{ env.IMAGE_TAG }} \
+            -t quay.io/${{ env.QUAY_NAMESPACE }}/${{ env.BACKEND_IMAGE }}:${{ env.IMAGE_TAG }} \
             -f backend/Dockerfile \
             backend/
 
       - name: Push backend Docker image
         run: |
-          docker push quay.io/${{ env.QUAY_ORG }}/amr-portal-backend:${{ env.IMAGE_TAG }}
+          docker push quay.io/${{ env.QUAY_NAMESPACE }}/${{ env.BACKEND_IMAGE }}:${{ env.IMAGE_TAG }}
 
   build-and-push-frontend:
     permissions:
@@ -61,10 +69,10 @@ jobs:
       - name: Build frontend Docker image
         run: |
           docker build \
-            -t quay.io/${{ env.QUAY_ORG }}/amr-portal-frontend:${{ env.IMAGE_TAG }} \
+            -t quay.io/${{ env.QUAY_NAMESPACE }}/${{ env.FRONTEND_IMAGE }}:${{ env.IMAGE_TAG }} \
             -f frontend/Dockerfile \
             .
 
       - name: Push frontend Docker image
         run: |
-          docker push quay.io/${{ env.QUAY_ORG }}/amr-portal-frontend:${{ env.IMAGE_TAG }}
+          docker push quay.io/${{ env.QUAY_NAMESPACE }}/${{ env.FRONTEND_IMAGE }}:${{ env.IMAGE_TAG }}
