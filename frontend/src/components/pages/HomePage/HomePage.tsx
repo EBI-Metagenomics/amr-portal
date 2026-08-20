@@ -11,27 +11,13 @@ import { useAmrPortalState } from '@/hooks/useAmrPortalState';
 import {
   AMR_VIEW_ID_PHENOTYPE,
   buildGenomeViewerRowContext,
+  pickGeneSymbol,
 } from '@utils/genomeViewer/recordContext';
 import { pickSearchResultView } from '@utils/search/pickSearchResultView';
 import { isGenomeViewerEnabled } from '@/config/appEnv';
 import { trackResultTypeChange, trackSearchSubmit } from '@/analytics/events';
-import type { AMRRecord, AMRRecordValue } from '@interfaces/amrRecord';
+import type { AMRRecord } from '@interfaces/amrRecord';
 import styles from './HomePage.module.css';
-
-const GENE_SYMBOL_KEYS = [
-  'amrfinderplus_element_symbol',
-  'gene_symbol',
-  'element_symbol',
-  'Gene_symbol',
-];
-
-function pickGeneSymbol(record: AMRRecord): string | null {
-  for (const key of GENE_SYMBOL_KEYS) {
-    const value: AMRRecordValue | undefined = record[key];
-    if (typeof value === 'string' && value.trim()) return value.trim();
-  }
-  return null;
-}
 
 const HomePage = () => {
   const genomeViewerFeatureEnabled = useMemo(() => isGenomeViewerEnabled(), []);

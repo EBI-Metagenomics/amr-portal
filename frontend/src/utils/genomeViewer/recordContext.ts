@@ -33,6 +33,23 @@ const STRAND_KEYS = ['strand', 'Strand'];
 
 const LOCUS_KEYS = ['id', 'locus_tag', 'Locus_tag', 'genotype-id', 'locus'];
 
+/** Column / record keys used for analytics gene-symbol labels (not locus tags). */
+export const GENE_SYMBOL_KEYS = [
+  'amrfinderplus_element_symbol',
+  'gene_symbol',
+  'element_symbol',
+  'Gene_symbol',
+];
+
+/** Best-effort gene / AMR element symbol from a table row (for analytics only). */
+export function pickGeneSymbol(record: AMRRecord): string | null {
+  for (const key of GENE_SYMBOL_KEYS) {
+    const value = record[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 function hasUsableValue(v: AMRRecordValue | undefined): boolean {
   return v !== undefined && v !== null && !(Array.isArray(v) && v.length === 0);
 }
