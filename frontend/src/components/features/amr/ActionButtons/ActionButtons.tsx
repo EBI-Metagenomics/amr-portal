@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { API_BASE_URL, FTP_DOWNLOAD_URL } from '@utils/common/constants';
 import { getDownloadLink } from '@utils/download';
+import { trackDownloadStart } from '@/analytics/events';
 import styles from './ActionButtons.module.css';
 
 type ActionView = 'columns' | 'clear' | 'download' | null;
@@ -186,6 +187,7 @@ const ActionButtons = ({
               href={downloadLink}
               download
               onClick={() => {
+                trackDownloadStart(viewId);
                 setDownloadStarted(true);
                 window.setTimeout(() => setDownloadStarted(false), 2000);
               }}

@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import GeneViewerContent from './GeneViewer/GeneViewerContent';
 import useGeneViewerState from './GeneViewer/geneViewerState';
 import { useAmrGeneViewerConfig } from './GeneViewer/geneViewerConfig';
 import { useGenomeBrowserResources } from './GeneViewer/useGenomeBrowserResources';
 import FeaturePanel from './FeaturePanel/FeaturePanel';
 import { useFeatureDetails } from './FeaturePanel/useFeatureDetails';
+import { trackGenomeViewerOpen } from '@/analytics/events';
 import type { GenomeViewerRowContext } from '@utils/genomeViewer/recordContext';
 import styles from './GeneViewerPanel.module.css';
 
@@ -14,6 +15,8 @@ type Props = {
   rowContext: GenomeViewerRowContext | null;
   hasSelectedTableRow: boolean;
   loadData: boolean;
+  viewId: string | number;
+  geneSymbol?: string | null;
 };
 
 const GeneViewerPanel = ({
@@ -22,8 +25,11 @@ const GeneViewerPanel = ({
   rowContext,
   hasSelectedTableRow,
   loadData,
+  viewId,
+  geneSymbol = null,
 }: Props) => {
   const [manualSelection, setManualSelection] = useState<{ key: string; locusTag: string | null } | null>(null);
+  const trackedOpenKeyRef = useRef<string | null>(null);
 
   const {
     baseUrlConfigError,
@@ -96,6 +102,13 @@ const GeneViewerPanel = ({
     showBrowser ? readySessionPlan?.gffUri ?? gffUri ?? null : null,
     highlightLocusId
   );
+
+  useEffect(() => {
+    if (!showBrowser || !sessionReady) return;
+    if (trackedOpenKeyRef.current === rowSelectionKey) return;
+    trackedOpenKeyRef.current = rowSelectionKey;
+    trackGenomeViewerOpen(viewId, geneSymbol);
+  }, [showBrowser, sessionReady, rowSelectionKey, viewId, geneSymbol]);
 
   return (
     <section className={sectionClass} aria-label="Gene viewer panel">

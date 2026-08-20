@@ -14,8 +14,24 @@ import {
 } from '@utils/genomeViewer/recordContext';
 import { pickSearchResultView } from '@utils/search/pickSearchResultView';
 import { isGenomeViewerEnabled } from '@/config/appEnv';
-import type { AMRRecord } from '@interfaces/amrRecord';
+import { trackResultTypeChange, trackSearchSubmit } from '@/analytics/events';
+import type { AMRRecord, AMRRecordValue } from '@interfaces/amrRecord';
 import styles from './HomePage.module.css';
+
+const GENE_SYMBOL_KEYS = [
+  'amrfinderplus_element_symbol',
+  'gene_symbol',
+  'element_symbol',
+  'Gene_symbol',
+];
+
+function pickGeneSymbol(record: AMRRecord): string | null {
+  for (const key of GENE_SYMBOL_KEYS) {
+    const value: AMRRecordValue | undefined = record[key];
+    if (typeof value === 'string' && value.trim()) return value.trim();
+  }
+  return null;
+}
 
 const HomePage = () => {
   const genomeViewerFeatureEnabled = useMemo(() => isGenomeViewerEnabled(), []);
@@ -52,6 +68,8 @@ const HomePage = () => {
     clearSearch,
   } = state;
   const hasResolvedLandingViewRef = useRef(hasViewInUrl);
+  const lastTrackedSearchRef = useRef<string | null>(null);
+  const [viewerGeneSymbol, setViewerGeneSymbol] = useState<string | null>(null);
   const numericStateViewId =
     typeof viewId === 'number'
       ? viewId
@@ -122,6 +140,31 @@ const HomePage = () => {
   const scopeTotal = recordsQuery.data?.meta.total_hits ?? null;
 
   useEffect(() => {
+    if (!activeSearchQuery) {
+      lastTrackedSearchRef.current = null;
+      return;
+    }
+    if (recordsQuery.isFetching || recordsQuery.isPlaceholderData || !recordsQuery.data) return;
+    if (lastTrackedSearchRef.current === activeSearchQuery) return;
+    lastTrackedSearchRef.current = activeSearchQuery;
+    const hasHits = (recordsQuery.data.meta.total_hits ?? 0) > 0;
+    trackSearchSubmit(hasHits, activeSearchQuery);
+  }, [
+    activeSearchQuery,
+    recordsQuery.data,
+    recordsQuery.isFetching,
+    recordsQuery.isPlaceholderData,
+  ]);
+
+  const handleUserViewChange = useCallback(
+    (nextViewId: string | number) => {
+      trackResultTypeChange(nextViewId);
+      setCurrentView(nextViewId);
+    },
+    [setCurrentView]
+  );
+
+  useEffect(() => {
     if (numericViewId !== null && numericStateViewId === null && resolvedViewId !== null) {
       if (!hasViewInUrl && isGlobalSearchActive) {
         return;
@@ -170,6 +213,7 @@ const HomePage = () => {
   useEffect(() => {
     if (selectedRowIndex === null) {
       setIsGeneViewerCollapsed(true);
+      setViewerGeneSymbol(null);
     }
   }, [selectedRowIndex]);
 
@@ -189,7 +233,7 @@ const HomePage = () => {
 
   const handleRowSelect = useCallback((rowIndex: number, record: AMRRecord) => {
     setSelectedRowIndex(rowIndex);
-    void record; // record isn't needed here, but keep signature stable for DataPanel
+    setViewerGeneSymbol(pickGeneSymbol(record));
     if (genomeViewerEnabled) {
       setIsGeneViewerCollapsed(false);
     }
@@ -218,6 +262,8 @@ const HomePage = () => {
                 rowContext={genomeRowContext}
                 hasSelectedTableRow={hasSelectedTableRow}
                 loadData={loadJbrowseData}
+                viewId={numericViewId}
+                geneSymbol={viewerGeneSymbol}
               />
             </Suspense>
           ) : null}
@@ -234,7 +280,7 @@ const HomePage = () => {
                 onSearchSubmit={submitSearch}
                 onClearSearch={clearSearch}
                 onClearActiveFilters={clearActiveFilters}
-                onViewChange={setCurrentView}
+                onViewChange={handleUserViewChange}
                 onFilterToggle={toggleFilter}
                 onClearAllFilters={clearAllFilters}
                 onFacetSearch={setFacetSearch}

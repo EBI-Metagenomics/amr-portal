@@ -1,0 +1,37 @@
+/* Keep vf-banner--fixed for sticky bottom, replace its narrow page-grid. */
+.root {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-inline: 1.5rem;
+  box-sizing: border-box;
+}
+
+.root :global(.vf-banner__content) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem 1.5rem;
+  width: 100%;
+  max-width: min(90rem, 100%);
+  margin: 0 auto;
+  padding-block: 0.75rem;
+  box-sizing: border-box;
+  text-align: left;
+}
+
+.text {
+  flex: 1 1 20rem;
+  margin: 0;
+  max-width: none;
+  text-align: left;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
