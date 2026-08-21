@@ -107,8 +107,11 @@ const GeneViewerPanel = ({
     if (!showBrowser || !sessionReady) return;
     if (trackedOpenKeyRef.current === rowSelectionKey) return;
     trackedOpenKeyRef.current = rowSelectionKey;
-    trackGenomeViewerOpen(viewId, geneSymbol);
-  }, [showBrowser, sessionReady, rowSelectionKey, viewId, geneSymbol]);
+    trackGenomeViewerOpen(viewId, {
+      geneSymbol,
+      locusTag: rowLocusTag,
+    });
+  }, [showBrowser, sessionReady, rowSelectionKey, viewId, geneSymbol, rowLocusTag]);
 
   return (
     <section className={sectionClass} aria-label="Gene viewer panel">

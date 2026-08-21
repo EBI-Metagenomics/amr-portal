@@ -3,8 +3,8 @@ import { trackEvent } from './matomo';
 const CATEGORY = 'amr_explore';
 
 const VIEW_LABELS: Record<string, string> = {
-  '1': 'experiments',
-  '2': 'predictions',
+  '1': 'phenotypes',
+  '2': 'genotypes',
   '3': 'combined',
 };
 
@@ -35,11 +35,16 @@ export function trackFacetSelect(facetId: string, activeFilterCount: number): vo
   trackEvent(CATEGORY, 'facet_select', facetId, activeFilterCount);
 }
 
-export function trackGenomeViewerOpen(viewId: string | number, geneSymbol?: string | null): void {
-  const name = geneSymbol?.trim()
-    ? `${viewLabel(viewId)}:${geneSymbol.trim()}`
-    : viewLabel(viewId);
-  trackEvent(CATEGORY, 'genome_viewer_open', name);
+export function trackGenomeViewerOpen(
+  viewId: string | number,
+  options?: { geneSymbol?: string | null; locusTag?: string | null }
+): void {
+  const parts = [viewLabel(viewId)];
+  const geneSymbol = options?.geneSymbol?.trim();
+  const locusTag = options?.locusTag?.trim();
+  if (geneSymbol) parts.push(geneSymbol);
+  if (locusTag) parts.push(locusTag);
+  trackEvent(CATEGORY, 'genome_viewer_open', parts.join(':'));
 }
 
 export function trackDownloadStart(viewId: string | number): void {
