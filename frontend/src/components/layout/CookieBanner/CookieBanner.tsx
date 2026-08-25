@@ -5,7 +5,7 @@ import { grantMatomoConsent } from '@/analytics/matomo';
 import styles from './CookieBanner.module.css';
 
 const privacyNoticeHref =
-  'https://www.ebi.ac.uk/data-protection/privacy-notice/embl-ebi-public-website/';
+  'https://ftp.ebi.ac.uk/pub/databases/metagenomics/media/privacy-notice.pdf;
 
 const CookieBanner = () => {
   const [display, setDisplay] = useState(
