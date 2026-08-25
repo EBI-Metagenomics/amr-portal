@@ -36,11 +36,13 @@ RUN rm -f /etc/nginx/conf.d/default.conf \
 COPY --chown=nginx:nginx frontend/nginx-conf/nginx.conf /etc/nginx/nginx.conf
 COPY --chown=nginx:nginx frontend/nginx-conf/local.conf /etc/nginx/conf.d/local.conf
 COPY --chown=nginx:nginx frontend/nginx-conf/mime.types /etc/nginx/conf.d/mime.types
+COPY --chown=nginx:nginx frontend/docker-entrypoint.sh /docker-entrypoint.sh
 COPY --chown=nginx:nginx --from=merge /html /usr/share/nginx/html
 RUN sed -i 's|<head>|<head><script src="./runtime-config.js"></script>|' /usr/share/nginx/html/data/index.html \
+  && chmod +x /docker-entrypoint.sh \
   && chown -R nginx:nginx /usr/share/nginx/html
 
 USER nginx
 EXPOSE 8000
 
-CMD ["/bin/sh", "-c", "API_BASE_URL=\"${VITE_API_BASE_URL:-/amr/api}\"; B64=$(printf '%s' \"$API_BASE_URL\" | base64 | tr -d '\\n'); printf 'window.__AMR_API_BASE_URL__=atob(\"%s\");\\n' \"$B64\" > /usr/share/nginx/html/data/runtime-config.js; FA=\"${VITE_GENOME_FASTA_BASE_URL:-}\"; if [ -n \"$FA\" ]; then B64FA=$(printf '%s' \"$FA\" | base64 | tr -d '\\n'); printf 'window.__AMR_GENOME_FASTA_BASE_URL__=atob(\"%s\");\\n' \"$B64FA\" >> /usr/share/nginx/html/data/runtime-config.js; fi; GF=\"${VITE_GENOME_GFF_BASE_URL:-}\"; if [ -n \"$GF\" ]; then B64GF=$(printf '%s' \"$GF\" | base64 | tr -d '\\n'); printf 'window.__AMR_GENOME_GFF_BASE_URL__=atob(\"%s\");\\n' \"$B64GF\" >> /usr/share/nginx/html/data/runtime-config.js; fi; GV=\"${VITE_ENABLE_GENOME_VIEWER:-}\"; if [ -n \"$GV\" ]; then printf 'window.__AMR_ENABLE_GENOME_VIEWER__=\"%s\";\\n' \"$GV\" >> /usr/share/nginx/html/data/runtime-config.js; fi; exec nginx -g 'daemon off;'"]
+CMD ["/docker-entrypoint.sh"]

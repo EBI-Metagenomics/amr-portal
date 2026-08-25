@@ -1,5 +1,7 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { FacetOperator, FacetPageState, SelectedFilter } from '@interfaces/amrApi';
+import { trackFacetSelect } from '@/analytics/events';
+import { trackPageView } from '@/analytics/matomo';
 import { isGlobalSearchActive, SEARCH_QUERY_URL_PARAM } from '@/config/globalSearch';
 import { LANDING_SEARCH_PROVISIONAL_VIEW } from '@utils/search/pickSearchResultView';
 
@@ -65,6 +67,7 @@ export const useAmrPortalState = () => {
     : undefined;
 
   const resolvedViewId = viewId ?? initialUrlState.viewIdFromUrl;
+  const skipNextSpaPageViewRef = useRef(true);
 
   useEffect(() => {
     if (resolvedViewId == null) return;
@@ -76,6 +79,12 @@ export const useAmrPortalState = () => {
       url.searchParams.delete(SEARCH_QUERY_URL_PARAM);
     }
     window.history.replaceState(null, '', url);
+    // Initial pageview is sent from initMatomo(); only track later SPA URL updates.
+    if (skipNextSpaPageViewRef.current) {
+      skipNextSpaPageViewRef.current = false;
+      return;
+    }
+    trackPageView(`${url.pathname}${url.search}${url.hash}`);
   }, [resolvedViewId, committedSearchQuery]);
 
   const selectedFilters = useMemo(() => {
@@ -105,13 +114,14 @@ export const useAmrPortalState = () => {
   const toggleFilter = (category: string, value: string, isSelected: boolean) => {
     if (!resolvedViewId) return;
     const key = String(resolvedViewId);
-    setSelectedFiltersByView(prev => {
-      const current = prev[key] ?? [];
-      const next = isSelected
-        ? [...current, { category, value }]
-        : current.filter(filter => !(filter.category === category && filter.value === value));
-      return { ...prev, [key]: next };
-    });
+    const current = selectedFiltersByView[key] ?? [];
+    const next = isSelected
+      ? [...current, { category, value }]
+      : current.filter(filter => !(filter.category === category && filter.value === value));
+    setSelectedFiltersByView(prev => ({ ...prev, [key]: next }));
+    if (isSelected) {
+      trackFacetSelect(category, next.length);
+    }
     setPage(1);
   };
 

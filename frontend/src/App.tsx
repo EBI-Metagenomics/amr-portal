@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import HomePage from '@components/pages/HomePage';
 import PortalSubheader from '@components/layout/PortalSubheader';
 import EbiFooter from '@components/layout/EbiFooter';
+import CookieBanner from '@components/layout/CookieBanner';
 import appStyles from './App.module.css';
 
 const queryClient = new QueryClient({
@@ -35,6 +36,7 @@ const App = () => {
         </Router>
       </main>
       <EbiFooter />
+      <CookieBanner />
     </QueryClientProvider>
   );
 };

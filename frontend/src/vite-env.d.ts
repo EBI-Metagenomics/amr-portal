@@ -8,4 +8,8 @@ interface ImportMetaEnv {
   readonly VITE_ENABLE_GENOME_VIEWER?: string;
   readonly VITE_GENOME_FASTA_BASE_URL?: string;
   readonly VITE_GENOME_GFF_BASE_URL?: string;
+  readonly VITE_MATOMO_ENABLED?: string;
+  readonly VITE_MATOMO_URL?: string;
+  readonly VITE_MATOMO_SITE_ID?: string;
+  readonly VITE_MATOMO_SCRIPT_URL?: string;
 }

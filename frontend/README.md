@@ -22,6 +22,17 @@ Copy `.env.example` to `.env` and adjust as needed.
 
 - `VITE_API_BASE_URL` - backend API base (default `/amr/api`). In Docker/Kubernetes runtime, this can be overridden via container env var `VITE_API_BASE_URL` without rebuilding the image.
 - `VITE_APP_BASE` - Vite asset base and React Router basename (default in `vite.config.ts` is `{VITE_PORTAL_PREFIX}/data/`, e.g. `/amr/data/`)
+- `VITE_ENABLE_GENOME_VIEWER` - enable the genome browser strip (`true` / `1`)
+- `VITE_GENOME_FASTA_BASE_URL` / `VITE_GENOME_GFF_BASE_URL` - genome file roots (also overridable at container runtime)
+
+### Matomo analytics
+
+Direct Matomo JS tracker (`_paq`) only — **Matomo Tag Manager is not used** (avoids double pageviews; custom events are owned in app code).
+
+- `VITE_MATOMO_ENABLED` - master switch (`false` by default). When on, pageviews and all custom events are active after cookie consent.
+- `VITE_MATOMO_URL` - tracker base (default `https://ebi-mgnify.matomo.cloud/`)
+- `VITE_MATOMO_SITE_ID` - site ID (default `11`)
+- `VITE_MATOMO_SCRIPT_URL` - optional CDN override for `matomo.js`
 
 ## Build
 

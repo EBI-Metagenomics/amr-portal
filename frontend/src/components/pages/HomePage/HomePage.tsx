@@ -11,9 +11,12 @@ import { useAmrPortalState } from '@/hooks/useAmrPortalState';
 import {
   AMR_VIEW_ID_PHENOTYPE,
   buildGenomeViewerRowContext,
+  pickGeneSymbol,
 } from '@utils/genomeViewer/recordContext';
 import { pickSearchResultView } from '@utils/search/pickSearchResultView';
+import { getActiveScopeTotal } from '@components/features/amr/FacetSidebar/facetHeaderSummary';
 import { isGenomeViewerEnabled } from '@/config/appEnv';
+import { trackResultTypeChange, trackSearchSubmit } from '@/analytics/events';
 import type { AMRRecord } from '@interfaces/amrRecord';
 import styles from './HomePage.module.css';
 
@@ -52,6 +55,8 @@ const HomePage = () => {
     clearSearch,
   } = state;
   const hasResolvedLandingViewRef = useRef(hasViewInUrl);
+  const lastTrackedSearchRef = useRef<string | null>(null);
+  const [viewerGeneSymbol, setViewerGeneSymbol] = useState<string | null>(null);
   const numericStateViewId =
     typeof viewId === 'number'
       ? viewId
@@ -121,6 +126,45 @@ const HomePage = () => {
   // Facet headers use the current table result count (search + filters), not search-only totals.
   const scopeTotal = recordsQuery.data?.meta.total_hits ?? null;
 
+  // search_submit uses search-only counts (facets data_type.search_count), not
+  // filtered table totals — so zero/hits reflects the query itself.
+  useEffect(() => {
+    if (!activeSearchQuery) {
+      lastTrackedSearchRef.current = null;
+      return;
+    }
+    if (facetsQuery.isFetching || facetsQuery.isPlaceholderData || !facetsQuery.data) return;
+    if (lastTrackedSearchRef.current === activeSearchQuery) return;
+
+    const viewForCount = numericViewId ?? numericStateViewId;
+    if (viewForCount == null) return;
+
+    const searchOnlyHits = getActiveScopeTotal(
+      facetsQuery.data.data_type,
+      viewForCount,
+      true
+    );
+    if (searchOnlyHits == null) return;
+
+    lastTrackedSearchRef.current = activeSearchQuery;
+    trackSearchSubmit(searchOnlyHits > 0, activeSearchQuery);
+  }, [
+    activeSearchQuery,
+    facetsQuery.data,
+    facetsQuery.isFetching,
+    facetsQuery.isPlaceholderData,
+    numericViewId,
+    numericStateViewId,
+  ]);
+
+  const handleUserViewChange = useCallback(
+    (nextViewId: string | number) => {
+      trackResultTypeChange(nextViewId);
+      setCurrentView(nextViewId);
+    },
+    [setCurrentView]
+  );
+
   useEffect(() => {
     if (numericViewId !== null && numericStateViewId === null && resolvedViewId !== null) {
       if (!hasViewInUrl && isGlobalSearchActive) {
@@ -170,6 +214,7 @@ const HomePage = () => {
   useEffect(() => {
     if (selectedRowIndex === null) {
       setIsGeneViewerCollapsed(true);
+      setViewerGeneSymbol(null);
     }
   }, [selectedRowIndex]);
 
@@ -189,7 +234,7 @@ const HomePage = () => {
 
   const handleRowSelect = useCallback((rowIndex: number, record: AMRRecord) => {
     setSelectedRowIndex(rowIndex);
-    void record; // record isn't needed here, but keep signature stable for DataPanel
+    setViewerGeneSymbol(pickGeneSymbol(record));
     if (genomeViewerEnabled) {
       setIsGeneViewerCollapsed(false);
     }
@@ -218,6 +263,8 @@ const HomePage = () => {
                 rowContext={genomeRowContext}
                 hasSelectedTableRow={hasSelectedTableRow}
                 loadData={loadJbrowseData}
+                viewId={numericViewId}
+                geneSymbol={viewerGeneSymbol}
               />
             </Suspense>
           ) : null}
@@ -234,7 +281,7 @@ const HomePage = () => {
                 onSearchSubmit={submitSearch}
                 onClearSearch={clearSearch}
                 onClearActiveFilters={clearActiveFilters}
-                onViewChange={setCurrentView}
+                onViewChange={handleUserViewChange}
                 onFilterToggle={toggleFilter}
                 onClearAllFilters={clearAllFilters}
                 onFacetSearch={setFacetSearch}
