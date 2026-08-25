@@ -32,11 +32,11 @@ const CookieBanner = () => {
           This site uses cookies. We use essential cookies for site functionality, and non-essential
           cookies to help improve the service using Matomo analytics. No data is shared with third
           parties for advertising. See our{' '}
-          <a className="vf-banner__link" href={privacyNoticeHref}>
+          <a className="vf-banner__link" href={privacyNoticeHref} target="_blank">
             Privacy Notice
           </a>{' '}
           and{' '}
-          <a className="vf-banner__link" href="//www.ebi.ac.uk/about/terms-of-use">
+          <a className="vf-banner__link" href="//www.ebi.ac.uk/about/terms-of-use" target="_blank">
             Terms Of Use
           </a>
           .
