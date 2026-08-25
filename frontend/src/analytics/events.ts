@@ -1,17 +1,10 @@
 import { trackEvent } from './matomo';
-
-const CATEGORY = 'amr_explore';
-
-const VIEW_LABELS: Record<string, string> = {
-  '1': 'phenotypes',
-  '2': 'genotypes',
-  '3': 'combined',
-};
+import { AMR_ANALYTICS_CATEGORY, AMR_VIEW_ANALYTICS_LABELS } from './constants';
 
 export function viewLabel(viewId: string | number | null | undefined): string {
   if (viewId == null) return 'unknown';
   const key = String(viewId);
-  return VIEW_LABELS[key] ?? key;
+  return AMR_VIEW_ANALYTICS_LABELS[key] ?? key;
 }
 
 /** Query length buckets for Matomo event value (not the raw query). */
@@ -24,15 +17,20 @@ export function searchLengthBucket(query: string): number {
 }
 
 export function trackSearchSubmit(hasHits: boolean, query: string): void {
-  trackEvent(CATEGORY, 'search_submit', hasHits ? 'hits' : 'zero', searchLengthBucket(query));
+  trackEvent(
+    AMR_ANALYTICS_CATEGORY,
+    'search_submit',
+    hasHits ? 'hits' : 'zero',
+    searchLengthBucket(query)
+  );
 }
 
 export function trackResultTypeChange(viewId: string | number): void {
-  trackEvent(CATEGORY, 'result_type_change', viewLabel(viewId));
+  trackEvent(AMR_ANALYTICS_CATEGORY, 'result_type_change', viewLabel(viewId));
 }
 
 export function trackFacetSelect(facetId: string, activeFilterCount: number): void {
-  trackEvent(CATEGORY, 'facet_select', facetId, activeFilterCount);
+  trackEvent(AMR_ANALYTICS_CATEGORY, 'facet_select', facetId, activeFilterCount);
 }
 
 export function trackGenomeViewerOpen(
@@ -44,9 +42,9 @@ export function trackGenomeViewerOpen(
   const locusTag = options?.locusTag?.trim();
   if (geneSymbol) parts.push(geneSymbol);
   if (locusTag) parts.push(locusTag);
-  trackEvent(CATEGORY, 'genome_viewer_open', parts.join(':'));
+  trackEvent(AMR_ANALYTICS_CATEGORY, 'genome_viewer_open', parts.join(':'));
 }
 
 export function trackDownloadStart(viewId: string | number): void {
-  trackEvent(CATEGORY, 'download_start', viewLabel(viewId));
+  trackEvent(AMR_ANALYTICS_CATEGORY, 'download_start', viewLabel(viewId));
 }

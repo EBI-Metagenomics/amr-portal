@@ -36,7 +36,7 @@ Direct Matomo JS tracker (`_paq`) only — **Matomo Tag Manager is not used** (a
 
 In Docker/Kubernetes, set the same names on the pod env; [`docker-entrypoint.sh`](docker-entrypoint.sh) writes them into `runtime-config.js`.
 
-Consent matches the hmmer-app pattern: Matomo `requireConsent`, a VF cookie banner (Accept all / Reject non-essential), and a `cookies-accepted=true|false` cookie under `VITE_PORTAL_PREFIX` (default `/amr`). Tracking only sends after Accept.
+Consent matches the hmmer-app pattern: Matomo `requireConsent`, a VF cookie banner (Accept all / Reject non-essential), and a `cookies-accepted=true|false` cookie scoped to the SPA base (`VITE_APP_BASE`, e.g. `/amr/data`). Tracking only sends after Accept.
 ## Build
 
 - `npm run typecheck`

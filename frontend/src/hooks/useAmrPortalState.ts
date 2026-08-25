@@ -114,15 +114,13 @@ export const useAmrPortalState = () => {
   const toggleFilter = (category: string, value: string, isSelected: boolean) => {
     if (!resolvedViewId) return;
     const key = String(resolvedViewId);
-    setSelectedFiltersByView(prev => {
-      const current = prev[key] ?? [];
-      const next = isSelected
-        ? [...current, { category, value }]
-        : current.filter(filter => !(filter.category === category && filter.value === value));
-      return { ...prev, [key]: next };
-    });
+    const current = selectedFiltersByView[key] ?? [];
+    const next = isSelected
+      ? [...current, { category, value }]
+      : current.filter(filter => !(filter.category === category && filter.value === value));
+    setSelectedFiltersByView(prev => ({ ...prev, [key]: next }));
     if (isSelected) {
-      trackFacetSelect(category, selectedFilters.length + 1);
+      trackFacetSelect(category, next.length);
     }
     setPage(1);
   };

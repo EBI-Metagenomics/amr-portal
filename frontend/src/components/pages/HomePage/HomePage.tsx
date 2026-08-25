@@ -14,6 +14,7 @@ import {
   pickGeneSymbol,
 } from '@utils/genomeViewer/recordContext';
 import { pickSearchResultView } from '@utils/search/pickSearchResultView';
+import { getActiveScopeTotal } from '@components/features/amr/FacetSidebar/facetHeaderSummary';
 import { isGenomeViewerEnabled } from '@/config/appEnv';
 import { trackResultTypeChange, trackSearchSubmit } from '@/analytics/events';
 import type { AMRRecord } from '@interfaces/amrRecord';
@@ -125,21 +126,35 @@ const HomePage = () => {
   // Facet headers use the current table result count (search + filters), not search-only totals.
   const scopeTotal = recordsQuery.data?.meta.total_hits ?? null;
 
+  // search_submit uses search-only counts (facets data_type.search_count), not
+  // filtered table totals — so zero/hits reflects the query itself.
   useEffect(() => {
     if (!activeSearchQuery) {
       lastTrackedSearchRef.current = null;
       return;
     }
-    if (recordsQuery.isFetching || recordsQuery.isPlaceholderData || !recordsQuery.data) return;
+    if (facetsQuery.isFetching || facetsQuery.isPlaceholderData || !facetsQuery.data) return;
     if (lastTrackedSearchRef.current === activeSearchQuery) return;
+
+    const viewForCount = numericViewId ?? numericStateViewId;
+    if (viewForCount == null) return;
+
+    const searchOnlyHits = getActiveScopeTotal(
+      facetsQuery.data.data_type,
+      viewForCount,
+      true
+    );
+    if (searchOnlyHits == null) return;
+
     lastTrackedSearchRef.current = activeSearchQuery;
-    const hasHits = (recordsQuery.data.meta.total_hits ?? 0) > 0;
-    trackSearchSubmit(hasHits, activeSearchQuery);
+    trackSearchSubmit(searchOnlyHits > 0, activeSearchQuery);
   }, [
     activeSearchQuery,
-    recordsQuery.data,
-    recordsQuery.isFetching,
-    recordsQuery.isPlaceholderData,
+    facetsQuery.data,
+    facetsQuery.isFetching,
+    facetsQuery.isPlaceholderData,
+    numericViewId,
+    numericStateViewId,
   ]);
 
   const handleUserViewChange = useCallback(

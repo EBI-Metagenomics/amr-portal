@@ -52,7 +52,7 @@ export function grantMatomoConsent(): void {
 }
 
 export function trackPageView(customUrl?: string, documentTitle?: string): void {
-  if (!isMatomoEnabled()) return;
+  if (!isMatomoEnabled() || !hasAnalyticsConsent()) return;
   if (customUrl) push('setCustomUrl', customUrl);
   if (documentTitle) push('setDocumentTitle', documentTitle);
   push('trackPageView');
@@ -64,7 +64,7 @@ export function trackEvent(
   name?: string,
   value?: number
 ): void {
-  if (!isMatomoEnabled()) return;
+  if (!isMatomoEnabled() || !hasAnalyticsConsent()) return;
   if (name !== undefined && value !== undefined) {
     push('trackEvent', category, action, name, value);
     return;
